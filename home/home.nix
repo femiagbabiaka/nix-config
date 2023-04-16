@@ -29,6 +29,8 @@
     interactiveShellInit = builtins.readFile ./fish/init.fish;
     shellAliases = {
       vim = "emacsclient -c";
+      gc = "git commit";
+      gp = "git push";
     };
   };
 
