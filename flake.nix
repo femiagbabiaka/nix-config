@@ -39,10 +39,13 @@
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.users.femi = import ./home/home.nix;
-            home-manager.extraSpecialArgs = {
-              inherit pkgs self home-manager;
+            home-manager.extraSpecialArgs = 
+            let
               username = "femi";
               homeDirectory = "/home/${username}";
+            in
+            {
+              inherit pkgs username homeDirectory self home-manager;
             };
           }
         ];
