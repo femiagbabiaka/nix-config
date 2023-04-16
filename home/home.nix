@@ -10,6 +10,14 @@
       (org-babel-load-file "/home/femi/.emacs.d/configuration.org")
     '';
   };
+  services.emacs = {
+    enable = true;
+    defaultEditor = true;
+    client = {
+      enable = true;
+    };
+  };
+
   home.file.".emacs.d/early-init.el".text = ''
     (setq package-enable-at-startup nil)
   '';
@@ -28,7 +36,7 @@
     enable = true;
     config = {
       modifier = "Mod1";
-      fonts = ["font pango:DejaVu Sans Mono 8"];
+      fonts = [ "font pango:DejaVu Sans Mono 8" ];
       keybindings = lib.mkOptionDefault {
         "XF86AudioRaiseVolume" = "exec --no-startup-id ${pkgs.pulseaudio}/bin/pactl set-sink-volume @DEFAULT_SINK@ +10%";
         "XF86AudioLowerVolume" = "exec --no-startup-id ${pkgs.pulseaudio}/bin/pactl set-sink-volume @DEFAULT_SINK@ -10%";
@@ -48,13 +56,13 @@
       vim-sensible
     ];
     extraConfig = ''
-              set number
-              set cc=80
-              set list
-              set listchars=tab:→\ ,space:·,nbsp:␣,trail:•,eol:¶,precedes:«,extends:»
-              if &diff
-                colorscheme blue
-              endif
+      set number
+      set cc=80
+      set list
+      set listchars=tab:→\ ,space:·,nbsp:␣,trail:•,eol:¶,precedes:«,extends:»
+      if &diff
+        colorscheme blue
+      endif
     '';
   };
   programs.git = {

@@ -26,7 +26,7 @@ with lib;
   boot.loader.efi.canTouchEfiVariables = true;
 
   networking.hostName = "laincomp"; # Define your hostname.
-  networking.networkmanager.enable = true;  # Easiest to use and most distros use this by default.
+  networking.networkmanager.enable = true; # Easiest to use and most distros use this by default.
   hardware.bluetooth.enable = true;
 
 
@@ -53,8 +53,8 @@ with lib;
     extraPackages = with pkgs; [
     ];
     extraSessionCommands = ''
-     ${lib.strings.optionalString config.networking.networkmanager.enable "${pkgs.networkmanagerapplet}/bin/nm-applet &"}
-     ${lib.strings.optionalString config.hardware.bluetooth.enable "${pkgs.blueman}/bin/blueman-applet &"}
+      ${lib.strings.optionalString config.networking.networkmanager.enable "${pkgs.networkmanagerapplet}/bin/nm-applet &"}
+      ${lib.strings.optionalString config.hardware.bluetooth.enable "${pkgs.blueman}/bin/blueman-applet &"}
     '';
   };
 
@@ -63,45 +63,45 @@ with lib;
   ];
 
   services.xserver.displayManager.sessionCommands = ''
-    ${pkgs.xorg.xrdb}/bin/xrdb -merge <<EOF
-     xterm*font: xft:Fira Code:size=14
-     ! special
-     *.foreground:   #cccccc
-     *.background:   #222222
-     *.cursorColor:  #cccccc
+     ${pkgs.xorg.xrdb}/bin/xrdb -merge <<EOF
+      xterm*font: xft:Fira Code:size=14
+      ! special
+      *.foreground:   #cccccc
+      *.background:   #222222
+      *.cursorColor:  #cccccc
 
-     ! black
-     *.color0:       #222222
-     *.color8:       #444444
+      ! black
+      *.color0:       #222222
+      *.color8:       #444444
 
-     ! red
-     *.color1:       #a74437
-     *.color9:       #e52902
+      ! red
+      *.color1:       #a74437
+      *.color9:       #e52902
 
-     ! green
-     *.color2:       #809611
-     *.color10:      #d6d031
+      ! green
+      *.color2:       #809611
+      *.color10:      #d6d031
 
-     ! yellow
-     *.color3:       #ee8600
-     *.color11:      #877c5f
+      ! yellow
+      *.color3:       #ee8600
+      *.color11:      #877c5f
 
-     ! blue
-     *.color4:       #9aaa66
-     *.color12:      #b8d190
+      ! blue
+      *.color4:       #9aaa66
+      *.color12:      #b8d190
 
-     ! magenta
-     *.color5:       #77a558
-     *.color13:      #6cad2c
+      ! magenta
+      *.color5:       #77a558
+      *.color13:      #6cad2c
 
-     ! cyan
-     *.color6:       #8bd524
-     *.color14:      #a7d603
+      ! cyan
+      *.color6:       #8bd524
+      *.color14:      #a7d603
 
-     ! white
-     *.color7:       #c2c2ca
-     *.color15:      #bdb6a6
-   EOF
+      ! white
+      *.color7:       #c2c2ca
+      *.color15:      #bdb6a6
+    EOF
   '';
 
   # Enable sound.
@@ -137,13 +137,9 @@ with lib;
       tailscale
       zoxide
       delta
-      dmenu
-      i3status
-      i3lock
-      i3blocks
-      i3
     ];
   };
+  programs.light.enable = true;
   programs.fish.enable = true;
   services.dbus.enable = true;
   services.tailscale.enable = true;
@@ -160,6 +156,12 @@ with lib;
     vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
     xorg.xf86videointel
     blueman
+    i3
+    i3status
+    i3lock
+    i3blocks
+
+    dmenu
   ];
 
   environment.pathsToLink = [ "/libexec" ];
