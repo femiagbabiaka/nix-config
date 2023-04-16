@@ -1,5 +1,16 @@
-{ pkgs, home, lib, ... }:
+{ pkgs, lib, username, homeDirectory, home-manager, ...}:
+let
+  emacs-configuration-org = pkgs.writeTextFile {
+    name = "configuration.org";
+    destination = "/.emacs.d/configuration.org";
+    text = builtins.readFile ./emacs/configuration.org;
+  };
+in
 {
+  home = {
+    inherit username homeDirectory;
+    stateVersion = "23.05";
+  };
   programs.nushell.enable = true;
   programs.firefox = {
     enable = true;
@@ -7,21 +18,14 @@
   programs.emacs = {
     enable = true;
     extraConfig = ''
-      (org-babel-load-file "/home/femi/.emacs.d/configuration.org")
+      (org-babel-load-file "${emacs-configuration-org}/.emacs.d/configuration.org")
     '';
-  };
-  services.emacs = {
-    enable = true;
-    defaultEditor = true;
-    client = {
-      enable = true;
-    };
   };
 
   home.file.".emacs.d/early-init.el".text = ''
     (setq package-enable-at-startup nil)
   '';
-  home.file.".emacs.d/configuration.org".source = ./emacs/configuration.org;
+  home.file.".emacs.d/configuration.org".source = "${emacs-configuration-org}/.emacs.d/configuration.org";
   programs.home-manager.enable = true;
   nixpkgs.config.allowUnfree = true;
   programs.fish = {
