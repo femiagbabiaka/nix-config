@@ -41,7 +41,7 @@
             home-manager.users.femi = import ./home/home.nix;
             home-manager.extraSpecialArgs = {
               inherit pkgs self home-manager;
-              username = femi;
+              username = "femi";
               homeDirectory = "/home/${username}";
             };
           }
