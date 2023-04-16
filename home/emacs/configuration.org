@@ -1,62 +1,63 @@
 ;;; -*- lexical-binding: t -*-
+#+PROPERTY: header-args:emacs-lisp :tangle yes
 * Emacs Configuration.. semi-literate
 ** Packages
 *** Bootstrap
 This section sets up straight.el, which will be used in place of package.el.
 We'll set up use-package next.
 #+begin_src emacs-lisp
-    (defvar bootstrap-version)
-    (let ((bootstrap-file
-     (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-    (bootstrap-version 6))
-    (unless (file-exists-p bootstrap-file)
-    (with-current-buffer
-      (url-retrieve-synchronously
-       "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
-       'silent 'inhibit-cookies)
-    (goto-char (point-max))
-    (eval-print-last-sexp)))
-    (load bootstrap-file nil 'nomessage))
+  (defvar bootstrap-version)
+  (let ((bootstrap-file
+   (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+  (bootstrap-version 6))
+  (unless (file-exists-p bootstrap-file)
+  (with-current-buffer
+    (url-retrieve-synchronously
+     "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
+     'silent 'inhibit-cookies)
+  (goto-char (point-max))
+  (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
+#+end_src
+*** Custom file location
+custom and the way it stores items in init.el is one of the dumber things
+emacs does. well whatever, we move it
+#+begin_src emacs-lisp
+  (setq custom-file (concat user-emacs-directory "custom.el"))
+  (load custom-file 'noerror)
 #+end_src
 
 *** use-package
 Pretty straight forward use-package invocation. Uses straight.el to bootstrap
 use-package.
 #+begin_src emacs-lisp
-(straight-use-package 'use-package)
-(eval-when-compile (require 'use-package))
+  (straight-use-package 'use-package)
+  (eval-when-compile (require 'use-package))
 #+end_src
 
 ** Performance
 *** Measuring startup speed
 Function copied from sqrtminusone's config, measures emacs startup time.
 #+begin_src emacs-lisp
-(setq my/emacs-started nil)
+  (setq my/emacs-started nil)
 
-(add-hook 'emacs-startup-hook
-	  (lambda ()
-	    (message "*** Emacs loaded in %s with %d garbage collections."
-		     (format "%.2f seconds"
-			     (float-time
-			      (time-subtract after-init-time before-init-time)))
-		     gcs-done))
-	  (setq my/emacs-started t))
+  (add-hook 'emacs-startup-hook
+	    (lambda ()
+	      (message "*** Emacs loaded in %s with %d garbage collections."
+		       (format "%.2f seconds"
+			       (float-time
+				(time-subtract after-init-time before-init-time)))
+		       gcs-done))
+	    (setq my/emacs-started t))
 #+end_src
 
 *** Garbage collection
 #+begin_src emacs-lisp
-(setq gc-cons-threshold 80000000)
-(setq read-process-output-max (* 1024 1024))
+  (setq gc-cons-threshold 80000000)
+  (setq read-process-output-max (* 1024 1024))
 #+end_src
 
 ** Config Files
-*** Custom file location
-custom and the way it stores items in init.el is one of the dumber things
-emacs does. well whatever, we move it
-#+begin_src emacs-lisp
-(setq custom-file (concat user-emacs-directory "custom.el"))
-(load custom-file 'noerror)
-#+end_src
 *** No littering
 I actually didn't know about this package until reading through sqrtminusone's
 emacs config. But uhh yeah, emacs leaves tmp files all over and it's annoying.
@@ -68,5 +69,5 @@ lets change that
 *** Make it harder to kill emacs
 This will prompt us when we're going to kill Emacs.
 #+begin_src emacs-lisp
-(setq confirm-kill-emacs 'y-or-n-p)
+  (setq confirm-kill-emacs 'y-or-n-p)
 #+end_src

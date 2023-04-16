@@ -1,14 +1,8 @@
-{ pkgs, lib, username, homeDirectory, home-manager, ...}:
-let
-  emacs-configuration-org = pkgs.writeTextFile {
-    name = "configuration.org";
-    destination = "/.emacs.d/configuration.org";
-    text = builtins.readFile ./emacs/configuration.org;
-  };
-in
+{ pkgs, lib, username, homeDirectory, home-manager, config, ...}:
 {
   home = {
-    inherit username homeDirectory;
+    inherit username;
+    homeDirectory = lib.mkDefault homeDirectory;
     stateVersion = "23.05";
   };
   programs.nushell.enable = true;
@@ -17,15 +11,16 @@ in
   };
   programs.emacs = {
     enable = true;
+    package = pkgs.emacsGit;
     extraConfig = ''
-      (org-babel-load-file "${emacs-configuration-org}/.emacs.d/configuration.org")
+      (org-babel-load-file "${homeDirectory}/.emacs.d/configuration.org")
     '';
   };
 
   home.file.".emacs.d/early-init.el".text = ''
     (setq package-enable-at-startup nil)
   '';
-  home.file.".emacs.d/configuration.org".source = "${emacs-configuration-org}/.emacs.d/configuration.org";
+  home.file.".emacs.d/configuration.org".source = config.lib.file.mkOutOfStoreSymlink ./emacs/configuration.org;
   programs.home-manager.enable = true;
   nixpkgs.config.allowUnfree = true;
   programs.fish = {
@@ -42,14 +37,17 @@ in
     enable = true;
     config = {
       modifier = "Mod1";
-      fonts = [ "font pango:DejaVu Sans Mono 8" ];
+      fonts = {
+        names = [ "pango:DejaVu Sans Mono" ];
+        size = 8.0;
+      };
       keybindings = lib.mkOptionDefault {
         "XF86AudioRaiseVolume" = "exec --no-startup-id ${pkgs.pulseaudio}/bin/pactl set-sink-volume @DEFAULT_SINK@ +10%";
         "XF86AudioLowerVolume" = "exec --no-startup-id ${pkgs.pulseaudio}/bin/pactl set-sink-volume @DEFAULT_SINK@ -10%";
         "XF86AudioMute" = "exec --no-startup-id ${pkgs.pulseaudio}/bin/pactl set-sink-mute @DEFAULT_SINK@ toggle";
         "XF86AudioMicMute" = "exec --no-startup-id ${pkgs.pulseaudio}/bin/pactl set-source-mute @DEFAULT_SOURCE@ toggle";
         "XF86MonBrightnessUp" = "exec ${pkgs.light}/bin/light -A 10";
-        "XF86MonBrightnessDown" = "exec ${pkgs.light}/bin/light -D 10";
+        "XF86MonBrightnessDown" = "exec ${pkgs.light}/bin/light -U 10";
       };
     };
   };

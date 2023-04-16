@@ -8,17 +8,22 @@
       url = "github:nix-community/home-manager/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    emacs-overlay = {
+      url = "github:nix-community/emacs-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = inputs @ { self, nixpkgs, nixos-hardware, home-manager }:
+  outputs = inputs @ { self, nixpkgs, nixos-hardware, home-manager, emacs-overlay }:
   let
     system = "x86_64-linux";
     pkgs = import nixpkgs {
       inherit system;
       config.allowUnfree = true;
+      overlays = [
+        emacs-overlay.overlay
+      ];
     };
-    username = "femi";
-    homeDirectory = "/home/${username}";
   in
   {
     nixosConfigurations = {
@@ -27,15 +32,17 @@
         specialArgs = { inherit inputs; };
         modules = [
           ./systems/laincomp
+          ./systems/laincomp/configuration.nix
           nixos-hardware.nixosModules.dell-xps-13-9380
-          ./configuration.nix
           home-manager.nixosModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.users.femi = import ./home/home.nix;
             home-manager.extraSpecialArgs = {
-              inherit pkgs username homeDirectory self home-manager;
+              inherit pkgs self home-manager;
+              username = femi;
+              homeDirectory = "/home/${username}";
             };
           }
         ];
