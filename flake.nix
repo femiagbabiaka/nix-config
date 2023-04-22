@@ -19,7 +19,7 @@
   };
 
   outputs =
-    inputs@{ self, nixpkgs, nixos-hardware, home-manager, emacs-overlay, mkAlias }:
+    inputs@{ self, nixpkgs, nixos-hardware, home-manager, emacs-overlay, mkAlias, ... }:
     let
       linux-pkgs = import nixpkgs {
         system = "x86_64-linux";
