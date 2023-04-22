@@ -147,6 +147,7 @@ with lib;
   services.tlp.enable = true;
   services.upower.enable = true;
   services.blueman.enable = true;
+  services.fwupd.enable = true;
 
 
 
@@ -181,6 +182,3 @@ with lib;
   system.stateVersion = "22.11"; # Did you read the comment?
 
 }
-
-
-
