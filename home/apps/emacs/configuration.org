@@ -272,6 +272,42 @@ masterpiece of the one and only prot
     :mode "\\.fish\\'")
 #+end_src
 
+**** Haskell
+#+begin_src emacs-lisp
+  (use-package haskell-mode
+    :straight t
+    :mode "\\.hs\\'")
+
+  (use-package lsp-haskell
+    :straight t
+    :after (lsp haskell-mode))
+#+end_src
+
+**** LSP
+#+begin_src emacs-lisp
+  (use-package lsp-mode
+    :straight t
+    :hook (
+       (haskell-mode . lsp)
+       )
+    :commands lsp
+    :init
+    (setq lsp-keymap-prefix nil)
+    :config
+    (setq lsp-idle-delay 1)
+    (setq lsp-signature-render-documentation nil)
+    (setq lsp-headerline-breadcrumb-enable nil)
+    (setq lsp-modeline-code-actions-enable nil)
+    (setq lsp-modeline-diagnostics-enable nil))
+
+  (use-package lsp-ui
+    :straight t
+    :commands lsp-ui-mode
+    :config
+    (setq lsp-ui-doc-delay 2)
+    (setq lsp-ui-sideline-show-hover nil))
+#+end_src
+
 *** Text Editing
 **** indentation and whitespace
 ***** aggressive indent
@@ -377,8 +413,9 @@ Emacs efficiently without this.
     :bind (:map projectile-mode-map
                ("C-c p" . projectile-command-map))
     :config
-    (projectile-mode +1)
-    (setq projectile-project-search-path '("~/src/")))
+    (setq projectile-project-search-path '("~/src/"))
+    :init
+    (projectile-mode +1))
 
   (use-package counsel-projectile
     :after (counsel projectile)

@@ -1,7 +1,9 @@
 { pkgs, lib, username, homeDirectory, home-manager, config, ... }: {
   programs.emacs = {
     enable = true;
-    package = pkgs.emacsGit;
+    package = pkgs.emacsGit.overrideAttrs (oldAttrs: {
+      buildInputs = oldAttrs.buildInputs ++ [ pkgs.tree-sitter ];
+    });
     extraConfig = ''
       (org-babel-load-file "${homeDirectory}/.emacs.d/configuration.org")
     '';
