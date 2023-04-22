@@ -74,16 +74,6 @@ This will prompt us when we're going to kill Emacs.
 
 ** General settings
 *** Keybindings
-**** general.el
-general.el provides a convenient interface to manage Emacs keybindings.
-I don't know if I'll use this long term, at the moment I'm just cargo-culting.
-#+begin_src emacs-lisp
-  (use-package general
-    :straight t
-    :config
-    (general-evil-setup))
-#+end_src
-
 **** which-key
 A package that displays the available keybindings in a popup.
 The package is pretty useful, as Emacs seems to have more keybindings than
@@ -269,10 +259,17 @@ masterpiece of the one and only prot
 #+begin_src emacs-lisp
   (use-package rust-mode
     :straight t
-    :hook ((lambda () (setq indent-tabs-mode nil))
-	   (lambda () (prettify-symbols-mode)))
     :config
-    (setq rust-format-on-save t))
+    (setq rust-format-on-save t)
+    (add-hook 'rust-mode-hook (lambda () (setq indent-tabs-mode nil)))
+    (add-hook 'rust-mode-hook (lambda () (prettify-symbols-mode))))
+#+end_src
+
+**** Fish Shell
+#+begin_src emacs-lisp
+  (use-package fish-mode
+    :straight t
+    :mode "\\.fish\\'")
 #+end_src
 
 *** Text Editing
@@ -283,7 +280,7 @@ This package reindents the file being edited after every change. Pretty useful.
   (use-package aggressive-indent
     :straight t
     :config
-    (global-indent-mode 1))
+    (global-aggressive-indent-mode 1))
 #+end_src
 
 ***** Delete trailing whitespace
@@ -340,9 +337,193 @@ Replaces Emacs built-in sequential undo system with a tree-based one. Probably o
     (setq undo-tree-visualizer-diff t)
     (setq undo-tree-visualizer-timestamps t)
     (setq undo-tree-auto-save-history nil)
-    (my-leader-def "u" 'undo-tree-visualize)
     (fset 'undo-auto-amalgamate 'ignore)
     (setq undo-limit 6710886400)
     (setq undo-strong-limit 100663296)
     (setq undo-outer-limit 1006632960))
+
+#+end_src
+*** Project Management
+Packages related to managing projects and files.
+**** dired-sidebar
+
+Never heard of this until digging into sqrtminusone's config,
+but seems like a nice lightweight replacement for Treemacs.
+#+begin_src emacs-lisp
+  (use-package dired-sidebar
+    :bind (("C-x t t" . dired-sidebar-toggle-sidebar))
+    :straight t
+    :commands (dired-sidebar-toggle-sidebar)
+    :init
+    (add-hook 'dired-sidebar-mode-hook
+              (lambda ()
+                (unless (file-remote-p default-directory)
+                  (auto-revert-mode))))
+    :config
+    (push 'toggle-window-split dired-sidebar-toggle-hidden-commands)
+    (push 'rotate-windows dired-sidebar-toggle-hidden-commands)
+    (setq dired-sidebar-subtree-line-prefix "__")
+    (setq dired-sidebar-theme 'nerd)
+    (setq dired-sidebar-use-term-integration t)
+    (setq dired-sidebar-use-custom-font t))
+#+end_src
+
+**** Projectile
+So necessary. Manages projects, git aware. IDK how you would use
+Emacs efficiently without this.
+#+begin_src emacs-lisp
+  (use-package projectile
+    :straight t
+    :bind (:map projectile-mode-map
+               ("C-c p" . projectile-command-map))
+    :config
+    (projectile-mode +1)
+    (setq projectile-project-search-path '("~/src/")))
+
+  (use-package counsel-projectile
+    :after (counsel projectile)
+    :straight t)
+#+end_src
+
+**** Magit
+Probably the most iconic Emacs program? Anyways, super good either way.
+#+begin_src emacs-lisp
+  (use-package magit
+    :straight t
+    :commands (magit-status magit-file-dispatch)
+    :config
+    (setq magit-blame-styles
+          '((headings
+             (heading-format . "%-20a %C %s\n"))
+            (highlight
+             (highlight-face . magit-blame-highlight))
+            (lines
+             (show-lines . t)
+             (show-message . t)))))
+#+end_src
+
+**** Forge
+Integrates with magit, used for integrations with github and the like.
+#+begin_src emacs-lisp
+  (use-package forge
+    :after magit
+    :straight t)
+#+end_src
+
+**** Git gutter
+Shows git changes on each line, pretty nice.
+#+begin_src emacs-lisp
+  (use-package git-gutter
+    :straight t
+    :config
+    (global-git-gutter-mode +1))
+#+end_src
+
+**** Editing files
+Remember recently edited files.
+#+begin_src emacs-lisp
+  (recentf-mode 1)
+#+end_src
+
+Save the most recently edited place in a file.
+#+begin_src emacs-lisp
+  (save-place-mode nil)
+#+end_src
+
+*** Completion
+This entire section is pretty much cargo culted. We'll see what works long term.
+**** Ivy, counsel, swiper
+#+begin_src emacs-lisp
+  (use-package ivy
+    :straight t
+    :config
+    (setq ivy-use-virtual-buffers t)
+    (ivy-mode))
+
+  (use-package counsel
+    :straight t
+    :after ivy
+    :config
+    (counsel-mode))
+
+  (use-package swiper
+    :defer t
+    :straight t)
+#+end_src
+
+** UI Settings
+*** Miscellaneous
+Disable the annoying stuff.
+#+begin_src emacs-lisp
+  (tool-bar-mode -1)
+  (menu-bar-mode -1)
+  (scroll-bar-mode -1)
+#+end_src
+
+Highlight the current line.
+#+begin_src emacs-lisp
+  (global-hl-line-mode 1)
+#+end_src
+
+Disable the start screen.
+#+begin_src emacs-lisp
+  (setq inhibit-startup-screen t)
+#+end_src
+
+Highlight the current line.
+#+begin_src emacs-lisp
+  (global-hl-line-mode 1)
+#+end_src
+
+*** Line numbers
+Turn on line numbers mode.
+Make line numbers absolute.
+#+begin_src emacs-lisp
+  (global-display-line-numbers-mode 1)
+  (setq display-line-numbers-type t)
+#+end_src
+
+*** Word wrapping
+#+begin_src emacs-lisp
+  (setq word-wrap 1)
+  (global-visual-line-mode 1)
+#+end_src
+
+*** Olivetti
+This package limits the text body width, super useful in visual mode.
+#+begin_src emacs-lisp
+  (use-package olivetti
+    :straight t
+    :if (display-graphic-p)
+    :config
+    (setq-default olivetti-body-width 86))
+#+end_src
+
+*** Doom Modeline
+It looks cool, but IDK if I want to use it long term. Let's see!
+#+begin_src emacs-lisp
+  (use-package doom-modeline
+    :straight t
+    :after all-the-icons
+    :init
+    (setq doom-modeline-env-enable-python nil)
+    (setq doom-modeline-env-enable-go nil)
+    (setq doom-modeline-buffer-encoding 'nondefault)
+    (setq doom-modeline-hud t)
+    (setq doom-modeline-persp-icon nil)
+    (setq doom-modeline-persp-name nil)
+    (setq doom-modeline-display-misc-in-all-mode-lines nil)
+    (doom-modeline-mode 1)
+    :config
+    (setq doom-modeline-minor-modes nil)
+    (setq doom-modeline-irc nil)
+    (setq doom-modeline-buffer-state-icon nil))
+#+end_src
+
+*** Icons
+load all the icons on first boot only
+#+begin_src emacs-lisp
+  (use-package all-the-icons
+    :if (display-graphic-p)
+    :straight t)
 #+end_src
