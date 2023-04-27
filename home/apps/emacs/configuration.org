@@ -57,14 +57,28 @@ Function copied from sqrtminusone's config, measures emacs startup time.
   (setq read-process-output-max (* 1024 1024))
 #+end_src
 
+**** exec-path-from-shell
+This conditionally sets the shell path based on the users configured shell path on boot.
+Pretty good.
+#+begin_src emacs-lisp
+  (use-package exec-path-from-shell
+    :straight t
+    :init
+    (require 'exec-path-from-shell)
+    (dolist (var '("SSH_AUTH_SOCK" "SSH_AGENT_PID" "GPG_AGENT_INFO" "LANG" "LC_CTYPE" "NIX_SSL_CERT_FILE" "NIX_PATH"))
+      (add-to-list 'exec-path-from-shell-variables var))
+    (when (memq window-system '(mac ns x))
+      (exec-path-from-shell-initialize)))
+#+end_src
+
 ** Config Files
 *** No littering
 I actually didn't know about this package until reading through sqrtminusone's
 emacs config. But uhh yeah, emacs leaves tmp files all over and it's annoying.
 lets change that
 #+begin_src emacs-lisp
-(use-package no-littering
-  :straight t)
+  (use-package no-littering
+    :straight t)
 #+end_src
 *** Make it harder to kill emacs
 This will prompt us when we're going to kill Emacs.
@@ -79,15 +93,15 @@ A package that displays the available keybindings in a popup.
 The package is pretty useful, as Emacs seems to have more keybindings than
 I can remember at any given point.
 #+begin_src emacs-lisp
-(use-package which-key
-  :config
-  (setq which-key-idle-delay 0.3)
-  (setq which-key-popup-type 'frame)
-  (which-key-mode)
-  (which-key-setup-side-window-bottom)
-  (set-face-attribute 'which-key-local-map-description-face nil
-		      :weight 'bold)
-  :straight t)
+  (use-package which-key
+    :config
+    (setq which-key-idle-delay 0.3)
+    (setq which-key-popup-type 'frame)
+    (which-key-mode)
+    (which-key-setup-side-window-bottom)
+    (set-face-attribute 'which-key-local-map-description-face nil
+                :weight 'bold)
+    :straight t)
 #+end_src
 
 **** dump keybindings
@@ -96,30 +110,30 @@ A function to dump keybindings starting with a prefix to a buffer in a tree-like
 Taken from: https://sqrtminusone.xyz/configs/emacs/
 
 #+begin_src emacs-lisp
-(defun my/dump-bindings-recursive (prefix &optional level buffer)
-  (dolist (key (which-key--get-bindings (kbd prefix)))
-    (with-current-buffer buffer
-      (when level
-	(insert (make-string level ? )))
-      (insert (apply #'format "%s%s%s\n" key)))
-    (when (string-match-p
-	   (rx bos "+" (* nonl))
-	   (substring-no-properties (elt key 2)))
-      (my/dump-bindings-recursive
-       (concat prefix " " (substring-no-properties (car key)))
-       (+ 2 (or level 0))
-       buffer))))
+  (defun my/dump-bindings-recursive (prefix &optional level buffer)
+    (dolist (key (which-key--get-bindings (kbd prefix)))
+      (with-current-buffer buffer
+        (when level
+      (insert (make-string level ? )))
+        (insert (apply #'format "%s%s%s\n" key)))
+      (when (string-match-p
+         (rx bos "+" (* nonl))
+         (substring-no-properties (elt key 2)))
+        (my/dump-bindings-recursive
+         (concat prefix " " (substring-no-properties (car key)))
+         (+ 2 (or level 0))
+         buffer))))
 
-(defun my/dump-bindings (prefix)
-  "Dump keybindings starting with PREFIX in a tree-like form."
-  (interactive "sPrefix: ")
-  (let ((buffer (get-buffer-create "bindings")))
-    (with-current-buffer buffer
-      (erase-buffer))
-    (my/dump-bindings-recursive prefix 0 buffer)
-    (with-current-buffer buffer
-      (goto-char (point-min)))
-    (switch-to-buffer-other-window buffer)))
+  (defun my/dump-bindings (prefix)
+    "Dump keybindings starting with PREFIX in a tree-like form."
+    (interactive "sPrefix: ")
+    (let ((buffer (get-buffer-create "bindings")))
+      (with-current-buffer buffer
+        (erase-buffer))
+      (my/dump-bindings-recursive prefix 0 buffer)
+      (with-current-buffer buffer
+        (goto-char (point-min)))
+      (switch-to-buffer-other-window buffer)))
 #+end_src
 
 *** Editing modez
@@ -283,12 +297,25 @@ masterpiece of the one and only prot
     :after (lsp haskell-mode))
 #+end_src
 
+**** Terraform
+#+begin_src emacs-lisp
+  (use-package terraform-mode
+    :straight t
+    :custom (terraform-format-on-save t)
+    :config
+    (defun my-terraform-mode-init ()
+      ;; if you want to use outline-minor-mode
+      (outline-minor-mode 1))
+    (add-hook 'terraform-mode-hook 'my-terraform-mode-init))
+#+end_src
+
 **** LSP
 #+begin_src emacs-lisp
   (use-package lsp-mode
     :straight t
     :hook (
        (haskell-mode . lsp)
+       (rust-mode . lsp)
        )
     :commands lsp
     :init
@@ -308,13 +335,46 @@ masterpiece of the one and only prot
     (setq lsp-ui-sideline-show-hover nil))
 #+end_src
 
+**** Typescript
+#+begin_src emacs-lisp
+  (use-package typescript-mode
+    :straight t
+    :mode "\\.ts\\'"
+    :config
+    (add-hook 'typescript-mode-hook #'hs-minor-mode))
+#+end_src
+
+*** Doom Modeline
+It looks cool, but IDK if I want to use it long term. Let's see!
+#+begin_src emacs-lisp
+  (use-package doom-modeline
+    :straight t
+    :after all-the-icons
+    :init
+    (setq doom-modeline-env-enable-python nil)
+    (setq doom-modeline-env-enable-go nil)
+    (setq doom-modeline-buffer-encoding 'nondefault)
+    (setq doom-modeline-hud t)
+    (setq doom-modeline-persp-icon nil)
+    (setq doom-modeline-persp-name nil)
+    (setq doom-modeline-display-misc-in-all-mode-lines nil)
+    (doom-modeline-mode 1)
+    :config
+    (setq doom-modeline-minor-modes nil)
+    (setq doom-modeline-irc nil)
+    (setq doom-modeline-buffer-state-icon nil))
+#+end_src
+
 *** Text Editing
 **** indentation and whitespace
 ***** aggressive indent
 This package reindents the file being edited after every change. Pretty useful.
+
+<2023-04-24 Mon> Removing this, it's hella annoying. I think if I had a projectile configuration per project it would be better.
 #+begin_src emacs-lisp
   (use-package aggressive-indent
-    :straight t
+    :disabled t
+  ;;  :straight t
     :config
     (global-aggressive-indent-mode 1))
 #+end_src
@@ -413,7 +473,7 @@ Emacs efficiently without this.
     :bind (:map projectile-mode-map
                ("C-c p" . projectile-command-map))
     :config
-    (setq projectile-project-search-path '("~/src/"))
+    (setq projectile-project-search-path '(("~/src/" . 2)))
     :init
     (projectile-mode +1))
 
@@ -445,6 +505,56 @@ Integrates with magit, used for integrations with github and the like.
   (use-package forge
     :after magit
     :straight t)
+#+end_src
+
+Copied from: https://github.com/magit/forge/discussions/544.
+This adds a new auth-source that forge can use that taps into the gh-cli, which I always have installed.
+#+begin_src emacs-lisp
+  ;; =============================================================================
+  ;; use gh-cli as auth-source for forge to workaround forbidden PAT access to organization
+  ;; -----------------------------------------------------------------------------
+
+  (cl-defun auth-source-ghcli-search (&rest spec
+                                      &key backend require
+                                      type max host user port
+                                      &allow-other-keys)
+    "Given a property list SPEC, return search matches from the `:backend'.
+  See `auth-source-search' for details on SPEC."
+    ;; just in case, check that the type is correct (null or same as the backend)
+    (cl-assert (or (null type) (eq type (oref backend type)))
+               t "Invalid GH CLI search: %s %s")
+
+    (when-let* ((hostname (string-remove-prefix "api." host))
+           ;; split ghub--ident again
+           (ghub_ident (split-string user "\\^"))
+           (username (car ghub_ident))
+           (package (cadr ghub_ident))
+           (cmd (format "gh auth token --hostname '%s'" hostname))
+           (token (when (string= package "forge") (string-trim-right (shell-command-to-string cmd))))
+           (retval (list
+                    :host hostname
+                    :user username
+                    :secret token)))
+          (auth-source-do-debug  "auth-source-ghcli: return %s as final result (plus hidden password)"
+                                      (seq-subseq retval 0 -2)) ;; remove password
+          (list retval)))
+
+  (defvar auth-source-ghcli-backend
+    (auth-source-backend
+     :source "." ;; not used
+     :type 'gh-cli
+     :search-function #'auth-source-ghcli-search)
+    "Auth-source backend for GH CLI.")
+
+  (defun auth-source-ghcli-backend-parse (entry)
+    "Create a GH CLI auth-source backend from ENTRY."
+    (when (eq entry 'gh-cli)
+      (auth-source-backend-parse-parameters entry auth-source-ghcli-backend)))
+
+  (if (boundp 'auth-source-backend-parser-functions)
+      (add-hook 'auth-source-backend-parser-functions #'auth-source-ghcli-backend-parse)
+    (advice-add 'auth-source-backend-parse :before-until #'auth-source-ghcli-backend-parse))
+  (setq auth-sources '(gh-cli))
 #+end_src
 
 **** Git gutter
@@ -534,27 +644,6 @@ This package limits the text body width, super useful in visual mode.
     :if (display-graphic-p)
     :config
     (setq-default olivetti-body-width 86))
-#+end_src
-
-*** Doom Modeline
-It looks cool, but IDK if I want to use it long term. Let's see!
-#+begin_src emacs-lisp
-  (use-package doom-modeline
-    :straight t
-    :after all-the-icons
-    :init
-    (setq doom-modeline-env-enable-python nil)
-    (setq doom-modeline-env-enable-go nil)
-    (setq doom-modeline-buffer-encoding 'nondefault)
-    (setq doom-modeline-hud t)
-    (setq doom-modeline-persp-icon nil)
-    (setq doom-modeline-persp-name nil)
-    (setq doom-modeline-display-misc-in-all-mode-lines nil)
-    (doom-modeline-mode 1)
-    :config
-    (setq doom-modeline-minor-modes nil)
-    (setq doom-modeline-irc nil)
-    (setq doom-modeline-buffer-state-icon nil))
 #+end_src
 
 *** Icons

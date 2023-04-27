@@ -19,6 +19,8 @@
   home.packages = with pkgs; [
     ansible
     automake
+    awscli2
+    bat
     cmake
     colima
     coreutils
@@ -26,14 +28,18 @@
     fastly
     fd
     fq
+    google-cloud-sdk
     gh
     gopls
     infra
     jq
     k9s
     kubectx
+    nushell
     platinum-searcher
     rbenv
+    ripgrep
+    rustup
     shellcheck
     terraform-docs
     tflint
@@ -42,7 +48,8 @@
     tmux
     tmux-xpanes
     zoxide
+    (pkgs.nerdfonts.override { fonts = [ "FiraCode" ]; })
   ];
 
-  programs.nushell.enable = true;
+  fonts.fontconfig.enable = true;
 }

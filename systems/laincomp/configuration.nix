@@ -137,6 +137,7 @@ with lib;
       tailscale
       zoxide
       delta
+      bat
     ];
   };
   programs.light.enable = true;

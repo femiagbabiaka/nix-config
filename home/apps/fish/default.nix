@@ -7,6 +7,7 @@
       vim = "emacsclient -c";
       gc = "git commit";
       gp = "git push";
+      cat = "bat";
     };
     plugins = [
       {
