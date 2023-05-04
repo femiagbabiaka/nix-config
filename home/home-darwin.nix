@@ -28,8 +28,10 @@
     fastly
     fd
     fq
+    go
     google-cloud-sdk
     gh
+    gotools
     gopls
     infra
     jq

@@ -12,7 +12,7 @@
     delta = { enable = true; };
     extraConfig = {
       core = {
-        editor = "emacsclient -nw -a emacs";
+        editor = "emacs -nw";
       };
       github = {
         user = "femiagbabiaka";

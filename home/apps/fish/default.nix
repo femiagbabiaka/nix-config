@@ -4,7 +4,7 @@
     enable = true;
     interactiveShellInit = builtins.readFile ./init.fish;
     shellAliases = {
-      vim = "emacsclient -c";
+      vim = "emacs -nw";
       gc = "git commit";
       gp = "git push";
       cat = "bat";
