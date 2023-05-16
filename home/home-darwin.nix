@@ -49,6 +49,7 @@
     tfswitch
     tmux
     tmux-xpanes
+    zstd
     zoxide
     (pkgs.nerdfonts.override { fonts = [ "FiraCode" ]; })
   ];
