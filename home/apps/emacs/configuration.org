@@ -230,27 +230,27 @@ This is pretty new to me, I'm a vimmer by trade. But lets see how it goes.
        '("<escape>" . ignore)))
     (meow-setup)
     (meow-global-mode 1)
-    :disabled t
     :straight t)
 #+end_src
 
 **** Evil-mode
 #+begin_src emacs-lisp
-  (use-package evil
-    :straight t
-    :init
-    (setq evil-want-integration t)
-    (setq evil-want-C-u-scroll t)
-    (setq evil-want-keybinding nil)
-    (setq evil-search-module 'evil-search)
-    (setq evil-split-window-below t)
-    (setq evil-vsplit-window-right t)
-    (unless (display-graphic-p)
-      (setq evil-want-C-i-jump nil))
-    :config
-    (evil-mode 1)
-    ;; (setq evil-respect-visual-line-mode t)
-    (evil-set-undo-system 'undo-tree))
+  ;; (use-package evil
+  ;;   :straight t
+  ;;   :disabled t
+  ;;   :init
+  ;;   (setq evil-want-integration t)
+  ;;   (setq evil-want-C-u-scroll t)
+  ;;   (setq evil-want-keybinding nil)
+  ;;   (setq evil-search-module 'evil-search)
+  ;;   (setq evil-split-window-below t)
+  ;;   (setq evil-vsplit-window-right t)
+  ;;   (unless (display-graphic-p)
+  ;;     (setq evil-want-C-i-jump nil))
+  ;;   :config
+  ;;   (evil-mode 1)
+  ;;   ;; (setq evil-respect-visual-line-mode t)
+  ;;   (evil-set-undo-system 'undo-tree))
 #+end_src
 
 
@@ -380,6 +380,21 @@ masterpiece of the one and only prot
     :custom (gofmt-command "goimports"))
 #+end_src
 
+**** yaml-mode
+#+begin_src emacs-lisp
+  (use-package yaml-mode
+    :straight t
+    :mode "\\.yml\\'")
+#+end_src
+
+**** ruby-mode
+#+begin_src emacs-lisp
+  (use-package ruby-mode
+    :straight t
+    :mode "\\.\\(?:cap\\|gemspec\\|irbrc\\|gemrc\\|rake\\|rb\\|ru\\|thor\\)\\'"
+    :mode "\\(?:Brewfile\\|Capfile\\|Gemfile\\(?:\\.[a-zA-Z0-9._-]+\\)?\\|[rR]akefile\\)\\'")
+#+end_src
+
 *** Doom Modeline
 It looks cool, but IDK if I want to use it long term. Let's see!
 #+begin_src emacs-lisp
@@ -411,6 +426,7 @@ This package reindents the file being edited after every change. Pretty useful.
 #+begin_src emacs-lisp
   (use-package aggressive-indent
     :straight t
+    :disabled t
     :config
     (global-aggressive-indent-mode 1))
 #+end_src
@@ -432,8 +448,8 @@ This deletes trailing whitespace when the buffer is saved.
 Default tab settings, namely, no tabs, and also, a tab equaling four spaces.
 #+begin_src emacs-lisp
   (setq tab-always-indent nil)
-  (setq-default default-tab-width 4)
-  (setq-default tab-width 4)
+  (setq-default default-tab-width 2)
+  (setq-default tab-width 2)
   (setq-default indent-tabs-mode nil)
 #+end_src
 **** Settings
@@ -525,6 +541,8 @@ Probably the most iconic Emacs program? Anyways, super good either way.
     :straight t
     :commands (magit-status magit-file-dispatch)
     :config
+    (setq magit-git-executable "/usr/bin/git")
+    (setq magit-refresh-status-buffer nil)
     (setq magit-blame-styles
           '((headings
              (heading-format . "%-20a %C %s\n"))
