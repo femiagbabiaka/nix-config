@@ -33,6 +33,7 @@
     gh
     gotools
     gopls
+    kubernetes-helm
     infra
     jq
     k9s
@@ -41,6 +42,7 @@
     platinum-searcher
     rbenv
     ripgrep
+    roswell
     rustup
     shellcheck
     terraform-docs
