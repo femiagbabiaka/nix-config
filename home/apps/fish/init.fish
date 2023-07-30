@@ -1,6 +1,6 @@
 set -g fish_greeting ""
 zoxide init fish --cmd cd | source
-set -x PATH ~/.config/emacs/bin $PATH
+
 
 set -g fish_greeting ""
 set -U fish_color_autosuggestion      brblack

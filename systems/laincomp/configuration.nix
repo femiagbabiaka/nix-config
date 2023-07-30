@@ -28,6 +28,7 @@ with lib;
   networking.hostName = "laincomp"; # Define your hostname.
   networking.networkmanager.enable = true; # Easiest to use and most distros use this by default.
   hardware.bluetooth.enable = true;
+  hardware.pulseaudio.enable = true;
 
 
   # Set your time zone.

@@ -282,9 +282,18 @@ masterpiece of the one and only prot
   (set-face-attribute 'default t :font "FiraCode Nerd Font Mono 14")
 #+end_src
 
+<<<<<<< Updated upstream
 **** Default Frame Parameters
 #+begin_src emacs-lisp
   (add-to-list 'default-frame-alist '(fullscreen . fullboth))
+=======
+**** Dashboard
+#+begin_src emacs-lisp
+  (use-package dashboard
+    :straight t
+    :config
+    (dashboard-setup-startup-hook))
+>>>>>>> Stashed changes
 #+end_src
 
 *** Programming Modes
