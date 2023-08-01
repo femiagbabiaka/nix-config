@@ -3,7 +3,7 @@
   xsession.windowManager.i3 = {
     enable = true;
     config = {
-      modifier = "Mod1";
+      modifier = "Mod4";
       fonts = {
         names = [ "pango:DejaVu Sans Mono" ];
         size = 8.0;

@@ -1,7 +1,7 @@
 { pkgs, lib, username, homeDirectory, home-manager, config, ... }: {
   programs.emacs = {
     enable = true;
-    package = pkgs.emacsGit.overrideAttrs (oldAttrs: {
+    package = pkgs.emacs29.overrideAttrs (oldAttrs: {
       buildInputs = oldAttrs.buildInputs ++ [ pkgs.tree-sitter ];
     });
     extraConfig = ''
