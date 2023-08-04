@@ -1,5 +1,12 @@
-{ pkgs, lib, username, homeDirectory, home-manager, config, ... }:
 {
+  pkgs,
+  lib,
+  username,
+  homeDirectory,
+  home-manager,
+  config,
+  ...
+}: {
   programs.gh = {
     enable = true;
     enableGitCredentialHelper = true;
@@ -9,7 +16,7 @@
     enable = true;
     userName = "Femi Agbabiaka";
     userEmail = "femi@femiagbabiaka.xyz";
-    delta = { enable = true; };
+    delta = {enable = true;};
     extraConfig = {
       core = {
         editor = "emacs -nw";

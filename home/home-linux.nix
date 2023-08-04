@@ -1,5 +1,12 @@
-{ pkgs, lib, username, homeDirectory, home-manager, config, ... }:
 {
+  pkgs,
+  lib,
+  username,
+  homeDirectory,
+  home-manager,
+  config,
+  ...
+}: {
   imports = [
     ./apps/emacs
     ./apps/fish
@@ -18,5 +25,5 @@
   nixpkgs.config.allowUnfree = true;
 
   programs.nushell.enable = true;
-  programs.firefox = { enable = true; };
+  programs.firefox = {enable = true;};
 }

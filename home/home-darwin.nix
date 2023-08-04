@@ -1,5 +1,12 @@
-{ pkgs, lib, username, homeDirectory, home-manager, config, ... }:
 {
+  pkgs,
+  lib,
+  username,
+  homeDirectory,
+  home-manager,
+  config,
+  ...
+}: {
   imports = [
     ./apps/emacs
     ./apps/fish
@@ -54,7 +61,7 @@
     tmux-xpanes
     zstd
     zoxide
-    (pkgs.nerdfonts.override { fonts = [ "FiraCode" ]; })
+    (pkgs.nerdfonts.override {fonts = ["FiraCode"];})
   ];
 
   fonts.fontconfig.enable = true;

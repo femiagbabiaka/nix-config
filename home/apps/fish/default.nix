@@ -1,5 +1,12 @@
-{ pkgs, lib, username, homeDirectory, home-manager, config, ... }:
 {
+  pkgs,
+  lib,
+  username,
+  homeDirectory,
+  home-manager,
+  config,
+  ...
+}: {
   programs.fish = {
     enable = true;
     interactiveShellInit = builtins.readFile ./init.fish;
@@ -9,6 +16,7 @@
       gp = "git push";
       cat = "bat";
       subl = "/Applications/Sublime'\ 'Text.app/Contents/SharedSupport/bin/subl";
+      e = "emacsclient -r -n";
     };
     plugins = [
       {

@@ -1,20 +1,21 @@
 # Edit this configuration file to define what should be installed on
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
-
-{ config, pkgs, lib, ... }:
-
-with lib;
-
 {
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  config,
+  pkgs,
+  lib,
+  ...
+}:
+with lib; {
+  nix.settings.experimental-features = ["nix-command" "flakes"];
   nix.gc.automatic = true;
   nix.extraOptions = ''
     binary-caches-parallel-connections = 3
     connect-timeout = 5
   '';
 
-  fileSystems."/".options = [ "noatime" "nodiratime" "discard" ];
+  fileSystems."/".options = ["noatime" "nodiratime" "discard"];
 
   powerManagement.enable = true;
 
@@ -29,7 +30,6 @@ with lib;
   networking.networkmanager.enable = true; # Easiest to use and most distros use this by default.
   hardware.bluetooth.enable = true;
   hardware.pulseaudio.enable = true;
-
 
   # Set your time zone.
   time.timeZone = "America/Los_Angeles";
@@ -60,7 +60,7 @@ with lib;
   };
 
   fonts.fonts = with pkgs; [
-    (nerdfonts.override { fonts = [ "FiraCode" ]; })
+    (nerdfonts.override {fonts = ["FiraCode"];})
   ];
 
   services.xserver.displayManager.sessionCommands = ''
@@ -114,7 +114,7 @@ with lib;
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.femi = {
     isNormalUser = true;
-    extraGroups = [ "wheel" "video" ]; # Enable ‘sudo’ for the user.
+    extraGroups = ["wheel" "video"]; # Enable ‘sudo’ for the user.
     initialPassword = "test123";
     shell = pkgs.fish;
     packages = with pkgs; [
@@ -150,8 +150,6 @@ with lib;
   services.blueman.enable = true;
   services.fwupd.enable = true;
 
-
-
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
@@ -166,7 +164,7 @@ with lib;
     dmenu
   ];
 
-  environment.pathsToLink = [ "/libexec" ];
+  environment.pathsToLink = ["/libexec"];
 
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];
@@ -181,5 +179,4 @@ with lib;
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "22.11"; # Did you read the comment?
-
 }

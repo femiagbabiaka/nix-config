@@ -1,9 +1,16 @@
-{ pkgs, lib, username, homeDirectory, home-manager, config, ... }:
 {
+  pkgs,
+  lib,
+  username,
+  homeDirectory,
+  home-manager,
+  config,
+  ...
+}: {
   programs.neovim = {
     enable = true;
     vimAlias = true;
-    plugins = with pkgs.vimPlugins; [ vim-nix vim-sensible ];
+    plugins = with pkgs.vimPlugins; [vim-nix vim-sensible];
     extraConfig = ''
       set number
       set cc=80

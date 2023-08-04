@@ -109,6 +109,7 @@ A function to dump keybindings starting with a prefix to a buffer in a tree-like
 
 Taken from: https://sqrtminusone.xyz/configs/emacs/
 
+
 #+begin_src emacs-lisp
   (defun my/dump-bindings-recursive (prefix &optional level buffer)
     (dolist (key (which-key--get-bindings (kbd prefix)))
