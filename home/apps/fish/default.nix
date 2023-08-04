@@ -4,10 +4,11 @@
     enable = true;
     interactiveShellInit = builtins.readFile ./init.fish;
     shellAliases = {
-      vim = "emacs -nw";
+      vim = "nvim";
       gc = "git commit";
       gp = "git push";
       cat = "bat";
+      subl = "/Applications/Sublime'\ 'Text.app/Contents/SharedSupport/bin/subl";
     };
     plugins = [
       {

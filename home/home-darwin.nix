@@ -45,6 +45,7 @@
     roswell
     rustup
     shellcheck
+    spotify
     terraform-docs
     tflint
     terraform-ls

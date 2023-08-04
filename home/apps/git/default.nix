@@ -13,6 +13,7 @@
     extraConfig = {
       core = {
         editor = "emacs -nw";
+        excludesFile = "~/.gitignore";
       };
       github = {
         user = "femiagbabiaka";

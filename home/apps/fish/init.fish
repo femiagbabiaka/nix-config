@@ -1,6 +1,13 @@
 set -g fish_greeting ""
 zoxide init fish --cmd cd | source
 
+set -x PATH ~/.config/emacs/bin $PATH
+set -x PATH ~/.rd/bin $PATH
+set -x -a PATH /usr/local/go/bin
+set -x -a PATH ~/go/bin
+eval (chef shell-init fish)
+set -x FASTLY_CHEF_USERNAME fagbabiaka 
+set -x GOOGLE_SSH_USERNAME fagbabiaka
 
 set -g fish_greeting ""
 set -U fish_color_autosuggestion      brblack
