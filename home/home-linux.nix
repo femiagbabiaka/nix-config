@@ -26,4 +26,8 @@
 
   programs.nushell.enable = true;
   programs.firefox = {enable = true;};
+
+  home.packages = with pkgs; [
+    mitschemeX11
+  ];
 }
