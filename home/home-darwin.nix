@@ -6,7 +6,11 @@
   home-manager,
   config,
   ...
-}: {
+}: let
+  myInfra = pkgs.infra.overrideAttrs (finalAttrs: previousAttrs: {
+    version = "0.20.0";
+  });
+in {
   imports = [
     ./apps/emacs
     ./apps/fish
@@ -22,7 +26,6 @@
 
   programs.home-manager.enable = true;
   nixpkgs.config.allowUnfree = true;
-
   home.packages = with pkgs; [
     ansible
     automake
@@ -40,8 +43,8 @@
     gh
     gotools
     gopls
+    myInfra
     kubernetes-helm
-    infra
     jq
     k9s
     kubectx
@@ -53,6 +56,7 @@
     rustup
     shellcheck
     spotify
+    stern
     terraform-docs
     tflint
     terraform-ls

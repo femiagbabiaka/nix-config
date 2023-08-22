@@ -10,6 +10,9 @@ if test (hostname) != "laincomp"
     eval (chef shell-init fish)
     set -x FASTLY_CHEF_USERNAME fagbabiaka
     set -x GOOGLE_SSH_USERNAME fagbabiaka
+    set -x INFRA_SERVER infra.plat.k8s.secretcdn.net
+    set -x INFRA_PROVIDER okta
+    set -x INFRA_SKIP_VERSION_CHECK true
 end
 
 set -g fish_greeting ""

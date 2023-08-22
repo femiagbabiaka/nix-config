@@ -67,6 +67,8 @@ Pretty good.
     (require 'exec-path-from-shell)
     (dolist (var '("SSH_AUTH_SOCK" "SSH_AGENT_PID" "GPG_AGENT_INFO" "LANG" "LC_CTYPE" "NIX_SSL_CERT_FILE" "NIX_PATH"))
       (add-to-list 'exec-path-from-shell-variables var))
+    (when (daemonp)
+      (exec-path-from-shell-initialize))
     (when (memq window-system '(mac ns x))
       (exec-path-from-shell-initialize)))
 #+end_src
@@ -83,7 +85,8 @@ lets change that
 *** Make it harder to kill emacs
 This will prompt us when we're going to kill Emacs.
 #+begin_src emacs-lisp
-  (setq confirm-kill-emacs 'y-or-n-p)
+  (unless (daemonp)
+   (setq confirm-kill-emacs 'y-or-n-p))
 #+end_src
 
 ** General settings
@@ -365,7 +368,8 @@ masterpiece of the one and only prot
        )
     :commands lsp
     :init
-    (setq lsp-keymap-prefix nil)
+    (setq lsp-keymap-prefix "C-c l")
+    :bind-keymap ("C-c l" . lsp-command-map)
     :config
     (setq lsp-idle-delay 1)
     (setq lsp-signature-render-documentation nil)
