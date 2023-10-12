@@ -25,24 +25,27 @@ in {
   home.file.".emacs.d/configuration.org".source =
     config.lib.file.mkOutOfStoreSymlink ./configuration.org;
   services.emacs.enable = lib.mkIf pkgs.stdenv.isLinux true;
-  home.file."Library/LaunchAgents/gnu.emacs.daemon.plist".text = lib.mkIf pkgs.stdenv.isDarwin ''
-    <?xml version="1.0" encoding="UTF-8"?>
-    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
-        "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-        <plist version="1.0">
-        <dict>
-        <key>Label</key>
-        <string>gnu.emacs.daemon</string>
-        <key>ProgramArguments</key>
-        <array>
-            <string>${config.programs.emacs.finalPackage}/Applications/Emacs.app/Contents/MacOS/Emacs</string>
-            <string>--daemon</string>
-        </array>
-        <key>RunAtLoad</key>
-        <true/>
-        <key>ServiceDescription</key>
-        <string>Gnu Emacs Daemon</string>
-        </dict>
-    </plist>
-  '';
+  home.file."Library/LaunchAgents/gnu.emacs.daemon.plist".text =
+    if pkgs.stdenv.isDarwin
+    then ''
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+          "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+          <key>Label</key>
+          <string>gnu.emacs.daemon</string>
+          <key>ProgramArguments</key>
+          <array>
+              <string>${config.programs.emacs.finalPackage}/Applications/Emacs.app/Contents/MacOS/Emacs</string>
+              <string>--daemon</string>
+          </array>
+          <key>RunAtLoad</key>
+          <true/>
+          <key>ServiceDescription</key>
+          <string>Gnu Emacs Daemon</string>
+          </dict>
+      </plist>
+    ''
+    else "";
 }

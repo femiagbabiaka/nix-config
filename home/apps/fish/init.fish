@@ -6,7 +6,7 @@ set -x PATH ~/.rd/bin $PATH
 set -x -a PATH /usr/local/go/bin
 set -x -a PATH ~/go/bin
 
-if test (hostname) != "laincomp"
+if test (hostname) != "laincomp" and (hostname) != "nixos"
     eval (chef shell-init fish)
     set -x FASTLY_CHEF_USERNAME fagbabiaka
     set -x GOOGLE_SSH_USERNAME fagbabiaka

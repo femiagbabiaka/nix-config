@@ -12,7 +12,6 @@
     ./apps/fish
     ./apps/neovim
     ./apps/git
-    ./apps/i3
   ];
 
   home = {
@@ -22,12 +21,52 @@
   };
 
   programs.home-manager.enable = true;
+  programs.fish.enable = true;
   nixpkgs.config.allowUnfree = true;
 
-  programs.nushell.enable = true;
   programs.firefox = {enable = true;};
 
   home.packages = with pkgs; [
+    ansible
+    automake
+    awscli2
+    bat
+    cmake
+    colima
+    coreutils
+    curl
+    fastly
+    fd
+    fq
+    go
+    google-cloud-sdk
+    gh
+    gotools
+    gopls
+    kubernetes-helm
+    jq
+    k9s
+    kubectx
     mitschemeX11
+    nushell
+    platinum-searcher
+    rbenv
+    ripgrep
+    roswell
+    rustup
+    shellcheck
+    spotify
+    stern
+    terraform-docs
+    tflint
+    terraform-ls
+    tfswitch
+    tmux
+    tmux-xpanes
+    zstd
+    zoxide
+    (pkgs.nerdfonts.override {fonts = ["FiraCode"];})
   ];
+
+  fonts.fontconfig.enable = true;
 }

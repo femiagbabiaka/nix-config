@@ -16,6 +16,9 @@
       url = "github:reckenrode/mkAlias";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nixos-wsl = {
+      url = "github:nix-community/NixOS-WSL";
+    };
   };
 
   outputs = inputs @ {
@@ -25,6 +28,7 @@
     home-manager,
     emacs-overlay,
     mkAlias,
+    nixos-wsl,
     ...
   }: let
     linux-pkgs = import nixpkgs {
@@ -55,6 +59,28 @@
             home-manager.extraSpecialArgs = let
               username = "femi";
               homeDirectory = "/home/${username}";
+            in {
+              inherit username homeDirectory self home-manager;
+              pkgs = linux-pkgs;
+            };
+          }
+        ];
+      };
+      brain = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        specialArgs = {inherit inputs;};
+        modules = [
+          ./systems/brain/configuration.nix
+          nixos-wsl.nixosModules.wsl
+          home-manager.nixosModules.home-manager
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.users.nixos = import ./home/home-linux.nix;
+            home-manager.extraSpecialArgs = let
+              username = "nixos";
+              homeDirectory = "/home/${username}";
+              isNormalUser = true;
             in {
               inherit username homeDirectory self home-manager;
               pkgs = linux-pkgs;
