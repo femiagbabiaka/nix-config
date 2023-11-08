@@ -10,6 +10,10 @@
   myInfra = pkgs.infra.overrideAttrs (finalAttrs: previousAttrs: {
     version = "0.20.0";
   });
+  myGCSDK = pkgs.google-cloud-sdk.withExtraComponents [
+    pkgs.google-cloud-sdk.components.gke-gcloud-auth-plugin
+    pkgs.google-cloud-sdk.components.kubectl
+  ];
 in {
   imports = [
     ./apps/emacs
@@ -39,7 +43,7 @@ in {
     fd
     fq
     go
-    google-cloud-sdk
+    myGCSDK
     gh
     gotools
     gopls
@@ -48,6 +52,7 @@ in {
     jq
     k9s
     kubectx
+    nil
     nushell
     platinum-searcher
     rbenv

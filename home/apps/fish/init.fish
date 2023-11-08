@@ -5,6 +5,8 @@ set -x PATH ~/.config/emacs/bin $PATH
 set -x PATH ~/.rd/bin $PATH
 set -x -a PATH /usr/local/go/bin
 set -x -a PATH ~/go/bin
+set -x LSP_USE_LISTS true
+set -x EDITOR emacsclient -t
 
 if test (hostname) != "laincomp" and (hostname) != "nixos"
     eval (chef shell-init fish)

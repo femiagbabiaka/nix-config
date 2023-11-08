@@ -7,8 +7,8 @@
   config,
   ...
 }: let
-  myEmacs29 = pkgs.emacs29.overrideAttrs (finalAttrs: previousAttrs: {
-    buildInputs = previousAttrs.buildInputs ++ [pkgs.tree-sitter];
+  myEmacs29 = pkgs.emacs29.overrideAttrs (previousAttrs: {
+    buildInputs = previousAttrs.buildInputs ++ [pkgs.tree-sitter pkgs.jansson];
   });
 in {
   programs.emacs = {

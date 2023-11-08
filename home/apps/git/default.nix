@@ -9,7 +9,9 @@
 }: {
   programs.gh = {
     enable = true;
-    enableGitCredentialHelper = true;
+    gitCredentialHelper = {
+      enable = true;
+    };
   };
 
   programs.git = {

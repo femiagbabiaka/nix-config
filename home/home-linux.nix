@@ -66,6 +66,7 @@
     zstd
     zoxide
     (pkgs.nerdfonts.override {fonts = ["FiraCode"];})
+    nil
   ];
 
   fonts.fontconfig.enable = true;

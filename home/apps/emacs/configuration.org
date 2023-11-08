@@ -53,7 +53,7 @@ Function copied from sqrtminusone's config, measures emacs startup time.
 
 *** Garbage collection
 #+begin_src emacs-lisp
-  (setq gc-cons-threshold 80000000)
+  (setq gc-cons-threshold 100000000)
   (setq read-process-output-max (* 1024 1024))
 #+end_src
 
@@ -313,6 +313,7 @@ masterpiece of the one and only prot
 **** nix
 #+begin_src emacs-lisp
   (use-package nix-mode
+    :hook (nix-mode . lsp-deferred)
     :straight t)
 #+end_src
 
@@ -339,10 +340,6 @@ masterpiece of the one and only prot
   (use-package haskell-mode
     :straight t
     :mode "\\.hs\\'")
-
-  (use-package lsp-haskell
-    :straight t
-    :after (lsp haskell-mode))
 #+end_src
 
 **** Terraform
@@ -359,30 +356,32 @@ masterpiece of the one and only prot
 
 **** LSP
 #+begin_src emacs-lisp
-  (use-package lsp-mode
+  (use-package eglot
     :straight t
-    :hook (
-       (haskell-mode . lsp)
-       (rust-mode . lsp)
-       (go-mode . lsp)
-       )
-    :commands lsp
-    :init
-    (setq lsp-keymap-prefix "C-c l")
-    :bind-keymap ("C-c l" . lsp-command-map)
     :config
-    (setq lsp-idle-delay 1)
-    (setq lsp-signature-render-documentation nil)
-    (setq lsp-headerline-breadcrumb-enable nil)
-    (setq lsp-modeline-code-actions-enable nil)
-    (setq lsp-modeline-diagnostics-enable nil))
+    ;; Ensure `nil` is in your PATH.
+    (add-to-list 'eglot-server-programs '(nix-mode . ("nil")))
+    :hook
+    (nix-mode . eglot-ensure)
+    (terraform-mode . eglot-ensure)
+    (haskell-mode . eglot-ensure)
+    (rust-mode . eglot-ensure)
+    (fish-mode . eglot-ensure)
+    (typescript-mode . eglot-ensure)
+    (go-mode . eglot-ensure)
+    (yaml-mode . eglot-ensure)
+    (ruby-mode. eglot-ensure))
+#+end_src
 
-  (use-package lsp-ui
+**** Flycheck
+#+begin_src emacs-lisp
+  (use-package flycheck
     :straight t
-    :commands lsp-ui-mode
-    :config
-    (setq lsp-ui-doc-delay 2)
-    (setq lsp-ui-sideline-show-hover nil))
+    :init (global-flycheck-mode))
+  (use-package flycheck-eglot
+    :straight t
+    :after (flycheck eglot)
+    :config (global-flycheck-eglot-mode 1))
 #+end_src
 
 **** Typescript
