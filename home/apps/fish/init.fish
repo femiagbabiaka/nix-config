@@ -8,7 +8,7 @@ set -x -a PATH ~/go/bin
 set -x LSP_USE_LISTS true
 set -x EDITOR emacsclient -t
 
-if test (hostname) != "laincomp" and (hostname) != "nixos"
+if test (hostname) != "laincomp" -a (hostname) != "nixos"
     eval (chef shell-init fish)
     set -x FASTLY_CHEF_USERNAME fagbabiaka
     set -x GOOGLE_SSH_USERNAME fagbabiaka

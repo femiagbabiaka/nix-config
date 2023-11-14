@@ -35,6 +35,16 @@ use-package.
   (eval-when-compile (require 'use-package))
 #+end_src
 
+*** Automatically update packages
+Does what it says on the tin.
+#+begin_src emacs-lisp
+  (use-package auto-package-update
+    :config
+    (setq auto-package-update-delete-old-versions t)
+    (setq auto-package-update-hide-results t)
+    (auto-package-update-maybe))
+#+end_src
+
 ** Performance
 *** Measuring startup speed
 Function copied from sqrtminusone's config, measures emacs startup time.
@@ -382,6 +392,17 @@ masterpiece of the one and only prot
     :straight t
     :after (flycheck eglot)
     :config (global-flycheck-eglot-mode 1))
+#+end_src
+
+**** Company Mode
+#+begin_src emacs-lisp
+  (use-package company-mode
+    :straight t
+    :init (global-company-mode)
+    :config
+    (setq company-minimum-prefix-length 1
+          company-idle-delay 0.0) ;; default is 0.2
+    )
 #+end_src
 
 **** Typescript
