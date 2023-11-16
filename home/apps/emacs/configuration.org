@@ -67,7 +67,7 @@ Function copied from sqrtminusone's config, measures emacs startup time.
   (setq read-process-output-max (* 1024 1024))
 #+end_src
 
-**** exec-path-from-shell
+*** exec-path-from-shell
 This conditionally sets the shell path based on the users configured shell path on boot.
 Pretty good.
 #+begin_src emacs-lisp
@@ -91,6 +91,16 @@ lets change that
 #+begin_src emacs-lisp
   (use-package no-littering
     :straight t)
+#+end_src
+
+Turns out, there's a feature called file locking that's used for multi-user scenarios. That sucks.
+#+begin_src emacs-lisp
+  (setq lock-file-name-transforms
+        '(("\\`/.*/\\([^/]+\\)\\'" "~/.emacs.d/.cache/\\1" t)))
+  (setq auto-save-file-name-transforms
+        '(("\\`/.*/\\([^/]+\\)\\'" "~/.emacs.d/.cache/\\1" t)))
+  (setq backup-directory-alist
+        '((".*" . "~/.emacs.d/.cache/")))
 #+end_src
 *** Make it harder to kill emacs
 This will prompt us when we're going to kill Emacs.
