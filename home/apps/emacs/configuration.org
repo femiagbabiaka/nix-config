@@ -594,7 +594,10 @@ Probably the most iconic Emacs program? Anyways, super good either way.
     :straight t
     :commands (magit-status magit-file-dispatch)
     :config
-    (setq magit-git-executable "/usr/bin/git")
+    ;; (when (memq window-system '(mac ns))
+    ;;   (setq magit-git-executable "/usr/bin/git"))
+    ;; (when (memq window-system '(x))
+    ;;   (setq magit-git-executable "/etc/profiles/per-user/nixos/bin/git"))
     (setq magit-refresh-status-buffer nil)
     (setq magit-blame-styles
           '((headings
