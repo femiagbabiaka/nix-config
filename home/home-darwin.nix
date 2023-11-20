@@ -47,6 +47,8 @@ in {
     gh
     gotools
     gopls
+    ghc
+    haskell-language-server
     myInfra
     kubernetes-helm
     jq

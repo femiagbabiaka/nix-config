@@ -43,6 +43,8 @@
     gh
     gotools
     gopls
+    ghc
+    haskell-language-server
     kubernetes-helm
     jq
     k9s
