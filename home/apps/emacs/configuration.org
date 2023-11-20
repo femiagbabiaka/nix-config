@@ -572,9 +572,14 @@ but seems like a nice lightweight replacement for Treemacs.
 **** Projectile
 So necessary. Manages projects, git aware. IDK how you would use
 Emacs efficiently without this.
+
+11/19/2023: Turns out, project.el exists, and is quite good. In case
+I come back to this and don't remember, the default prefix for project.el
+keybinds in C-x p.
 #+begin_src emacs-lisp
   (use-package projectile
     :straight t
+    :disabled t
     :bind (:map projectile-mode-map
                ("C-c p" . projectile-command-map))
     :config
@@ -594,10 +599,6 @@ Probably the most iconic Emacs program? Anyways, super good either way.
     :straight t
     :commands (magit-status magit-file-dispatch)
     :config
-    ;; (when (memq window-system '(mac ns))
-    ;;   (setq magit-git-executable "/usr/bin/git"))
-    ;; (when (memq window-system '(x))
-    ;;   (setq magit-git-executable "/etc/profiles/per-user/nixos/bin/git"))
     (setq magit-refresh-status-buffer nil)
     (setq magit-blame-styles
           '((headings
@@ -689,24 +690,32 @@ Save the most recently edited place in a file.
 
 *** Completion
 This entire section is pretty much cargo culted. We'll see what works long term.
-**** Ivy, counsel, swiper
+**** Vertico
+Vertico is a completion framework that seeks to extend native Emacs functionality.
 #+begin_src emacs-lisp
-  (use-package ivy
+  (use-package vertico
     :straight t
-    :config
-    (setq ivy-use-virtual-buffers t)
-    (ivy-mode))
-
-  (use-package counsel
-    :straight t
-    :after ivy
-    :config
-    (counsel-mode))
-
-  (use-package swiper
-    :defer t
-    :straight t)
+    :config (vertico-mode))
 #+end_src
+
+**** orderless
+#+begin_src emacs-lisp
+  (use-package orderless
+    :straight t
+    :custom
+    (completion-styles '(orderless basic))
+    (completion-category-overrides '((file (styles basic partial-completion)))))
+#+end_src
+
+**** marginalia
+#+begin_src emacs-lisp
+  (use-package marginalia
+    :straight t
+    :config
+    (marginalia-mode))
+#+end_src
+
+
 
 ** UI Settings
 *** Miscellaneous
