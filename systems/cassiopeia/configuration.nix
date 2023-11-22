@@ -71,6 +71,9 @@
     extraGroups = ["wheel" "video"]; # Enable ‘sudo’ for the user.
     initialPassword = "test123";
     shell = pkgs.fish;
+    openssh.authorizedKeys.keys = [
+      "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCg1dleX+XEtt1M1A2GmY4OsYy5jl3JVdbcqZMYXMdcLXB8LCGavsYR35s3ZpT1fcv7i6o+Qyk/0kNtltIt/AA3Rm7Zpvtti+ScCtDJIxjAdaP00RsAmyvditxRuZUrE5hw7kpGgkfHetQym8HTTlMIYKA7ccnPBgLxNpP7ENafzuWsi5lHZEFzXISjRHvt1QlvVtcjx356K2Bl8s5ckmWHtYgWbNjUVaxmMTa7FdqmzBCCniZfs11GmI/m2WndANwkMAfwfE1cAluhReKowg8q/Kxz4TT2ozCaXUDnaQWnSL0KVsvlPrQAa4OkIfv6s1zK5l0uMq6zMlI89Ein5NnQOE+Q4xMHLBqSqWq4j4ZNrJ7mB35jmLUy0m8KgmtAMYlRd3UW0PoM0euElbrNHEghvoGuvmAOavU2BHV6mdCIFubsh0Db/Xln9EcyMYV5qX3GcHs2b6/Vynj1ENd6u0DJHMM0EssFP2S+rMOj31Pkc5++3emmjDWJFGlrYFE6IIQR9I9J5lV7i0Drauh5JWag+TMvZP5mxJq8tQbuOLIgns1oooSsHLHRRMveHLq1xfYxmcMkMOAfmjqosyGMNs6qcOdwZaSW7UHhanGjszvAN673FupGwXMEbPltV1yLaSeplRBPrEJ+DX/JzMkkvhXm52/YyMiZWj3BkYeB6R9tiw== openpgp:0x0635F2CF"
+    ];
     packages = with pkgs; [
       signal-desktop
       git
@@ -89,6 +92,7 @@
       fzf
       nushell
       tailscale
+      tailscale-systray
       zoxide
       delta
       bat
@@ -97,6 +101,7 @@
 
   services.udev.packages = [pkgs.yubikey-personalization];
   services.pcscd.enable = true;
+  services.tailscale.enable = true;
 
   fonts.packages = with pkgs; [
     (nerdfonts.override {fonts = ["FiraCode"];})
@@ -169,6 +174,7 @@
     enable = true;
     settings.PasswordAuthentication = false;
     settings.KbdInteractiveAuthentication = false;
+    settings.X11Forwarding = true;
   };
 
   # Open ports in the firewall.

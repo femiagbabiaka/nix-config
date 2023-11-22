@@ -4,7 +4,6 @@
 {
   config,
   lib,
-  pkgs,
   modulesPath,
   ...
 }: {
@@ -27,6 +26,16 @@
     fsType = "vfat";
   };
 
+  fileSystems."/mnt/brain" = {
+    device = "brain-2:/volume1/plex";
+    fsType = "nfs";
+    options = [
+      "x-systemd.automount"
+      "noauto"
+      "x-systemd.idle-timeout=600"
+    ];
+  };
+
   swapDevices = [
     {device = "/dev/disk/by-uuid/f91fbae4-75cc-474c-949e-283c33491ac6";}
   ];
@@ -36,6 +45,9 @@
   # still possible to use this option, but it's recommended to use it in conjunction
   # with explicit per-interface declarations with `networking.interfaces.<interface>.useDHCP`.
   networking.useDHCP = lib.mkDefault true;
+
+  # Enable wakeOnLan.
+  networking.interfaces.enp3s0.wakeOnLan.enable = true;
   # networking.interfaces.enp3s0.useDHCP = lib.mkDefault true;
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";

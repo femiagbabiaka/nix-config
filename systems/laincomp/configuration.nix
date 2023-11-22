@@ -135,6 +135,7 @@ with lib; {
       fzf
       nushell
       tailscale
+      tailscale-systray
       zoxide
       delta
       bat
