@@ -161,8 +161,14 @@ with lib; {
     i3lock
     i3blocks
 
+    pinentry
     dmenu
   ];
+
+  programs.gnupg.agent = {
+    enable = true;
+    enableSSHSupport = true;
+  };
 
   environment.pathsToLink = ["/libexec"];
 

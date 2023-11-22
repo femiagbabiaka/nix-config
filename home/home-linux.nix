@@ -59,6 +59,10 @@
     shellcheck
     spotify
     stern
+    tailscale
+    _1password-gui
+    firefox
+    yubioath-flutter
     terraform-docs
     tflint
     terraform-ls

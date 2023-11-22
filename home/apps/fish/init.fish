@@ -7,8 +7,9 @@ set -x -a PATH /usr/local/go/bin
 set -x -a PATH ~/go/bin
 set -x LSP_USE_LISTS true
 set -x EDITOR emacsclient -t
+set -l NON_WORK_HOSTS laincomp nixos cassiopeia
 
-if test (hostname) != "laincomp" -a (hostname) != "nixos"
+if not contains (hostname) $NON_WORK_HOSTS
     eval (chef shell-init fish)
     set -x FASTLY_CHEF_USERNAME fagbabiaka
     set -x GOOGLE_SSH_USERNAME fagbabiaka
