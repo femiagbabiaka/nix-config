@@ -103,7 +103,7 @@ function fish_prompt
 
   set -l hostname_shell_info (
   if test -n "$SSH_CONNECTION"
-      echo -n " "(prompt_login)
+      echo -n (prompt_login)
   end
   )
 
