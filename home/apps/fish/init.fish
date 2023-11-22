@@ -103,7 +103,7 @@ function fish_prompt
 
   set -l hostname_shell_info (
   if test -n "$SSH_CONNECTION"
-      echo -n (prompt_login)
+      echo -n " "(prompt_login)
   end
   )
 
@@ -112,6 +112,6 @@ function fish_prompt
 	end
 	__fish_git_prompt " (%s)"
 
-	_print_in_color "$nix_shell_info λ $hostname_shell_info " (_prompt_color_for_status $last_status) ]
+	_print_in_color "$nix_shell_info$hostname_shell_info λ " (_prompt_color_for_status $last_status) ]
 
 end

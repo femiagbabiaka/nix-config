@@ -12,6 +12,7 @@
     ./apps/fish
     ./apps/neovim
     ./apps/git
+    ./apps/ssh
   ];
 
   home = {

@@ -150,6 +150,8 @@ with lib; {
   services.upower.enable = true;
   services.blueman.enable = true;
   services.fwupd.enable = true;
+  services.udev.packages = [pkgs.yubikey-personalization];
+  services.pcscd.enable = true;
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget

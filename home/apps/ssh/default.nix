@@ -7,5 +7,12 @@
   config,
   ...
 }: {
-  programs.ssh
+  programs.ssh = {
+    enable = true;
+    matchBlocks = {
+      "cassiopeia" = {
+        forwardAgent = true;
+      };
+    };
+  };
 }
