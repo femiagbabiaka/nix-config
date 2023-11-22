@@ -1,10 +1,6 @@
 set -g fish_greeting ""
 zoxide init fish --cmd cd | source
 
-set -x PATH ~/.config/emacs/bin $PATH
-set -x PATH ~/.rd/bin $PATH
-set -x -a PATH /usr/local/go/bin
-set -x -a PATH ~/go/bin
 set -x LSP_USE_LISTS true
 set -x EDITOR emacsclient -t
 set -l NON_WORK_HOSTS laincomp nixos cassiopeia
@@ -16,6 +12,10 @@ if not contains (hostname) $NON_WORK_HOSTS
     set -x INFRA_SERVER infra.plat.k8s.secretcdn.net
     set -x INFRA_PROVIDER okta
     set -x INFRA_SKIP_VERSION_CHECK true
+    set -x PATH ~/.config/emacs/bin $PATH
+    set -x PATH ~/.rd/bin $PATH
+    set -x -a PATH /usr/local/go/bin
+    set -x -a PATH ~/go/bin
 end
 
 set -g fish_greeting ""
