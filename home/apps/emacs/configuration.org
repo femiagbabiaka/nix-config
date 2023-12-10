@@ -259,32 +259,52 @@ This is pretty new to me, I'm a vimmer by trade. But lets see how it goes.
 
 **** Evil-mode
 #+begin_src emacs-lisp
-  (use-package evil
-    :straight t
-    :init
-    (setq evil-want-integration t)
-    (setq evil-want-C-u-scroll t)
-    (setq evil-want-keybinding nil)
-    (setq evil-search-module 'evil-search)
-    (setq evil-split-window-below t)
-    (setq evil-vsplit-window-right t)
-    (unless (display-graphic-p)
-      (setq evil-want-C-i-jump nil))
-    :config
-    (evil-mode 1)
-    ;; (setq evil-respect-visual-line-mode t)
-    (evil-set-undo-system 'undo-tree))
+  ;; (use-package evil
+  ;;   :straight t
+  ;;   :init
+  ;;   (setq evil-want-integration t)
+  ;;   (setq evil-want-C-u-scroll t)
+  ;;   (setq evil-want-keybinding nil)
+  ;;   (setq evil-search-module 'evil-search)
+  ;;   (setq evil-split-window-below t)
+  ;;   (setq evil-vsplit-window-right t)
+  ;;   (unless (display-graphic-p)
+  ;;     (setq evil-want-C-i-jump nil))
+  ;;   :config
+  ;;   (evil-mode 1)
+  ;;   ;; (setq evil-respect-visual-line-mode t)
+  ;;   (evil-set-undo-system 'undo-tree))
 #+end_src
 
 
 **** xah fly keys
 #+begin_src emacs-lisp
-  ;; (use-package xah-fly-keys
-  ;;   :config
-  ;;   (xah-fly-keys-set-layout "qwerty")
-  ;;   :init
-  ;;   (xah-fly-keys 1)
-  ;;   :straight t)
+  (use-package xah-fly-keys
+    :config
+    (xah-fly-keys-set-layout "qwerty")
+    (define-key xah-fly-leader-key-map (kbd "p")  'nil)
+    (define-key xah-fly-leader-key-map (kbd "p !") 'project-shell-command)
+    (define-key xah-fly-leader-key-map (kbd "p &")  'project-async-shell-command)
+    (define-key xah-fly-leader-key-map (kbd "p f") 'project-find-file)
+    (define-key xah-fly-leader-key-map (kbd "p F") 'project-or-external-find-file)
+    (define-key xah-fly-leader-key-map (kbd "p b") 'project-switch-to-buffer)
+    (define-key xah-fly-leader-key-map (kbd "p s") 'project-shell)
+    (define-key xah-fly-leader-key-map (kbd "p d")  'project-find-dir)
+    (define-key xah-fly-leader-key-map (kbd "p D") 'project-dired)
+    (define-key xah-fly-leader-key-map (kbd "p v") 'project-vc-dir)
+    (define-key xah-fly-leader-key-map (kbd "p c") 'project-compile)
+    (define-key xah-fly-leader-key-map (kbd "p e") 'project-eshell)
+    (define-key xah-fly-leader-key-map (kbd "p k") 'project-kill-buffers)
+    (define-key xah-fly-leader-key-map (kbd "p p") 'project-switch-project)
+    (define-key xah-fly-leader-key-map (kbd "p g") 'project-find-regexp)
+    (define-key xah-fly-leader-key-map (kbd "p G") 'project-or-external-find-regexp)
+    (define-key xah-fly-leader-key-map (kbd "p r") 'project-query-replace-regexp)
+    (define-key xah-fly-leader-key-map (kbd "p x") 'project-execute-extended-command)
+    (define-key xah-fly-leader-key-map (kbd "p o") 'project-any-command)
+    (define-key xah-fly-leader-key-map (kbd "\C-b") 'project-list-buffers)
+    :init
+    (xah-fly-keys 1)
+    :straight t)
 #+end_src
 
 *** Theme
