@@ -46,6 +46,7 @@
     gopls
     ghc
     haskell-language-server
+    stack
     kubernetes-helm
     jq
     k9s
@@ -72,6 +73,7 @@
     tmux-xpanes
     zstd
     zoxide
+    zathura
     (pkgs.nerdfonts.override {fonts = ["FiraCode"];})
     nil
   ];
