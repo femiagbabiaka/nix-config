@@ -93,7 +93,7 @@
         modules = [
           ./systems/arisu
           ./systems/arisu/configuration.nix
-          nixos-hardware.nixosModules.dell-xps-13-9380
+          nixos-hardware.nixosModules.lenovo-thinkpad
           home-manager.nixosModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
