@@ -3,7 +3,7 @@ zoxide init fish --cmd cd | source
 
 set -x LSP_USE_LISTS true
 set -x EDITOR emacsclient -t
-set -l NON_WORK_HOSTS laincomp nixos cassiopeia
+set -l NON_WORK_HOSTS laincomp nixos cassiopeia arisu
 
 if not contains (hostname) $NON_WORK_HOSTS
     eval (chef shell-init fish)
