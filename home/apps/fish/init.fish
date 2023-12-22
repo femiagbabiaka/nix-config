@@ -97,21 +97,19 @@ function fish_prompt
 
 	set -l nix_shell_info (
 	if test -n "$IN_NIX_SHELL"
-		echo -n " [nix-shell]"
+		echo -n " [nix-shell] "
 	end
 	)
 
-  set -l hostname_shell_info (
   if test -n "$SSH_CONNECTION"
-      echo -n (prompt_login)
+      printf (prompt_login)
   end
-  )
 
 	if test $HOME != $PWD
-		_print_in_color ""(prompt_pwd) blue
+		_print_in_color " "(prompt_pwd) blue
 	end
 	__fish_git_prompt " (%s)"
 
-	_print_in_color "$nix_shell_info$hostname_shell_info λ " (_prompt_color_for_status $last_status) ]
+	_print_in_color "$nix_shell_info λ " (_prompt_color_for_status $last_status)
 
 end

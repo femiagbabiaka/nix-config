@@ -93,6 +93,7 @@
       zoxide
       delta
       bat
+      calibre
     ];
   };
 
