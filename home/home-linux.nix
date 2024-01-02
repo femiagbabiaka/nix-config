@@ -49,13 +49,16 @@
     gotools
     gopls
     ghc
+    guardian-agent
     haskell-language-server
+    mpv
     stack
     kubernetes-helm
     jq
     k9s
     kubectx
     mitschemeX11
+    mosh
     nushell
     platinum-searcher
     rbenv
