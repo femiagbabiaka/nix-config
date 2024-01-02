@@ -45,6 +45,17 @@
       xterm.enable = false;
     };
 
+    xrandrHeads = [
+      {
+        output = "DP-2";
+        primary = true;
+      }
+      {
+        output = "DP-3";
+        monitorConfig = "Option \"Rotate\" \"left \"";
+      }
+    ];
+
     displayManager = {
       defaultSession = "none+i3";
     };
