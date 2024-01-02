@@ -52,7 +52,10 @@
       }
       {
         output = "DP-3";
-        monitorConfig = "Option \"Rotate\" \"left \"";
+        monitorConfig = ''
+          Option "Rotate" "left"
+          Option "LeftOf" "DP-2"
+        '';
       }
     ];
 
@@ -167,6 +170,8 @@
     git
     pinentry
   ];
+
+  programs.mosh.enable = true;
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
