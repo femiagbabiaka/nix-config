@@ -26,7 +26,7 @@ with lib; {
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  networking.hostName = "arisu"; # Define your hostname.
+  networking.hostName = "jormungand"; # Define your hostname.
   networking.networkmanager.enable = true; # Easiest to use and most distros use this by default.
   hardware.bluetooth.enable = true;
   hardware.pulseaudio.enable = true;

@@ -87,12 +87,12 @@
           }
         ];
       };
-      arisu = nixpkgs.lib.nixosSystem {
+      jormungand = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         specialArgs = {inherit inputs;};
         modules = [
-          ./systems/arisu
-          ./systems/arisu/configuration.nix
+          ./systems/jormungand
+          ./systems/jormungand/configuration.nix
           nixos-hardware.nixosModules.lenovo-thinkpad
           home-manager.nixosModules.home-manager
           {
