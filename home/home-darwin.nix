@@ -39,6 +39,7 @@ in {
     colima
     coreutils
     curl
+    dockerfile-language-server-nodejs
     fastly
     fd
     fq
@@ -72,6 +73,7 @@ in {
     tmux-xpanes
     zstd
     zoxide
+    zellij
     (pkgs.nerdfonts.override {fonts = ["FiraCode"];})
   ];
 

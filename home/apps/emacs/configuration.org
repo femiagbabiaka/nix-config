@@ -394,23 +394,37 @@ masterpiece of the one and only prot
     (add-hook 'terraform-mode-hook 'my-terraform-mode-init))
 #+end_src
 
+**** Dockerfile
+#+begin_src emacs-lisp
+  (use-package dockerfile-mode
+    :straight t)
+#+end_src
+
+**** Groovy
+#+begin_src emacs-lisp
+  (use-package groovy-mode
+    :straight t)
+#+end_src
+
 **** LSP
 #+begin_src emacs-lisp
-  (use-package eglot
-    :straight t
-    :config
-    ;; Ensure `nil` is in your PATH.
-    (add-to-list 'eglot-server-programs '(nix-mode . ("nil")))
-    :hook
-    (nix-mode . eglot-ensure)
-    (terraform-mode . eglot-ensure)
-    (haskell-mode . eglot-ensure)
-    (rust-mode . eglot-ensure)
-    (fish-mode . eglot-ensure)
-    (typescript-mode . eglot-ensure)
-    (go-mode . eglot-ensure)
-    (yaml-mode . eglot-ensure)
-    (ruby-mode. eglot-ensure))
+      (use-package eglot
+        :straight t
+        :config
+        ;; Ensure `nil` is in your PATH.
+        (add-to-list 'eglot-server-programs '(nix-mode . ("nil")))
+        :hook
+        (nix-mode . eglot-ensure)
+        (terraform-mode . eglot-ensure)
+        (haskell-mode . eglot-ensure)
+        (rust-mode . eglot-ensure)
+        (fish-mode . eglot-ensure)
+        (typescript-mode . eglot-ensure)
+        (go-mode . eglot-ensure)
+        (yaml-mode . eglot-ensure)
+        (ruby-mode. eglot-ensure)
+        (dockerfile-mode . eglot-ensure)
+        (groovy-mode . eglot-ensure))
 #+end_src
 
 **** Flycheck

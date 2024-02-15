@@ -81,6 +81,7 @@
     zstd
     zoxide
     zathura
+    zellij
     (pkgs.nerdfonts.override {fonts = ["FiraCode"];})
     nil
   ];
