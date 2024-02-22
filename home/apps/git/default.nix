@@ -33,6 +33,11 @@
       pull = {
         rebase = "true";
       };
+      url = {
+        "ssh://git@github.com:fastly" = {
+          insteadof = "https://github.com/fastly";
+        };
+      };
     };
   };
 }

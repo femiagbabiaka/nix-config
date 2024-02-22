@@ -55,6 +55,7 @@ in {
     jq
     k9s
     kubectx
+    nodejs
     nil
     nushell
     platinum-searcher

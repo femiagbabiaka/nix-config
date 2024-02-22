@@ -269,7 +269,7 @@ This is pretty new to me, I'm a vimmer by trade. But lets see how it goes.
   ;;   (setq evil-split-window-below t)
   ;;   (setq evil-vsplit-window-right t)
   ;;   (unless (display-graphic-p)
-  ;;     (setq evil-want-C-i-jump nil))
+  ;;     (setq evil-want-C-i-jump
   ;;   :config
   ;;   (evil-mode 1)
   ;;   ;; (setq evil-respect-visual-line-mode t)
@@ -580,6 +580,7 @@ Replaces Emacs built-in sequential undo system with a tree-based one. Probably o
 #+end_src
 *** Project Management
 Packages related to managing projects and files.
+
 **** dired-sidebar
 
 Never heard of this until digging into sqrtminusone's config,
