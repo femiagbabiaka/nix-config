@@ -72,6 +72,7 @@ in {
     tfswitch
     tmux
     tmux-xpanes
+    vault
     zstd
     zoxide
     zellij
