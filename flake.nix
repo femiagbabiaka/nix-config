@@ -19,6 +19,7 @@
     nixos-wsl = {
       url = "github:nix-community/NixOS-WSL";
     };
+    mac-app-util.url = "github:hraban/mac-app-util";
   };
 
   outputs = inputs @ {
@@ -29,6 +30,7 @@
     emacs-overlay,
     mkAlias,
     nixos-wsl,
+    mac-app-util,
     ...
   }: let
     linux-pkgs = import nixpkgs {
@@ -138,7 +140,7 @@
         pkgs = darwin-pkgs;
         modules = [
           ./home/home-darwin.nix
-          ./scripts/aliasApplications.nix
+          mac-app-util.homeManagerModules.default
         ];
         extraSpecialArgs = let
           username = "fagbabiaka";
