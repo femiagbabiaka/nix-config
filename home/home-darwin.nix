@@ -22,6 +22,7 @@ in {
     ./apps/git
     ./apps/helix
     ./apps/kitty
+    ./apps/alacritty
   ];
 
   home = {
