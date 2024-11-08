@@ -20,6 +20,8 @@ in {
     ./apps/fish
     ./apps/neovim
     ./apps/git
+    ./apps/helix
+    ./apps/kitty
   ];
 
   home = {
