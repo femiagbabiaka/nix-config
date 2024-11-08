@@ -6,7 +6,8 @@ set -x EDITOR emacsclient -t
 set -l NON_WORK_HOSTS laincomp nixos cassiopeia jormungand
 
 if not contains (hostname) $NON_WORK_HOSTS
-    eval (chef shell-init fish)
+    eval (cinc shell-init fish)
+    export KITCHEN_LOCAL_YAML=.kitchen.gce.yml
     set -x FASTLY_CHEF_USERNAME fagbabiaka
     set -x GOOGLE_SSH_USERNAME fagbabiaka
     set -x INFRA_SERVER infra.plat.k8s.secretcdn.net

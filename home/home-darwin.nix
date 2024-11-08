@@ -36,12 +36,14 @@ in {
     awscli2
     bat
     cmake
-    colima
     coreutils
+    crane
     curl
+    dive
     dockerfile-language-server-nodejs
     fastly
     fd
+    #fluxcd 
     fq
     go
     myGCSDK
@@ -50,6 +52,7 @@ in {
     gopls
     ghc
     haskell-language-server
+    helix
     myInfra
     kubernetes-helm
     jq

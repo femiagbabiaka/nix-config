@@ -141,7 +141,7 @@
           ./scripts/aliasApplications.nix
         ];
         extraSpecialArgs = let
-          username = "femiagbabiaka";
+          username = "fagbabiaka";
           homeDirectory = "/Users/${username}";
         in {
           inherit username homeDirectory self home-manager inputs;
