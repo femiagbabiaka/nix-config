@@ -13,6 +13,7 @@
       theme = "github_dark";
       editor = {
         lsp.display-messages = true;
+        cursor-shape.insert = "bar";
       };
     };
   };

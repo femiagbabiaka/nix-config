@@ -34,6 +34,7 @@ in {
   programs.home-manager.enable = true;
   nixpkgs.config.allowUnfree = true;
   home.packages = with pkgs; [
+    arc-browser
     ansible
     automake
     awscli2
@@ -65,6 +66,7 @@ in {
     nil
     nushell
     platinum-searcher
+    #plexamp
     rbenv
     ripgrep
     roswell
@@ -79,6 +81,7 @@ in {
     tmux
     tmux-xpanes
     vault
+#    yubioath-flutter
     zstd
     zoxide
     zellij

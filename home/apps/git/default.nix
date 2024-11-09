@@ -21,7 +21,7 @@
     delta = {enable = true;};
     extraConfig = {
       core = {
-        editor = "emacs -nw";
+        editor = "hx";
         excludesFile = "~/.gitignore";
       };
       github = {
