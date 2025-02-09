@@ -16,7 +16,6 @@
   ];
 in {
   imports = [
-    ./apps/emacs
     ./apps/fish
     ./apps/neovim
     ./apps/git
@@ -34,7 +33,6 @@ in {
   programs.home-manager.enable = true;
   nixpkgs.config.allowUnfree = true;
   home.packages = with pkgs; [
-    arc-browser
     ansible
     automake
     awscli2
@@ -43,49 +41,52 @@ in {
     coreutils
     crane
     curl
+    delve
     dive
     dockerfile-language-server-nodejs
     fastly
     fd
-    #fluxcd 
     fq
-    go
-    myGCSDK
     gh
-    gotools
+    # ghostty
+    go
     gopls
-    ghc
-    haskell-language-server
+    gotools
     helix
-    myInfra
-    kubernetes-helm
     jq
     k9s
+    kakoune
     kubectx
-    nodejs
+    kubernetes-helm
+    lldb
+    myGCSDK
+    myInfra
+    nerd-fonts.fira-code
     nil
+    nodejs
     nushell
     platinum-searcher
-    #plexamp
     rbenv
     ripgrep
     roswell
+    rubyPackages.solargraph
     rustup
     shellcheck
     spotify
     stern
     terraform-docs
-    tflint
     terraform-ls
+    tflint
     tfswitch
     tmux
     tmux-xpanes
     vault
-#    yubioath-flutter
-    zstd
-    zoxide
+    yaml-language-server
     zellij
-    (pkgs.nerdfonts.override {fonts = ["FiraCode"];})
+    zig
+    zls
+    zoxide
+    zstd
   ];
 
   fonts.fontconfig.enable = true;

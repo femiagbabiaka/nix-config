@@ -8,10 +8,6 @@
       url = "github:nix-community/home-manager/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    emacs-overlay = {
-      url = "github:nix-community/emacs-overlay";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     mkAlias = {
       url = "github:reckenrode/mkAlias";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -27,22 +23,20 @@
     nixpkgs,
     nixos-hardware,
     home-manager,
-    emacs-overlay,
     mkAlias,
     nixos-wsl,
     mac-app-util,
+    nur,
     ...
   }: let
     linux-pkgs = import nixpkgs {
       system = "x86_64-linux";
       config.allowUnfree = true;
-      overlays = [emacs-overlay.overlay];
     };
 
     darwin-pkgs = import nixpkgs {
-      system = "x86_64-darwin";
+      system = "aarch64-darwin";
       config.allowUnfree = true;
-      overlays = [emacs-overlay.overlay];
     };
   in {
     nixosConfigurations = {
@@ -148,18 +142,19 @@
         in {
           inherit username homeDirectory self home-manager inputs;
           pkgs = darwin-pkgs;
-          system = "x86_64-darwin";
+          system = "aarch64-darwin";
         };
       };
     };
 
     formatter."x86_64-linux" = linux-pkgs.alejandra;
     formatter."x86_64-darwin" = darwin-pkgs.alejandra;
+    formatter."aarch64-darwin" = darwin-pkgs.alejandra;
 
     devShells."x86_64-linux".default = with linux-pkgs;
       mkShell {packages = [nixfmt];};
 
-    devShells."x86_64-darwin".default = with darwin-pkgs;
+    devShells."aarch64-darwin".default = with darwin-pkgs;
       mkShell {packages = [nixfmt];};
   };
 }
