@@ -16,6 +16,8 @@
       url = "github:nix-community/NixOS-WSL";
     };
     mac-app-util.url = "github:hraban/mac-app-util";
+    dagger.url = "github:dagger/nix";
+    dagger.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = inputs @ {
@@ -26,7 +28,7 @@
     mkAlias,
     nixos-wsl,
     mac-app-util,
-    nur,
+    dagger,
     ...
   }: let
     linux-pkgs = import nixpkgs {
@@ -119,7 +121,6 @@
             home-manager.extraSpecialArgs = let
               username = "nixos";
               homeDirectory = "/home/${username}";
-              isNormalUser = true;
             in {
               inherit username homeDirectory self home-manager;
               pkgs = linux-pkgs;
@@ -140,7 +141,7 @@
           username = "fagbabiaka";
           homeDirectory = "/Users/${username}";
         in {
-          inherit username homeDirectory self home-manager inputs;
+          inherit username homeDirectory inputs dagger;
           pkgs = darwin-pkgs;
           system = "aarch64-darwin";
         };

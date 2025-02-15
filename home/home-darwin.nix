@@ -3,8 +3,7 @@
   lib,
   username,
   homeDirectory,
-  home-manager,
-  config,
+  dagger,
   ...
 }: let
   myInfra = pkgs.infra.overrideAttrs (finalAttrs: previousAttrs: {
@@ -87,7 +86,7 @@ in {
     zls
     zoxide
     zstd
-  ];
+  ] ++ [dagger.packages.${system}.dagger];
 
   fonts.fontconfig.enable = true;
 }
