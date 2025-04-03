@@ -29,7 +29,16 @@ with lib; {
   networking.hostName = "jormungand"; # Define your hostname.
   networking.networkmanager.enable = true; # Easiest to use and most distros use this by default.
   hardware.bluetooth.enable = true;
-  hardware.pulseaudio.enable = true;
+  # rtkit is optional but recommended
+  security.rtkit.enable = true;
+  services.pipewire = {
+    enable = true;
+    alsa.enable = true;
+    alsa.support32Bit = true;
+    pulse.enable = true;
+    # If you want to use JACK applications, uncomment this
+    #jack.enable = true;
+  };
 
   # Set your time zone.
   time.timeZone = "America/Los_Angeles";
@@ -60,7 +69,7 @@ with lib; {
   };
 
   fonts.packages = with pkgs; [
-    (nerdfonts.override {fonts = ["FiraCode"];})
+    nerd-fonts.fira-code
   ];
 
   services.xserver.displayManager.sessionCommands = ''
@@ -105,9 +114,6 @@ with lib; {
     EOF
   '';
 
-  # Enable sound.
-  sound.enable = true;
-
   # Enable touchpad support (enabled default in most desktopManager).
   services.xserver.libinput.enable = true;
 
@@ -134,6 +140,7 @@ with lib; {
       fishPlugins.hydro
       fzf
       nushell
+      pavucontrol
       tailscale
       tailscale-systray
       zoxide

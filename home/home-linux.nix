@@ -8,11 +8,11 @@
   ...
 }: {
   imports = [
-    ./apps/emacs
     ./apps/fish
     ./apps/neovim
     ./apps/git
     ./apps/ssh
+    ./apps/helix
   ];
 
   home = {
@@ -49,8 +49,9 @@
     gotools
     gopls
     ghc
-    guardian-agent
+    ghostty
     haskell-language-server
+    helix
     mpv
     stack
     kubernetes-helm
@@ -70,7 +71,6 @@
     stern
     tailscale
     _1password-gui
-    firefox
     yubioath-flutter
     terraform-docs
     tflint
@@ -82,7 +82,7 @@
     zoxide
     zathura
     zellij
-    (pkgs.nerdfonts.override {fonts = ["FiraCode"];})
+    nerd-fonts.fira-code
     nil
   ];
 
