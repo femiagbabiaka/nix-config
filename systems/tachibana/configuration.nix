@@ -70,14 +70,27 @@
   users.users.femi = {
     isNormalUser = true;
     extraGroups = ["wheel"]; # Enable ‘sudo’ for the user.
+    shell = pkgs.fish;
     packages = with pkgs; [
       tree
+      fish
+      fishPlugins.done
+      fishPlugins.fzf-fish
+      fishPlugins.forgit
+      fishPlugins.hydro
+      zoxide
+      delta
+      bat
+      fzf
+      neofetch
+      htop
     ];
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEtIEIUvyo/++CgRlA7izwA20E1BLXp9vXYP9BazA+pY femi@femiagbabiaka.xyz"
       "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDuaV4yn3JSy53bFUrKhxhUnkEB7XysquwmyI7196jzTry6zUlvufAchkXGmtYQN+O/HyTWwV8CqjXlMCIqlQPd5Zt6Dg8GgIn1hAYIZQx6XoczTBmtZTs9aqV9Sw39XunUtLGILF6OYpF2Wn4k7wlHCvxO9tHjHS0p4+g1ZW7nCd8PzJ9JBeaa5Hj8UR0WrzZKm/HQT4OVnVzSuMPbAj8y8sYr6GZHZ7bQy2GOEtC8PKh2xRnj8nhNXZkPCxr4Vgso3Fj4ZHocs5z7QP8R5eoLOnJ3DHlWwliHQtaCIJx9EorISDffYyNfaQdE0w+uYjGsWHbyAlFlEuoA7brne4w7+3HHp7/BxnlO+CEsRM5tw3WXICRB4KsU1giAinZn2xiGJr5+8HVuDyRj9r8fphlqvoIlW9HWE7woTlyNzJ8Q7fWy9crLuJ9DwCZsN9AIYqJ8vp1/Fv4bF/zbB6V4Wc+uVB/rfEKEfy4xdvrY4YHuSLcMv+nMMPFCvOGsi+YpAVn+xhKmUTdDiGkDOWR62YSO/wYrBEvMel047vn66G23LFmRLthi3pWoioHqwvPJ186uDy0Ybjv7C1x/xymqt7yJlu0LCOTQVTiSX16QTjvqWOttyuMQRAvOSHgQZGNj9saD07t9zMwCxZ8c5eaGNed79Na95OROVq8am3lcnPYc2w== cardno:24_026_415"
     ];
   };
+  programs.fish.enable = true;
 
   # programs.firefox.enable = true;
 
