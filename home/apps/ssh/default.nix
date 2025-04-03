@@ -13,6 +13,9 @@
       "cassiopeia" = {
         forwardAgent = true;
       };
+      "tachibana" = {
+        forwardAgent = true;
+      };
     };
   };
 }

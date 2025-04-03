@@ -63,6 +63,27 @@
           }
         ];
       };
+      tachibana = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        specialArgs = {inherit inputs;};
+        modules = [
+          ./systems/tachibana
+          ./systems/tachibana/configuration.nix
+          home-manager.nixosModules.home-manager
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.users.femi = import ./home/home-linux.nix;
+            home-manager.extraSpecialArgs = let
+              username = "femi";
+              homeDirectory = "/home/${username}";
+            in {
+              inherit username homeDirectory self home-manager;
+              pkgs = linux-pkgs;
+            };
+          }
+        ];
+      };
       laincomp = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         specialArgs = {inherit inputs;};
