@@ -26,10 +26,6 @@
   nixpkgs.config.allowUnfree = true;
 
   programs.firefox = {enable = true;};
-  programs.nix-index = {
-    enable = true;
-    enableFishIntegration = true;
-  };
 
   home.packages = with pkgs; [
     ansible
@@ -62,6 +58,7 @@
     mosh
     nushell
     platinum-searcher
+    pulseaudio
     rbenv
     ripgrep
     roswell
