@@ -31,64 +31,68 @@ in {
 
   programs.home-manager.enable = true;
   nixpkgs.config.allowUnfree = true;
-  home.packages = with pkgs;
-    [
-      ansible
-      automake
-      awscli2
-      bat
-      cmake
-      coreutils
-      crane
-      curl
-      delve
-      dive
-      dockerfile-language-server-nodejs
-      fastly
-      fd
-      fq
-      gh
-      # ghostty
-      go
-      gopls
-      gotools
-      helix
-      jq
-      k9s
-      kakoune
-      kubectx
-      kubernetes-helm
-      lldb
-      myGCSDK
-      myInfra
-      nerd-fonts.fira-code
-      nil
-      nodejs
-      nushell
-      platinum-searcher
-      rbenv
-      ripgrep
-      roswell
-      rubyPackages.solargraph
-      rustup
-      shellcheck
-      spotify
-      stern
-      terraform-docs
-      terraform-ls
-      tflint
-      tfswitch
-      tmux
-      tmux-xpanes
-      vault
-      yaml-language-server
-      zellij
-      zig
-      zls
-      zoxide
-      zstd
-    ]
-    ++ [dagger.packages.${system}.dagger];
+  home.packages = with pkgs; [
+    ansible
+    ansible-language-server
+    automake
+    awscli2
+    bat
+    cmake
+    coreutils
+    crane
+    curl
+    delve
+    dive
+    dockerfile-language-server-nodejs
+    fastly
+    fd
+    fq
+    gh
+    # ghostty
+    go
+    golangci-lint
+    golangci-lint-langserver
+    gopls
+    gotools
+    git-crypt
+    helm-ls
+    helix
+    jq
+    k9s
+    kakoune
+    kubectx
+    kubernetes-helm
+    lldb
+    myGCSDK
+    myInfra
+    nerd-fonts.fira-code
+    nil
+    nodejs
+    nushell
+    platinum-searcher
+    rbenv
+    ripgrep
+    roswell
+    rubyPackages.solargraph
+    rustup
+    shellcheck
+    spotify
+    stern
+    terraform-docs
+    terraform-ls
+    tflint
+    tfswitch
+    tmux
+    tmux-xpanes
+    vault
+    vscode-langservers-extracted
+    yaml-language-server
+    zellij
+    zig
+    zls
+    zoxide
+    zstd
+  ] ++ [dagger.packages.${system}.dagger];
 
   fonts.fontconfig.enable = true;
 }
