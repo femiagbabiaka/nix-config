@@ -6,7 +6,8 @@
   home-manager,
   config,
   ...
-}: {
+}:
+{
   programs.gh = {
     enable = true;
     gitCredentialHelper = {
@@ -18,7 +19,9 @@
     enable = true;
     userName = "Femi Agbabiaka";
     userEmail = "femi@femiagbabiaka.xyz";
-    delta = {enable = true;};
+    delta = {
+      enable = true;
+    };
     extraConfig = {
       core = {
         editor = "hx";

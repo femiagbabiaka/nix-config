@@ -6,7 +6,8 @@
   home-manager,
   config,
   ...
-}: {
+}:
+{
   programs.fish = {
     enable = true;
     interactiveShellInit = builtins.readFile ./init.fish;

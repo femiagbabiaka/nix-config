@@ -6,7 +6,8 @@
   home-manager,
   config,
   ...
-}: {
+}:
+{
   imports = [
     ./apps/fish
     ./apps/neovim
@@ -25,7 +26,9 @@
   programs.fish.enable = true;
   nixpkgs.config.allowUnfree = true;
 
-  programs.firefox = {enable = true;};
+  programs.firefox = {
+    enable = true;
+  };
 
   home.packages = with pkgs; [
     ansible
