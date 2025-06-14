@@ -8,8 +8,14 @@
 }:
 let
   myInfra = pkgs.infra.overrideAttrs (
-    finalAttrs: previousAttrs: {
+    finalAttrs: previousAttrs: rec {
       version = "0.20.0";
+      src = pkgs.fetchFromGitHub {
+        owner = "infrahq";
+        repo = "infra";
+        rev = "v${version}";
+        sha256 = "sha256-uz4wimhOfeHSL949m+biIhjfDwwEGnTiJWaz/r3Rsko=";
+      };
     }
   );
   myGCSDK = pkgs.google-cloud-sdk.withExtraComponents [
@@ -19,6 +25,7 @@ let
 in
 {
   imports = [
+    ./apps/vscode
     ./apps/emacs
     ./apps/fish
     ./apps/neovim
@@ -39,6 +46,7 @@ in
   home.packages =
     with pkgs;
     [
+      aider-chat-with-playwright
       ansible
       ansible-language-server
       automake
@@ -66,6 +74,7 @@ in
       gopls
       gotools
       git-crypt
+      graphviz
       helm-ls
       helix
       jq
@@ -78,9 +87,11 @@ in
       myInfra
       nerd-fonts.fira-code
       nil
+      nixfmt
       nodejs
       nushell
       platinum-searcher
+      #      procps.out.watch
       rbenv
       ripgrep
       roswell
@@ -93,6 +104,7 @@ in
       terraform-ls
       tflint
       tfswitch
+      tilt
       tmux
       tmux-xpanes
       vault

@@ -8,26 +8,6 @@
   ...
 }:
 let
-  # myEmacsAttrs = pkgs.emacs-git-pgtk.overrideAttrs (previousAttrs: {
-  #   buildInputs = previousAttrs.buildInputs ++ [pkgs.tree-sitter pkgs.jansson];
-  # } // lib.mkIf pkgs.stdenv.isDarwin {
-  #   patches = (previousAttrs.patches or []) ++
-  #     [
-  #         # Fix OS window role (needed for window managers like yabai)
-  #         (pkgs.fetchpatch {
-  #           url = "https://raw.githubusercontent.com/d12frosted/homebrew-emacs-plus/master/patches/emacs-28/fix-window-role.patch";
-  #           sha256 = "+z/KfsBm1lvZTZNiMbxzXQGRTjkCFO4QPlEK35upjsE=";
-  #         })
-  #         (pkgs.fetchpatch {
-  #           url = "https://raw.githubusercontent.com/d12frosted/homebrew-emacs-plus/refs/heads/master/patches/emacs-31/round-undecorated-frame.patch";
-  #           sha256 = "WWLg7xUqSa656JnzyUJTfxqyYB/4MCAiiiZUjMOqjuY=";
-  #         })
-  #         (pkgs.fetchpatch {
-  #           url = "https://raw.githubusercontent.com/d12frosted/homebrew-emacs-plus/refs/heads/master/patches/emacs-31/system-appearance.patch";
-  #           sha256 = "4+2U+4+2tpuaThNJfZOjy1JPnneGcsoge9r+WpgNDko=";
-  #         })
-  #     ];
-  #   });
   myEmacsAttrs = pkgs.emacs-git-pgtk.overrideAttrs (previousAttrs: {
     buildInputs = previousAttrs.buildInputs ++ [
       pkgs.tree-sitter
@@ -74,6 +54,7 @@ in
   };
 
   home.file.".emacs.d/early-init.el".text = ''
+    ;;; -*- lexical-binding: t -*-
     (setq package-enable-at-startup nil)
   '';
   home.file.".emacs.d/configuration.org".source =
