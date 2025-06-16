@@ -19,6 +19,8 @@
     dagger.url = "github:dagger/nix";
     dagger.inputs.nixpkgs.follows = "nixpkgs";
     emacs-overlay.url = "github:nix-community/emacs-overlay/bb1a28197681dc640b89a9a9bec75cdcd7e8d6ec";
+    nix-darwin.url = "github:nix-darwin/nix-darwin/master";
+    nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
@@ -32,6 +34,7 @@
       mac-app-util,
       dagger,
       emacs-overlay,
+      nix-darwin,
       ...
     }:
     let
@@ -49,6 +52,33 @@
       };
     in
     {
+      darwinConfigurations = {
+        jormungand = nix-darwin.lib.darwinSystem {
+          system = "aarch64-darwin";
+          specialArgs = { inherit inputs; };
+          modules = [
+            ./systems/jormungand
+            home-manager.darwinModules.home-manager
+            {
+              home-manager.useUserPackages = true;
+              home-manager.users.femi = import ./home/home-darwin-personal.nix;
+              home-manager.extraSpecialArgs =
+                let
+                  username = "femi";
+                in
+                {
+                  inherit
+                    username
+                    self
+                    home-manager
+                    ;
+                  pkgs = darwin-pkgs;
+                };
+            }
+          ];
+          
+        };
+      };
       nixosConfigurations = {
         cassiopeia = nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
@@ -113,35 +143,6 @@
             ./systems/laincomp
             ./systems/laincomp/configuration.nix
             nixos-hardware.nixosModules.dell-xps-13-9380
-            home-manager.nixosModules.home-manager
-            {
-              home-manager.useGlobalPkgs = true;
-              home-manager.useUserPackages = true;
-              home-manager.users.femi = import ./home/home-linux.nix;
-              home-manager.extraSpecialArgs =
-                let
-                  username = "femi";
-                  homeDirectory = "/home/${username}";
-                in
-                {
-                  inherit
-                    username
-                    homeDirectory
-                    self
-                    home-manager
-                    ;
-                  pkgs = linux-pkgs;
-                };
-            }
-          ];
-        };
-        jormungand = nixpkgs.lib.nixosSystem {
-          system = "x86_64-linux";
-          specialArgs = { inherit inputs; };
-          modules = [
-            ./systems/jormungand
-            ./systems/jormungand/configuration.nix
-            nixos-hardware.nixosModules.lenovo-thinkpad
             home-manager.nixosModules.home-manager
             {
               home-manager.useGlobalPkgs = true;

@@ -1,32 +1,14 @@
+
 {
   pkgs,
   lib,
   username,
-  homeDirectory,
   dagger,
   ...
 }:
-let
-  myInfra = pkgs.infra.overrideAttrs (
-    finalAttrs: previousAttrs: rec {
-      version = "0.20.0";
-      src = pkgs.fetchFromGitHub {
-        owner = "infrahq";
-        repo = "infra";
-        rev = "v${version}";
-        sha256 = "sha256-uz4wimhOfeHSL949m+biIhjfDwwEGnTiJWaz/r3Rsko=";
-      };
-    }
-  );
-  myGCSDK = pkgs.google-cloud-sdk.withExtraComponents [
-    pkgs.google-cloud-sdk.components.gke-gcloud-auth-plugin
-    pkgs.google-cloud-sdk.components.kubectl
-  ];
-in
 {
   imports = [
     ./apps/vscode
-    ./apps/emacs
     ./apps/fish
     ./apps/neovim
     ./apps/git
@@ -37,8 +19,7 @@ in
 
   home = {
     inherit username;
-    homeDirectory = lib.mkDefault homeDirectory;
-    stateVersion = "23.05";
+    stateVersion = "25.05";
   };
 
   programs.home-manager.enable = true;
@@ -67,7 +48,7 @@ in
       fd
       fq
       gh
-      # ghostty
+      ghostty
       go
       golangci-lint
       golangci-lint-langserver
@@ -83,15 +64,12 @@ in
       kubectx
       kubernetes-helm
       lldb
-      myGCSDK
-      myInfra
       nerd-fonts.fira-code
       nil
       nixfmt
       nodejs
       nushell
       platinum-searcher
-      #      procps.out.watch
       rbenv
       ripgrep
       roswell
@@ -115,10 +93,8 @@ in
       zls
       zoxide
       zstd
-      signal-desktop
       git
       _1password-gui-beta
-      networkmanagerapplet
       neofetch
       htop
       discord
@@ -131,15 +107,11 @@ in
       fishPlugins.hydro
       fzf
       nushell
-      pavucontrol
       tailscale
-      tailscale-systray
       zoxide
       delta
       bat
     ];
-    ]
-    ++ [ dagger.packages.${system}.dagger ];
 
   fonts.fontconfig.enable = true;
 }
