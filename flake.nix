@@ -80,7 +80,35 @@
             };
           }
         ];
-
+      };
+      proletariat = nix-darwin.lib.darwinSystem {
+        system = "aarch64-darwin";
+        specialArgs = { inherit inputs; };
+        modules = [
+          mac-app-util.darwinModules.default
+          ./systems/proletariat
+          home-manager.darwinModules.home-manager
+          {
+            home-manager.useUserPackages = true;
+            home-manager.users.fagbabiaka = import ./home/home-darwin.nix;
+            home-manager.sharedModules = [
+              mac-app-util.homeManagerModules.default
+            ];
+            home-manager.extraSpecialArgs =
+            let
+            username = "fagbabiaka";
+            in
+            {
+              inherit
+              username
+              self
+              home-manager
+              inputs
+              ;
+              pkgs = darwin-pkgs;
+            };
+          }
+        ];
       };
     };
     nixosConfigurations = {

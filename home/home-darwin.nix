@@ -1,9 +1,7 @@
 {
   pkgs,
-  lib,
   username,
-  homeDirectory,
-  dagger,
+  inputs,
   ...
 }:
 let
@@ -26,7 +24,6 @@ in
 {
   imports = [
     ./apps/vscode
-    ./apps/emacs
     ./apps/fish
     ./apps/neovim
     ./apps/git
@@ -37,7 +34,6 @@ in
 
   home = {
     inherit username;
-    homeDirectory = lib.mkDefault homeDirectory;
     stateVersion = "23.05";
   };
 
@@ -67,7 +63,6 @@ in
       fd
       fq
       gh
-      # ghostty
       go
       golangci-lint
       golangci-lint-langserver
@@ -91,7 +86,6 @@ in
       nodejs
       nushell
       platinum-searcher
-      #      procps.out.watch
       rbenv
       ripgrep
       roswell
@@ -115,31 +109,22 @@ in
       zls
       zoxide
       zstd
-      signal-desktop
       git
-      _1password-gui-beta
-      networkmanagerapplet
       neofetch
       htop
       discord
       fish
       wget
-      light
       fishPlugins.done
-      fishPlugins.fzf-fish
       fishPlugins.forgit
       fishPlugins.hydro
       fzf
       nushell
-      pavucontrol
-      tailscale
-      tailscale-systray
       zoxide
       delta
       bat
-    ];
     ]
-    ++ [ dagger.packages.${system}.dagger ];
+    ++ [ inputs.dagger.packages.${system}.dagger ];
 
   fonts.fontconfig.enable = true;
 }
