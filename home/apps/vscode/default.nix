@@ -64,6 +64,7 @@
           vscode-extensions.ziglang.vscode-zig
           vscode-extensions.eamodio.gitlens
           vscode-extensions.golang.go
+          vscode-extensions.ms-vscode.makefile-tools
         ];
       };
     };
