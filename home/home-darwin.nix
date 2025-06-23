@@ -99,8 +99,6 @@ in
       tflint
       tfswitch
       tilt
-      tmux
-      tmux-xpanes
       vault
       vscode-langservers-extracted
       yaml-language-server

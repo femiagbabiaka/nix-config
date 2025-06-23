@@ -63,7 +63,7 @@ with lib; {
       "on-focused-monitor-changed" = [ "move-mouse monitor-lazy-center" ];
       mode.main.binding = {
         "alt-enter" =
-          "exec-and-forget /etc/profiles/per-user/femi/bin/alacritty";
+          "exec-and-forget /etc/profiles/per-user/femi/bin/kitty -1";
         "alt-j" = "focus --boundaries-action wrap-around-the-workspace left";
         "alt-k" = "focus --boundaries-action wrap-around-the-workspace down";
         "alt-l" = "focus --boundaries-action wrap-around-the-workspace up";
@@ -124,7 +124,9 @@ with lib; {
 
   homebrew = {
     enable = true;
-    casks = [ "1password" "yubico-authenticator" "zen" "plexamp" "zed" ];
+    onActivation = { cleanup = "zap"; };
+    casks =
+      [ "zoom" "karabiner-elements" "1password" "yubico-authenticator" "signal" "zen" "plexamp" "zed" "discord" "keymapp" ];
   };
 
   # This value determines the NixOS release from which the default

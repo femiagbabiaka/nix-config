@@ -3,9 +3,10 @@
   programs.kitty = {
     enable = true;
     font = {
-      name = "Go Mono for Powerline";
+      name = "FiraCode Nerd Font Mono";
       size = 16;
     };
+    themeFile = "ayu";
     settings = {
       scrollback_lines = 10000;
       enable_audio_bell = false;

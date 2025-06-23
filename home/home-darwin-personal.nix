@@ -1,6 +1,6 @@
 { pkgs, username, ... }: {
   imports = [
-    ./apps/vscode
+    ./apps/emacs
     ./apps/fish
     ./apps/neovim
     ./apps/git
@@ -38,6 +38,7 @@
     fd
     fq
     gh
+    ghostty-bin
     go
     golangci-lint
     golangci-lint-langserver
@@ -72,8 +73,6 @@
     tflint
     tfswitch
     tilt
-    tmux
-    tmux-xpanes
     vault
     vscode-langservers-extracted
     yaml-language-server
@@ -85,7 +84,6 @@
     git
     neofetch
     htop
-    discord
     fish
     wget
     fishPlugins.done
@@ -97,6 +95,7 @@
     zoxide
     delta
     bat
+    glibtool
   ];
 
   fonts.fontconfig.enable = true;
