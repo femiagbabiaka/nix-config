@@ -2,7 +2,7 @@ set -g fish_greeting ""
 zoxide init fish --cmd cd | source
 
 set -x LSP_USE_LISTS true
-set -x EDITOR hx
+set -x EDITOR kak
 set -l NON_WORK_HOSTS laincomp nixos cassiopeia jormungand tachibana
 
 if not contains (hostname) $NON_WORK_HOSTS

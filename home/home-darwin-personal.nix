@@ -1,12 +1,9 @@
-{ pkgs, username, ... }: {
+{ pkgs, username, linux-pkgs, ... }: {
   imports = [
-    ./apps/emacs
     ./apps/fish
-    ./apps/neovim
     ./apps/git
-    ./apps/helix
     ./apps/kitty
-    ./apps/alacritty
+    ./apps/kakoune
   ];
 
   home = {
@@ -38,12 +35,10 @@
     fd
     fq
     gh
-    ghostty-bin
     go
     golangci-lint
     golangci-lint-langserver
     gopls
-    gotools
     git-crypt
     graphviz
     helm-ls
@@ -76,7 +71,6 @@
     vault
     vscode-langservers-extracted
     yaml-language-server
-    zellij
     zig
     zls
     zoxide
@@ -96,7 +90,7 @@
     delta
     bat
     glibtool
-  ];
+  ]; # ++ [ linux-pkgs.kak-tree-sitter ];
 
   fonts.fontconfig.enable = true;
 }
