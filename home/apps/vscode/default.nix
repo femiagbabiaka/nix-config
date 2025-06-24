@@ -1,8 +1,4 @@
-{
-  pkgs,
-  ...
-}:
-{
+{ pkgs, ... }: {
   programs.vscode = {
     enable = true;
     profiles = {
@@ -10,9 +6,7 @@
         userSettings = {
           "extensions" = {
             "experimental" = {
-              "affinity" = {
-                "asvetliakov.vscode-neovim" = 1;
-              };
+              "affinity" = { "asvetliakov.vscode-neovim" = 1; };
             };
           };
           "editor.fontFamily" = "Go Mono for Powerline";
@@ -24,11 +18,7 @@
           "nix.enableLanguageServer" = true;
           "nix.serverPath" = "nil";
           "nix.serverSettings" = {
-            "nil" = {
-              "formatting" = {
-                "command" = [ "nixfmt" ];
-              };
-            };
+            "nil" = { "formatting" = { "command" = [ "nixfmt" ]; }; };
           };
           "files.readonlyInclude" = {
             "**/.cargo/registry/src/**/*.rs" = true;
@@ -36,9 +26,7 @@
             "**/lib/rustlib/src/rust/library/**/*.rs" = true;
           };
           "vscode-neovim" = {
-            "neovimExecutablePaths" = {
-              "darwin" = "${pkgs.neovim}/bin/nvim";
-            };
+            "neovimExecutablePaths" = { "darwin" = "${pkgs.neovim}/bin/nvim"; };
           };
           "[terraform]" = {
             "editor.defaultFormatter" = "hashicorp.terraform";

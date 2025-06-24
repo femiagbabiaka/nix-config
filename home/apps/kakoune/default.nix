@@ -11,5 +11,9 @@
       ui.assistant = "dilbert";
     };
     defaultEditor = true;
+    extraConfig = ''
+      eval %sh{kak-lsp}
+      lsp-enable
+    '';
   };
 }

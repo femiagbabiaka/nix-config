@@ -1,10 +1,5 @@
 { pkgs, username, linux-pkgs, ... }: {
-  imports = [
-    ./apps/fish
-    ./apps/git
-    ./apps/kitty
-    ./apps/kakoune
-  ];
+  imports = [ ./apps/fish ./apps/gitconfig ./apps/kitty ./apps/kakoune ];
 
   home = {
     inherit username;
@@ -31,7 +26,6 @@
     delve
     dive
     dockerfile-language-server-nodejs
-    fastly
     fd
     fq
     gh
@@ -46,6 +40,7 @@
     jq
     k9s
     kakoune
+    kakoune-lsp
     kubectx
     kubernetes-helm
     lldb

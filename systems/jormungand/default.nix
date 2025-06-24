@@ -125,8 +125,18 @@ with lib; {
   homebrew = {
     enable = true;
     onActivation = { cleanup = "zap"; };
-    casks =
-      [ "zoom" "karabiner-elements" "1password" "yubico-authenticator" "signal" "zen" "plexamp" "zed" "discord" "keymapp" ];
+    casks = [
+      "zoom"
+      "karabiner-elements"
+      "1password"
+      "yubico-authenticator"
+      "signal"
+      "zen"
+      "plexamp"
+      "zed"
+      "discord"
+      "keymapp"
+    ];
   };
 
   # This value determines the NixOS release from which the default

@@ -25,7 +25,8 @@
   };
 
   outputs = inputs@{ self, nixpkgs, nixos-hardware, home-manager, mkAlias
-    , nixos-wsl, mac-app-util, dagger, emacs-overlay, nix-darwin, determinate, ... }:
+    , nixos-wsl, mac-app-util, dagger, emacs-overlay, nix-darwin, determinate
+    , ... }:
     let
       linux-pkgs = import nixpkgs {
         system = "x86_64-linux";
@@ -36,6 +37,10 @@
         system = "aarch64-darwin";
         config.allowUnfree = true;
         overlays = [ emacs-overlay.overlays.emacs ];
+      };
+      darwin-x86-pkgs = import nixpkgs {
+        system = "x86_64-darwin";
+        config.allowUnfree = true;
       };
     in {
       darwinConfigurations = {
@@ -55,7 +60,7 @@
               in {
                 inherit username self home-manager;
                 pkgs = darwin-pkgs;
-                linux-pkgs = linux-pkgs;
+                linux-pkgs = darwin-x86-pkgs;
               };
             }
           ];

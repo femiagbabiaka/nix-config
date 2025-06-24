@@ -1,13 +1,8 @@
 # Edit this configuration file to define what should be installed on
 # your system. Help is available in the configuration.nix(5) man page, on
 # https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
-{
-  config,
-  lib,
-  pkgs,
-  ...
-}: {
-  nix.settings.experimental-features = ["nix-command" "flakes"];
+{ config, lib, pkgs, ... }: {
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
   nix.gc.automatic = true;
   nix.extraOptions = ''
     binary-caches-parallel-connections = 3
@@ -29,7 +24,8 @@
   networking.hostName = "tachibana"; # Define your hostname.
   # Pick only one of the below networking options.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
-  networking.networkmanager.enable = true; # Easiest to use and most distros use this by default.
+  networking.networkmanager.enable =
+    true; # Easiest to use and most distros use this by default.
 
   # Set your time zone.
   time.timeZone = "UTC";
@@ -69,7 +65,7 @@
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.femi = {
     isNormalUser = true;
-    extraGroups = ["wheel"]; # Enable ‘sudo’ for the user.
+    extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
     shell = pkgs.fish;
     packages = with pkgs; [
       tree
@@ -128,7 +124,7 @@
     enable = true;
     rules = {
       "tailscale" = {
-        onState = ["routable"];
+        onState = [ "routable" ];
         script = ''
           #!${pkgs.runtimeShell}
           ethtool -K enp4s0 rx-udp-gro-forwarding on rx-gro-list off

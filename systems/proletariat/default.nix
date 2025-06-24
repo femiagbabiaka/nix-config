@@ -1,4 +1,3 @@
-
 # Edit this configuration file to define what should be installed on
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
@@ -125,7 +124,8 @@ with lib; {
 
   homebrew = {
     enable = true;
-    casks = [ "1password" "yubico-authenticator" "zen" "plexamp" "zed" "keymapp" ];
+    casks =
+      [ "1password" "yubico-authenticator" "zen" "plexamp" "zed" "keymapp" ];
   };
 
   # This value determines the NixOS release from which the default
