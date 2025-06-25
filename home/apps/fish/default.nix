@@ -2,6 +2,9 @@
   programs.fish = {
     enable = true;
     interactiveShellInit = builtins.readFile ./init.fish;
+    functions = {
+        kak = "command kak -c default 2>/dev/null $argv || command kak -s default $argv";
+    };
     shellAliases = {
       vim = "kak";
       gc = "git commit";

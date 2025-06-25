@@ -15,12 +15,11 @@ let
   ];
 in {
   imports = [
-    ./apps/vscode
     ./apps/fish
-    ./apps/neovim
     ./apps/gitconfig
     ./apps/helix
     ./apps/kitty
+    ./apps/kakoune
     ./apps/alacritty
   ];
 
@@ -58,7 +57,6 @@ in {
       golangci-lint
       golangci-lint-langserver
       gopls
-      gotools
       git-crypt
       graphviz
       helm-ls
@@ -66,6 +64,7 @@ in {
       jq
       k9s
       kakoune
+      kakoune-lsp
       kubectx
       kubernetes-helm
       lldb

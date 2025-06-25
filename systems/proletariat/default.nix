@@ -63,7 +63,7 @@ with lib; {
       "on-focused-monitor-changed" = [ "move-mouse monitor-lazy-center" ];
       mode.main.binding = {
         "alt-enter" =
-          "exec-and-forget /etc/profiles/per-user/fagbabiaka/bin/alacritty";
+          "exec-and-forget /etc/profiles/per-user/fagbabiaka/bin/kitty -1";
         "alt-j" = "focus --boundaries-action wrap-around-the-workspace left";
         "alt-k" = "focus --boundaries-action wrap-around-the-workspace down";
         "alt-l" = "focus --boundaries-action wrap-around-the-workspace up";
@@ -126,6 +126,7 @@ with lib; {
     enable = true;
     casks =
       [ "1password" "yubico-authenticator" "zen" "plexamp" "zed" "keymapp" ];
+    masApps = { "Wireguard" = 1451685025; };
   };
 
   # This value determines the NixOS release from which the default
