@@ -1,5 +1,4 @@
 # set up vsplit and hsplit
-
 # Define vertical split command
 define-command kitty-vsplit -params .. %{
     evaluate-commands %sh{
@@ -46,11 +45,11 @@ define-command kitty-hsplit -params .. %{
 
 # Convenient aliases
 alias global vs kitty-vsplit
-alias global split kitty-hsplit
+alias global sp kitty-hsplit
 
 # map splits in user mode
-map global user | ':kitty-vsplit <ret>'
-map global user <minus> ':kitty-hsplit <ret>'
+map global user | ':kitty-vsplit <ret>' -docstring 'split window vertically'
+map global user <minus> ':kitty-hsplit <ret>' -docstring 'split window horizontally'
 # LSP
 eval %sh{kak-lsp}
 # extra lsp keybindings
@@ -102,3 +101,9 @@ hook global BufSetOption filetype=go %{
     }
 }
 lsp-enable
+
+# set up autopairs
+enable-auto-pairs
+
+# set up fzf.kak
+map global user f ': fzf-mode<ret>' -docstring 'trigger fzf-mode'

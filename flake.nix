@@ -4,25 +4,25 @@
   inputs = {
     determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/*";
 
-    nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0";
+    nixpkgs.url = "github:femiagbabiaka/nixpkgs-unfree";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
     home-manager = {
-      url = "github:nix-community/home-manager/release-25.05";
-      inputs.nixpkgs.follows = "nixpkgs";
+      url = "github:nix-community/home-manager/master";
+      inputs.nixpkgs.follows = "nixpkgs/nixpkgs";
     };
     mkAlias = {
       url = "github:reckenrode/mkAlias";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs/nixpkgs";
     };
     nixos-wsl = {
       url = "github:nix-community/NixOS-WSL";
     };
     mac-app-util.url = "github:hraban/mac-app-util";
     dagger.url = "github:dagger/nix";
-    dagger.inputs.nixpkgs.follows = "nixpkgs";
+    dagger.inputs.nixpkgs.follows = "nixpkgs/nixpkgs";
     emacs-overlay.url = "github:nix-community/emacs-overlay/bb1a28197681dc640b89a9a9bec75cdcd7e8d6ec";
-    nix-darwin.url = "github:nix-darwin/nix-darwin/nix-darwin-25.05";
-    nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
+    nix-darwin.url = "github:nix-darwin/nix-darwin/master";
+    nix-darwin.inputs.nixpkgs.follows = "nixpkgs/nixpkgs";
   };
 
   outputs =
@@ -58,7 +58,7 @@
                 in
                 {
                   inherit username self home-manager;
-                  pkgs = nixpkgs.legacyPackages.${system};
+                  pkgs = inputs.nixpkgs.legacyPackages.${system};
                 };
             }
           ];
@@ -83,9 +83,10 @@
                     username
                     self
                     home-manager
-                    inputs
+                    dagger
+                    system
                     ;
-                  pkgs = nixpkgs.legacyPackages.${system};
+                  pkgs = inputs.nixpkgs.legacyPackages.${system};
                 };
             }
           ];
@@ -115,7 +116,7 @@
                     self
                     home-manager
                     ;
-                  pkgs = nixpkgs.legacyPackages.${system};
+                  pkgs = inputs.nixpkgs.legacyPackages.${system};
                 };
             }
           ];
@@ -143,7 +144,7 @@
                     self
                     home-manager
                     ;
-                  pkgs = nixpkgs.legacyPackages.${system};
+                  pkgs = inputs.nixpkgs.legacyPackages.${system};
                 };
             }
           ];
@@ -172,7 +173,7 @@
                     self
                     home-manager
                     ;
-                  pkgs = nixpkgs.legacyPackages.${system};
+                  pkgs = inputs.nixpkgs.legacyPackages.${system};
                 };
             }
           ];

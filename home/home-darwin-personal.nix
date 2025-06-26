@@ -14,6 +14,7 @@
   home = {
     inherit username;
     stateVersion = "25.05";
+    shell.enableShellIntegration = true;
   };
 
   programs.home-manager.enable = true;

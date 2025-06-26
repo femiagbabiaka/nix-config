@@ -1,7 +1,7 @@
 {
   pkgs,
   username,
-  inputs,
+  dagger,
   ...
 }:
 let
@@ -73,7 +73,6 @@ in
       helix
       jq
       k9s
-      kakoune
       kakoune-lsp
       kubectx
       kubernetes-helm
@@ -122,7 +121,7 @@ in
       delta
       bat
     ]
-    ++ [ inputs.dagger.packages.${system}.dagger ];
+    ++ [ dagger.packages.${system}.dagger ];
 
   fonts.fontconfig.enable = true;
 }
