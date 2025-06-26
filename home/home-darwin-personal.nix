@@ -57,7 +57,7 @@
     lldb
     nerd-fonts.fira-code
     nil
-    nixfmt
+    nixfmt-rfc-style
     nodejs
     nushell
     platinum-searcher
