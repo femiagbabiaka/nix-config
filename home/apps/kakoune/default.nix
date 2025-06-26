@@ -3,7 +3,7 @@
   programs.kakoune = {
     enable = true;
     config = {
-      colorScheme = "default";
+      colorScheme = "solarized-dark";
       numberLines = {
         enable = true;
         highlightCursor = true;

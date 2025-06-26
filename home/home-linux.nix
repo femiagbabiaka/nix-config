@@ -3,8 +3,6 @@
   lib,
   username,
   homeDirectory,
-  home-manager,
-  config,
   ...
 }:
 {

@@ -8,7 +8,7 @@
       name = "FiraCode Nerd Font Mono";
       size = 16;
     };
-    themeFile = "Constant_Perceptual_Luminosity_dark";
+    themeFile = "GitHub_Dark_High_Contrast";
     settings = {
       enabled_layouts = "splits:split_axis=horizontal,stack";
       allow_remote_control = "yes";
