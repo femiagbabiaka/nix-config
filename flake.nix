@@ -40,27 +40,10 @@
       determinate,
       ...
     }:
-    let
-      linux-pkgs = import nixpkgs {
-        system = "x86_64-linux";
-        config.allowUnfree = true;
-      };
-
-      darwin-pkgs = import nixpkgs {
-        system = "aarch64-darwin";
-        config.allowUnfree = true;
-        overlays = [ emacs-overlay.overlays.emacs ];
-      };
-      darwin-x86-pkgs = import nixpkgs {
-        system = "x86_64-darwin";
-        config.allowUnfree = true;
-      };
-    in
     {
       darwinConfigurations = {
-        jormungand = nix-darwin.lib.darwinSystem {
+        jormungand = nix-darwin.lib.darwinSystem rec {
           system = "aarch64-darwin";
-          specialArgs = { inherit inputs; };
           modules = [
             mac-app-util.darwinModules.default
             ./systems/jormungand
@@ -75,13 +58,12 @@
                 in
                 {
                   inherit username self home-manager;
-                  pkgs = darwin-pkgs;
-                  linux-pkgs = darwin-x86-pkgs;
+                  pkgs = nixpkgs.legacyPackages.${system};
                 };
             }
           ];
         };
-        proletariat = nix-darwin.lib.darwinSystem {
+        proletariat = nix-darwin.lib.darwinSystem rec {
           system = "aarch64-darwin";
           specialArgs = { inherit inputs; };
           modules = [
@@ -103,14 +85,14 @@
                     home-manager
                     inputs
                     ;
-                  pkgs = darwin-pkgs;
+                  pkgs = nixpkgs.legacyPackages.${system};
                 };
             }
           ];
         };
       };
       nixosConfigurations = {
-        cassiopeia = nixpkgs.lib.nixosSystem {
+        cassiopeia = nixpkgs.lib.nixosSystem rec {
           system = "x86_64-linux";
           specialArgs = { inherit inputs; };
           modules = [
@@ -133,12 +115,12 @@
                     self
                     home-manager
                     ;
-                  pkgs = linux-pkgs;
+                  pkgs = nixpkgs.legacyPackages.${system};
                 };
             }
           ];
         };
-        tachibana = nixpkgs.lib.nixosSystem {
+        tachibana = nixpkgs.lib.nixosSystem rec {
           system = "x86_64-linux";
           specialArgs = { inherit inputs; };
           modules = [
@@ -161,12 +143,12 @@
                     self
                     home-manager
                     ;
-                  pkgs = linux-pkgs;
+                  pkgs = nixpkgs.legacyPackages.${system};
                 };
             }
           ];
         };
-        laincomp = nixpkgs.lib.nixosSystem {
+        laincomp = nixpkgs.lib.nixosSystem rec {
           system = "x86_64-linux";
           specialArgs = { inherit inputs; };
           modules = [
@@ -190,12 +172,12 @@
                     self
                     home-manager
                     ;
-                  pkgs = linux-pkgs;
+                  pkgs = nixpkgs.legacyPackages.${system};
                 };
             }
           ];
         };
-        brain = nixpkgs.lib.nixosSystem {
+        brain = nixpkgs.lib.nixosSystem rec {
           system = "x86_64-linux";
           specialArgs = { inherit inputs; };
           modules = [
@@ -218,44 +200,11 @@
                     self
                     home-manager
                     ;
-                  pkgs = linux-pkgs;
+                  pkgs = nixpkgs.legacyPackages.${system};
                 };
             }
           ];
         };
       };
-
-      homeConfigurations = {
-        worklaptop = home-manager.lib.homeManagerConfiguration {
-          pkgs = darwin-pkgs;
-          modules = [
-            ./home/home-darwin.nix
-            mac-app-util.homeManagerModules.default
-          ];
-          extraSpecialArgs =
-            let
-              username = "fagbabiaka";
-              homeDirectory = "/Users/${username}";
-            in
-            {
-              inherit
-                username
-                homeDirectory
-                inputs
-                dagger
-                ;
-              pkgs = darwin-pkgs;
-              system = "aarch64-darwin";
-            };
-        };
-      };
-
-      formatter."x86_64-linux" = linux-pkgs.nixfmt-rfc-style;
-      formatter."x86_64-darwin" = darwin-pkgs.nixfmt-rfc-style;
-      formatter."aarch64-darwin" = darwin-pkgs.nixfmt-rfc-style;
-
-      devShells."x86_64-linux".default = with linux-pkgs; mkShell { packages = [ nixfmt ]; };
-
-      devShells."aarch64-darwin".default = with darwin-pkgs; mkShell { packages = [ nixfmt ]; };
     };
 }

@@ -5,6 +5,7 @@
 with lib;
 {
   nix.enable = false;
+  nixpkgs.config.allowUnfree = true;
   networking.hostName = "proletariat"; # Define your hostname.
   networking.knownNetworkServices = [
     "Wi-Fi"

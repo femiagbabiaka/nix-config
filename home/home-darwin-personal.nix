@@ -1,7 +1,6 @@
 {
   pkgs,
   username,
-  linux-pkgs,
   ...
 }:
 {
@@ -26,6 +25,7 @@
     automake
     awscli2
     bat
+    broot
     cmake
     lima
     colima
@@ -67,14 +67,12 @@
     rubyPackages.solargraph
     rustup
     shellcheck
-    spotify
     stern
     terraform-docs
     terraform-ls
     tflint
     tfswitch
     tilt
-    vault
     vscode-langservers-extracted
     yaml-language-server
     zig
@@ -96,6 +94,7 @@
     delta
     bat
     glibtool
+    vscode-langservers-extracted
   ]; # ++ [ linux-pkgs.kak-tree-sitter ];
 
   fonts.fontconfig.enable = true;

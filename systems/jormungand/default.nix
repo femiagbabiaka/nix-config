@@ -1,10 +1,10 @@
 # Edit this configuration file to define what should be installed on
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
-{ pkgs, lib, ... }:
-with lib;
+{ pkgs, ... }:
 {
   nix.enable = false;
+  nixpkgs.config.allowUnfree = true;
   networking.hostName = "jormungand"; # Define your hostname.
   networking.knownNetworkServices = [
     "Wi-Fi"
@@ -65,7 +65,7 @@ with lib;
       };
       "on-focused-monitor-changed" = [ "move-mouse monitor-lazy-center" ];
       mode.main.binding = {
-        "alt-enter" = "exec-and-forget ${pkgs.kitty}/bin/kitty -1 -directory ~";
+        "alt-enter" = "exec-and-forget ${pkgs.kitty}/bin/kitty -1 --directory ~";
         "alt-j" = "focus --boundaries-action wrap-around-the-workspace left";
         "alt-k" = "focus --boundaries-action wrap-around-the-workspace down";
         "alt-l" = "focus --boundaries-action wrap-around-the-workspace up";
@@ -138,6 +138,7 @@ with lib;
       "zed"
       "discord"
       "keymapp"
+      "spotify"
     ];
   };
 
