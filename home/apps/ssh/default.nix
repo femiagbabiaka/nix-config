@@ -1,9 +1,22 @@
-{ pkgs, lib, username, homeDirectory, home-manager, config, ... }: {
+{
+  pkgs,
+  lib,
+  username,
+  homeDirectory,
+  home-manager,
+  config,
+  ...
+}:
+{
   programs.ssh = {
     enable = true;
     matchBlocks = {
-      "cassiopeia" = { forwardAgent = true; };
-      "tachibana" = { forwardAgent = true; };
+      "cassiopeia" = {
+        forwardAgent = true;
+      };
+      "tachibana" = {
+        forwardAgent = true;
+      };
     };
   };
 }

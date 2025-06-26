@@ -1,7 +1,11 @@
-{ ... }: {
+{ ... }:
+{
   programs.helix = {
     enable = true;
-    ignores = [ ".terraform/*" ".git/*" ];
+    ignores = [
+      ".terraform/*"
+      ".git/*"
+    ];
     settings = {
       theme = "github_dark";
       editor = {

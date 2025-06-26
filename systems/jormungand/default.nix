@@ -2,10 +2,14 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 { pkgs, lib, ... }:
-with lib; {
+with lib;
+{
   nix.enable = false;
   networking.hostName = "jormungand"; # Define your hostname.
-  networking.knownNetworkServices = [ "Wi-Fi" "Thunderbolt Bridge" ];
+  networking.knownNetworkServices = [
+    "Wi-Fi"
+    "Thunderbolt Bridge"
+  ];
   system.primaryUser = "femi";
 
   # Set your time zone.
@@ -20,10 +24,9 @@ with lib; {
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
-  environment.systemPackages = with pkgs;
-    [
-      helix # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-    ];
+  environment.systemPackages = with pkgs; [
+    helix # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
+  ];
 
   environment.shells = with pkgs; [ fish ];
 
@@ -62,13 +65,11 @@ with lib; {
       };
       "on-focused-monitor-changed" = [ "move-mouse monitor-lazy-center" ];
       mode.main.binding = {
-        "alt-enter" =
-          "exec-and-forget /etc/profiles/per-user/femi/bin/kitty -1";
+        "alt-enter" = "exec-and-forget /etc/profiles/per-user/femi/bin/kitty -1";
         "alt-j" = "focus --boundaries-action wrap-around-the-workspace left";
         "alt-k" = "focus --boundaries-action wrap-around-the-workspace down";
         "alt-l" = "focus --boundaries-action wrap-around-the-workspace up";
-        "alt-semicolon" =
-          "focus --boundaries-action wrap-around-the-workspace right";
+        "alt-semicolon" = "focus --boundaries-action wrap-around-the-workspace right";
         "alt-shift-j" = "move left";
         "alt-shift-k" = "move down";
         "alt-shift-l" = "move up";
@@ -81,8 +82,7 @@ with lib; {
 
         "alt-s" = "layout v_accordion"; # "layout stacking" in i3
         "alt-w" = "layout h_accordion"; # "layout tabbed" in i3
-        "alt-e" =
-          "layout tiles horizontal vertical"; # "layout toggle split" in i3
+        "alt-e" = "layout tiles horizontal vertical"; # "layout toggle split" in i3
 
         "alt-shift-space" = "layout floating tiling"; # "floating toggle" in i3
         "alt-1" = "workspace 1";
@@ -124,7 +124,9 @@ with lib; {
 
   homebrew = {
     enable = true;
-    onActivation = { cleanup = "zap"; };
+    onActivation = {
+      cleanup = "zap";
+    };
     casks = [
       "zoom"
       "karabiner-elements"

@@ -14,19 +14,32 @@
       url = "github:reckenrode/mkAlias";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nixos-wsl = { url = "github:nix-community/NixOS-WSL"; };
+    nixos-wsl = {
+      url = "github:nix-community/NixOS-WSL";
+    };
     mac-app-util.url = "github:hraban/mac-app-util";
     dagger.url = "github:dagger/nix";
     dagger.inputs.nixpkgs.follows = "nixpkgs";
-    emacs-overlay.url =
-      "github:nix-community/emacs-overlay/bb1a28197681dc640b89a9a9bec75cdcd7e8d6ec";
+    emacs-overlay.url = "github:nix-community/emacs-overlay/bb1a28197681dc640b89a9a9bec75cdcd7e8d6ec";
     nix-darwin.url = "github:nix-darwin/nix-darwin/nix-darwin-25.05";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = inputs@{ self, nixpkgs, nixos-hardware, home-manager, mkAlias
-    , nixos-wsl, mac-app-util, dagger, emacs-overlay, nix-darwin, determinate
-    , ... }:
+  outputs =
+    inputs@{
+      self,
+      nixpkgs,
+      nixos-hardware,
+      home-manager,
+      mkAlias,
+      nixos-wsl,
+      mac-app-util,
+      dagger,
+      emacs-overlay,
+      nix-darwin,
+      determinate,
+      ...
+    }:
     let
       linux-pkgs = import nixpkgs {
         system = "x86_64-linux";
@@ -42,7 +55,8 @@
         system = "x86_64-darwin";
         config.allowUnfree = true;
       };
-    in {
+    in
+    {
       darwinConfigurations = {
         jormungand = nix-darwin.lib.darwinSystem {
           system = "aarch64-darwin";
@@ -54,14 +68,16 @@
             {
               home-manager.useUserPackages = true;
               home-manager.users.femi = import ./home/home-darwin-personal.nix;
-              home-manager.sharedModules =
-                [ mac-app-util.homeManagerModules.default ];
-              home-manager.extraSpecialArgs = let username = "femi";
-              in {
-                inherit username self home-manager;
-                pkgs = darwin-pkgs;
-                linux-pkgs = darwin-x86-pkgs;
-              };
+              home-manager.sharedModules = [ mac-app-util.homeManagerModules.default ];
+              home-manager.extraSpecialArgs =
+                let
+                  username = "femi";
+                in
+                {
+                  inherit username self home-manager;
+                  pkgs = darwin-pkgs;
+                  linux-pkgs = darwin-x86-pkgs;
+                };
             }
           ];
         };
@@ -75,13 +91,20 @@
             {
               home-manager.useUserPackages = true;
               home-manager.users.fagbabiaka = import ./home/home-darwin.nix;
-              home-manager.sharedModules =
-                [ mac-app-util.homeManagerModules.default ];
-              home-manager.extraSpecialArgs = let username = "fagbabiaka";
-              in {
-                inherit username self home-manager inputs;
-                pkgs = darwin-pkgs;
-              };
+              home-manager.sharedModules = [ mac-app-util.homeManagerModules.default ];
+              home-manager.extraSpecialArgs =
+                let
+                  username = "fagbabiaka";
+                in
+                {
+                  inherit
+                    username
+                    self
+                    home-manager
+                    inputs
+                    ;
+                  pkgs = darwin-pkgs;
+                };
             }
           ];
         };
@@ -98,13 +121,20 @@
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
               home-manager.users.femi = import ./home/home-linux.nix;
-              home-manager.extraSpecialArgs = let
-                username = "femi";
-                homeDirectory = "/home/${username}";
-              in {
-                inherit username homeDirectory self home-manager;
-                pkgs = linux-pkgs;
-              };
+              home-manager.extraSpecialArgs =
+                let
+                  username = "femi";
+                  homeDirectory = "/home/${username}";
+                in
+                {
+                  inherit
+                    username
+                    homeDirectory
+                    self
+                    home-manager
+                    ;
+                  pkgs = linux-pkgs;
+                };
             }
           ];
         };
@@ -119,13 +149,20 @@
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
               home-manager.users.femi = import ./home/home-linux.nix;
-              home-manager.extraSpecialArgs = let
-                username = "femi";
-                homeDirectory = "/home/${username}";
-              in {
-                inherit username homeDirectory self home-manager;
-                pkgs = linux-pkgs;
-              };
+              home-manager.extraSpecialArgs =
+                let
+                  username = "femi";
+                  homeDirectory = "/home/${username}";
+                in
+                {
+                  inherit
+                    username
+                    homeDirectory
+                    self
+                    home-manager
+                    ;
+                  pkgs = linux-pkgs;
+                };
             }
           ];
         };
@@ -141,13 +178,20 @@
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
               home-manager.users.femi = import ./home/home-linux.nix;
-              home-manager.extraSpecialArgs = let
-                username = "femi";
-                homeDirectory = "/home/${username}";
-              in {
-                inherit username homeDirectory self home-manager;
-                pkgs = linux-pkgs;
-              };
+              home-manager.extraSpecialArgs =
+                let
+                  username = "femi";
+                  homeDirectory = "/home/${username}";
+                in
+                {
+                  inherit
+                    username
+                    homeDirectory
+                    self
+                    home-manager
+                    ;
+                  pkgs = linux-pkgs;
+                };
             }
           ];
         };
@@ -162,13 +206,20 @@
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
               home-manager.users.nixos = import ./home/home-linux.nix;
-              home-manager.extraSpecialArgs = let
-                username = "nixos";
-                homeDirectory = "/home/${username}";
-              in {
-                inherit username homeDirectory self home-manager;
-                pkgs = linux-pkgs;
-              };
+              home-manager.extraSpecialArgs =
+                let
+                  username = "nixos";
+                  homeDirectory = "/home/${username}";
+                in
+                {
+                  inherit
+                    username
+                    homeDirectory
+                    self
+                    home-manager
+                    ;
+                  pkgs = linux-pkgs;
+                };
             }
           ];
         };
@@ -177,16 +228,25 @@
       homeConfigurations = {
         worklaptop = home-manager.lib.homeManagerConfiguration {
           pkgs = darwin-pkgs;
-          modules =
-            [ ./home/home-darwin.nix mac-app-util.homeManagerModules.default ];
-          extraSpecialArgs = let
-            username = "fagbabiaka";
-            homeDirectory = "/Users/${username}";
-          in {
-            inherit username homeDirectory inputs dagger;
-            pkgs = darwin-pkgs;
-            system = "aarch64-darwin";
-          };
+          modules = [
+            ./home/home-darwin.nix
+            mac-app-util.homeManagerModules.default
+          ];
+          extraSpecialArgs =
+            let
+              username = "fagbabiaka";
+              homeDirectory = "/Users/${username}";
+            in
+            {
+              inherit
+                username
+                homeDirectory
+                inputs
+                dagger
+                ;
+              pkgs = darwin-pkgs;
+              system = "aarch64-darwin";
+            };
         };
       };
 
@@ -194,10 +254,8 @@
       formatter."x86_64-darwin" = darwin-pkgs.nixfmt-rfc-style;
       formatter."aarch64-darwin" = darwin-pkgs.nixfmt-rfc-style;
 
-      devShells."x86_64-linux".default = with linux-pkgs;
-        mkShell { packages = [ nixfmt ]; };
+      devShells."x86_64-linux".default = with linux-pkgs; mkShell { packages = [ nixfmt ]; };
 
-      devShells."aarch64-darwin".default = with darwin-pkgs;
-        mkShell { packages = [ nixfmt ]; };
+      devShells."aarch64-darwin".default = with darwin-pkgs; mkShell { packages = [ nixfmt ]; };
     };
 }

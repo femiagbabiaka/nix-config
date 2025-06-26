@@ -1,5 +1,16 @@
-{ pkgs, username, linux-pkgs, ... }: {
-  imports = [ ./apps/fish ./apps/gitconfig ./apps/kitty ./apps/kakoune ];
+{
+  pkgs,
+  username,
+  linux-pkgs,
+  ...
+}:
+{
+  imports = [
+    ./apps/fish
+    ./apps/gitconfig
+    ./apps/kitty
+    ./apps/kakoune
+  ];
 
   home = {
     inherit username;

@@ -1,19 +1,27 @@
 # Edit this configuration file to define what should be installed on
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running `nixos-help`).
-{ pkgs, ... }: {
+{ pkgs, ... }:
+{
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
   nix.gc.automatic = true;
   nix.extraOptions = ''
     binary-caches-parallel-connections = 3
     connect-timeout = 5
   '';
 
-  fileSystems."/".options = [ "noatime" "nodiratime" "discard" ];
+  fileSystems."/".options = [
+    "noatime"
+    "nodiratime"
+    "discard"
+  ];
 
   nixpkgs.config.allowUnfree = true;
 
@@ -41,7 +49,9 @@
     enable = true;
     layout = "us";
     xkbOptions = "ctrl:nocaps";
-    desktopManager = { xterm.enable = false; };
+    desktopManager = {
+      xterm.enable = false;
+    };
 
     xrandrHeads = [
       {
@@ -57,11 +67,18 @@
       }
     ];
 
-    displayManager = { defaultSession = "none+i3"; };
+    displayManager = {
+      defaultSession = "none+i3";
+    };
 
     windowManager.i3 = {
       enable = true;
-      extraPackages = with pkgs; [ dmenu i3status i3lock i3blocks ];
+      extraPackages = with pkgs; [
+        dmenu
+        i3status
+        i3lock
+        i3blocks
+      ];
     };
   };
 
@@ -70,7 +87,10 @@
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.femi = {
     isNormalUser = true;
-    extraGroups = [ "wheel" "video" ]; # Enable ‘sudo’ for the user.
+    extraGroups = [
+      "wheel"
+      "video"
+    ]; # Enable ‘sudo’ for the user.
     initialPassword = "test123";
     shell = pkgs.fish;
     openssh.authorizedKeys.keys = [
@@ -106,8 +126,7 @@
   services.pcscd.enable = true;
   services.tailscale.enable = true;
 
-  fonts.packages = with pkgs;
-    [ (nerdfonts.override { fonts = [ "FiraCode" ]; }) ];
+  fonts.packages = with pkgs; [ (nerdfonts.override { fonts = [ "FiraCode" ]; }) ];
 
   services.xserver.displayManager.sessionCommands = ''
      ${pkgs.xorg.xrdb}/bin/xrdb -merge <<EOF

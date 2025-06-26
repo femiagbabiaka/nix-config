@@ -51,7 +51,6 @@ alias global split kitty-hsplit
 # map splits in user mode
 map global user | ':kitty-vsplit <ret>'
 map global user <minus> ':kitty-hsplit <ret>'
-
 # LSP
 eval %sh{kak-lsp}
 # extra lsp keybindings

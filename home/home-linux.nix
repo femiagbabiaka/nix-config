@@ -1,6 +1,20 @@
-{ pkgs, lib, username, homeDirectory, home-manager, config, ... }: {
-  imports =
-    [ ./apps/fish ./apps/neovim ./apps/gitconfig ./apps/ssh ./apps/helix ];
+{
+  pkgs,
+  lib,
+  username,
+  homeDirectory,
+  home-manager,
+  config,
+  ...
+}:
+{
+  imports = [
+    ./apps/fish
+    ./apps/neovim
+    ./apps/gitconfig
+    ./apps/ssh
+    ./apps/helix
+  ];
 
   home = {
     inherit username;
@@ -12,7 +26,9 @@
   programs.fish.enable = true;
   nixpkgs.config.allowUnfree = true;
 
-  programs.firefox = { enable = true; };
+  programs.firefox = {
+    enable = true;
+  };
 
   home.packages = with pkgs; [
     ansible

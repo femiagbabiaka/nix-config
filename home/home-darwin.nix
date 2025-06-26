@@ -1,19 +1,27 @@
-{ pkgs, username, inputs, ... }:
+{
+  pkgs,
+  username,
+  inputs,
+  ...
+}:
 let
-  myInfra = pkgs.infra.overrideAttrs (finalAttrs: previousAttrs: rec {
-    version = "0.20.0";
-    src = pkgs.fetchFromGitHub {
-      owner = "infrahq";
-      repo = "infra";
-      rev = "v${version}";
-      sha256 = "sha256-uz4wimhOfeHSL949m+biIhjfDwwEGnTiJWaz/r3Rsko=";
-    };
-  });
+  myInfra = pkgs.infra.overrideAttrs (
+    finalAttrs: previousAttrs: rec {
+      version = "0.20.0";
+      src = pkgs.fetchFromGitHub {
+        owner = "infrahq";
+        repo = "infra";
+        rev = "v${version}";
+        sha256 = "sha256-uz4wimhOfeHSL949m+biIhjfDwwEGnTiJWaz/r3Rsko=";
+      };
+    }
+  );
   myGCSDK = pkgs.google-cloud-sdk.withExtraComponents [
     pkgs.google-cloud-sdk.components.gke-gcloud-auth-plugin
     pkgs.google-cloud-sdk.components.kubectl
   ];
-in {
+in
+{
   imports = [
     ./apps/fish
     ./apps/gitconfig
@@ -30,7 +38,8 @@ in {
 
   programs.home-manager.enable = true;
   nixpkgs.config.allowUnfree = true;
-  home.packages = with pkgs;
+  home.packages =
+    with pkgs;
     [
       aider-chat-with-playwright
       ansible
@@ -38,6 +47,7 @@ in {
       automake
       awscli2
       bat
+      broot
       cmake
       lima
       colima
@@ -72,7 +82,7 @@ in {
       myInfra
       nerd-fonts.fira-code
       nil
-      nixfmt
+      nixfmt-rfc-style
       nodejs
       nushell
       platinum-searcher
@@ -111,7 +121,8 @@ in {
       zoxide
       delta
       bat
-    ] ++ [ inputs.dagger.packages.${system}.dagger ];
+    ]
+    ++ [ inputs.dagger.packages.${system}.dagger ];
 
   fonts.fontconfig.enable = true;
 }

@@ -1,16 +1,27 @@
-{ config, inputs, lib, pkgs, system, mkAlias, ... }:
-let mkalias = inputs.mkAlias.outputs.apps.${system}.default.program;
-in {
+{
+  config,
+  inputs,
+  lib,
+  pkgs,
+  system,
+  mkAlias,
+  ...
+}:
+let
+  mkalias = inputs.mkAlias.outputs.apps.${system}.default.program;
+in
+{
   disabledModules = [ "targets/darwin/linkapps.nix" ];
 
-  home.activation.aliasApplications = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin
-    (let
+  home.activation.aliasApplications = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin (
+    let
       apps = pkgs.buildEnv {
         name = "home-manager-applications";
         paths = config.home.packages;
         pathsToLink = "/Applications";
       };
-    in lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+    in
+    lib.hm.dag.entryAfter [ "linkGeneration" ] ''
       echo "Linking Home Manager applications..."
 
       # only link per-user applications
@@ -26,5 +37,6 @@ in {
               -x $DRY_RUN_CMD ${mkalias} -L {} "$tmp_path/{/}"
 
       $DRY_RUN_CMD mv "$tmp_path" "$app_path"
-    '');
+    ''
+  );
 }

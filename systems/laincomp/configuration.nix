@@ -1,16 +1,29 @@
 # Edit this configuration file to define what should be installed on
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
-{ config, pkgs, lib, ... }:
-with lib; {
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
+with lib;
+{
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
   nix.gc.automatic = true;
   nix.extraOptions = ''
     binary-caches-parallel-connections = 3
     connect-timeout = 5
   '';
 
-  fileSystems."/".options = [ "noatime" "nodiratime" "discard" ];
+  fileSystems."/".options = [
+    "noatime"
+    "nodiratime"
+    "discard"
+  ];
 
   powerManagement.enable = true;
 
@@ -22,8 +35,7 @@ with lib; {
   boot.loader.efi.canTouchEfiVariables = true;
 
   networking.hostName = "laincomp"; # Define your hostname.
-  networking.networkmanager.enable =
-    true; # Easiest to use and most distros use this by default.
+  networking.networkmanager.enable = true; # Easiest to use and most distros use this by default.
   hardware.bluetooth.enable = true;
   hardware.pulseaudio.enable = true;
 
@@ -49,15 +61,12 @@ with lib; {
     enable = true;
     extraPackages = with pkgs; [ ];
     extraSessionCommands = ''
-      ${lib.strings.optionalString config.networking.networkmanager.enable
-      "${pkgs.networkmanagerapplet}/bin/nm-applet &"}
-      ${lib.strings.optionalString config.hardware.bluetooth.enable
-      "${pkgs.blueman}/bin/blueman-applet &"}
+      ${lib.strings.optionalString config.networking.networkmanager.enable "${pkgs.networkmanagerapplet}/bin/nm-applet &"}
+      ${lib.strings.optionalString config.hardware.bluetooth.enable "${pkgs.blueman}/bin/blueman-applet &"}
     '';
   };
 
-  fonts.packages = with pkgs;
-    [ (nerdfonts.override { fonts = [ "FiraCode" ]; }) ];
+  fonts.packages = with pkgs; [ (nerdfonts.override { fonts = [ "FiraCode" ]; }) ];
 
   services.xserver.displayManager.sessionCommands = ''
      ${pkgs.xorg.xrdb}/bin/xrdb -merge <<EOF
@@ -110,7 +119,10 @@ with lib; {
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.femi = {
     isNormalUser = true;
-    extraGroups = [ "wheel" "video" ]; # Enable ‘sudo’ for the user.
+    extraGroups = [
+      "wheel"
+      "video"
+    ]; # Enable ‘sudo’ for the user.
     initialPassword = "test123";
     shell = pkgs.fish;
     packages = with pkgs; [

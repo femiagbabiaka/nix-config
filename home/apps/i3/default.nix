@@ -1,4 +1,13 @@
-{ pkgs, lib, username, homeDirectory, home-manager, config, ... }: {
+{
+  pkgs,
+  lib,
+  username,
+  homeDirectory,
+  home-manager,
+  config,
+  ...
+}:
+{
   xsession.windowManager.i3 = {
     enable = true;
     config = {
