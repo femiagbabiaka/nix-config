@@ -107,3 +107,7 @@ enable-auto-pairs
 
 # set up fzf.kak
 map global user f ': fzf-mode<ret>' -docstring 'trigger fzf-mode'
+hook global ModuleLoaded fzf-file %{
+	set-option global fzf_file_command 'rg'
+	set-option global fzf_highlight_command 'bat'
+}
