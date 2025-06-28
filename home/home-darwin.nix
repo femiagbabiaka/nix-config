@@ -85,6 +85,7 @@ in
       nodejs
       nushell
       platinum-searcher
+      presenterm
       rbenv
       ripgrep
       roswell
