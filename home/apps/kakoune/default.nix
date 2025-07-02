@@ -16,6 +16,7 @@
       auto-pairs-kak
       active-window-kak
       fzf-kak
+      smarttab-kak
     ];
   };
 }

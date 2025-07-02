@@ -50,6 +50,16 @@ alias global sp kitty-hsplit
 # map splits in user mode
 map global user | ':kitty-vsplit <ret>' -docstring 'split window vertically'
 map global user <minus> ':kitty-hsplit <ret>' -docstring 'split window horizontally'
+# autopairs
+hook global ModuleLoaded smarttab %{
+    expandtab
+    set-option global indentwidth 4
+    set-option global softtabstop 4
+    # you can configure text that is being used to represent curent active mode
+    set-option global smarttab_expandtab_mode_name 'exp'
+    set-option global smarttab_noexpandtab_mode_name 'noexp'
+    set-option global smarttab_smarttab_mode_name 'smart'
+}
 # LSP
 eval %sh{kak-lsp}
 # extra lsp keybindings
