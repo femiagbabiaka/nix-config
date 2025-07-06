@@ -1,0 +1,19 @@
+#!/bin/bash
+# Save as ~/.local/bin/kitty-broot-toggle
+
+# Check if there's a window with broot running
+BROOT_WINDOW=$(kitty @ ls | jq -r '
+  .[] | 
+  .tabs[] | 
+  .windows[] | 
+  select(.foreground_processes[]?.cmdline[]? | match("^.*/bin/broot$")) |
+  .id'
+)
+
+if [ -n "$BROOT_WINDOW" ]; then
+    # Close the broot window
+    kitty @ close-window --match "id:$BROOT_WINDOW"
+else
+    # Launch broot in a new window with 30% width
+    kitty @ launch --location=vsplit --bias=30 --cwd=current broot
+fi
