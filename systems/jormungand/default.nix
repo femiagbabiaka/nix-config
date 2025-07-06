@@ -65,7 +65,7 @@
       };
       "on-focused-monitor-changed" = [ "move-mouse monitor-lazy-center" ];
       mode.main.binding = {
-        "alt-enter" = "exec-and-forget ${pkgs.kitty}/bin/kitty -1 --directory ~";
+        "alt-enter" = "exec-and-forget ${pkgs.kitty}/bin/kitty --directory ~";
         "alt-j" = "focus --boundaries-action wrap-around-the-workspace left";
         "alt-k" = "focus --boundaries-action wrap-around-the-workspace down";
         "alt-l" = "focus --boundaries-action wrap-around-the-workspace up";

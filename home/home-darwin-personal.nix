@@ -50,6 +50,7 @@
     helm-ls
     helix
     jq
+    jujutsu
     k9s
     kakoune
     kakoune-lsp
