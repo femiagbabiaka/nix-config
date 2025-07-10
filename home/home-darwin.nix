@@ -47,38 +47,54 @@ in
       automake
       awscli2
       bat
+      bat
       broot
+      cloud-provider-kind
       cmake
-      lima
       colima
       coreutils
       crane
+      ctlptl
       curl
+      delta
+      delve
+      discord
+      dive
       docker
       docker-compose
-      delve
-      dive
+      docker-credential-helpers
       dockerfile-language-server-nodejs
       fastly
       fd
+      fish
+      fishPlugins.done
+      fishPlugins.forgit
+      fishPlugins.hydro
       fq
+      fzf
       gh
+      git
+      git-crypt
       go
       golangci-lint
       golangci-lint-langserver
       gopls
-      git-crypt
       graphviz
-      helm-ls
       helix
+      helm-ls
+      htop
       jq
+      jujutsu
       k9s
       kakoune-lsp
+      kind
       kubectx
       kubernetes-helm
+      lima
       lldb
       myGCSDK
       myInfra
+      neofetch
       nerd-fonts.fira-code
       nil
       nixfmt-rfc-style
@@ -99,28 +115,17 @@ in
       tflint
       tfswitch
       tilt
+      uv
       vault
       vscode-langservers-extracted
+      wget
       yaml-language-server
       zellij
       zig
       zls
       zoxide
-      zstd
-      git
-      neofetch
-      htop
-      discord
-      fish
-      wget
-      fishPlugins.done
-      fishPlugins.forgit
-      fishPlugins.hydro
-      fzf
-      nushell
       zoxide
-      delta
-      bat
+      zstd
     ]
     ++ [ dagger.packages.${system}.dagger ];
 

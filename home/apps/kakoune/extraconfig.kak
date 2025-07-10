@@ -50,7 +50,13 @@ alias global sp kitty-hsplit
 # map splits in user mode
 map global user | ':kitty-vsplit <ret>' -docstring 'split window vertically'
 map global user <minus> ':kitty-hsplit <ret>' -docstring 'split window horizontally'
-# autopairs
+# smarttab.kak
+hook global BufOpenFile .* expandtab
+hook global BufNewFile  .* expandtab
+hook global WinSetOption filetype=(ruby|yaml|json) %{
+    set-option global indentwidth 2
+    set-option global softtabstop 2
+}
 hook global ModuleLoaded smarttab %{
     expandtab
     set-option global indentwidth 4
