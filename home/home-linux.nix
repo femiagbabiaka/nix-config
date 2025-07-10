@@ -11,7 +11,7 @@
     ./apps/neovim
     ./apps/gitconfig
     ./apps/ssh
-    ./apps/helix
+    ./apps/kakoune
   ];
 
   home = {
@@ -29,7 +29,9 @@
   };
 
   home.packages = with pkgs; [
+    aider-chat-with-playwright
     ansible
+    ansible-language-server
     automake
     awscli2
     bat
@@ -37,10 +39,13 @@
     colima
     coreutils
     curl
+    dockerfile-language-server-nodejs
     fastly
     fd
     fq
     go
+    golangci-lint
+    golangci-lint-langserver
     google-cloud-sdk
     gh
     gotools
@@ -52,17 +57,22 @@
     mpv
     stack
     kubernetes-helm
+    jujutsu
     jq
     k9s
     kubectx
+    kakoune-lsp
     mitschemeX11
     mosh
+    nil    
+    nixfmt-rfc-style
     nushell
     platinum-searcher
     pulseaudio
     rbenv
     ripgrep
     roswell
+    rubyPackages.solargraph
     rustup
     shellcheck
     spotify
@@ -76,12 +86,18 @@
     tfswitch
     tmux
     tmux-xpanes
+    vscode-langservers-extracted
+    yaml-language-server
+    zig
+    zls
     zstd
     zoxide
     zathura
     zellij
     nerd-fonts.fira-code
-    nil
+    fzf
+    delta
+    bat
   ];
 
   fonts.fontconfig.enable = true;
