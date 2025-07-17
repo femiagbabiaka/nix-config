@@ -8,7 +8,7 @@
     ./apps/fish
     ./apps/gitconfig
     ./apps/kitty
-    ./apps/kakoune
+    ./apps/neovim
   ];
 
   home = {
@@ -52,7 +52,6 @@
     jq
     jujutsu
     k9s
-    kakoune
     kakoune-lsp
     kubectx
     kubernetes-helm

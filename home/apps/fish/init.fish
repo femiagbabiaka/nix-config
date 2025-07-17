@@ -94,6 +94,61 @@ function _prompt_color_for_status
     end
 end
 
+function fish_jj_prompt --description 'Write out the jj prompt'
+    # Is jj installed?
+    if not command -sq jj
+        return 1
+    end
+
+    # Are we in a jj repo?
+    if not jj root --quiet &>/dev/null
+        return 1
+    end
+
+    # Generate prompt
+    jj log --ignore-working-copy --no-graph --color always -r @ -T '
+        surround(
+            " (",
+            ")",
+            separate(
+                " ",
+                bookmarks.join(", "),
+                coalesce(
+                    surround(
+                        "\"",
+                        "\"",
+                        if(
+                            description.first_line().substr(0, 24).starts_with(description.first_line()),
+                            description.first_line().substr(0, 24),
+                            description.first_line().substr(0, 23) ++ "…"
+                        )
+                    ),
+                    label(if(empty, "empty"), description_placeholder)
+                ),
+                change_id.shortest(),
+                commit_id.shortest(),
+                if(conflict, label("conflict", "(conflict)")),
+                if(empty, label("empty", "(empty)")),
+                if(divergent, "(divergent)"),
+                if(hidden, "(hidden)"),
+            )
+        )
+    '
+end
+
+function fish_vcs_prompt --description "Print all vcs prompts"
+    # If a prompt succeeded, we assume that it's printed the correct info.
+    # This is so we don't try svn if git already worked.
+    fish_jj_prompt $argv
+    or fish_git_prompt $argv
+    or fish_hg_prompt $argv
+    or fish_fossil_prompt $argv
+    # The svn prompt is disabled by default because it's quite slow on common svn repositories.
+    # To enable it uncomment it.
+    # You can also only use it in specific directories by checking $PWD.
+    # or fish_svn_prompt
+end
+
 function fish_prompt
     set -l last_status $status
 
@@ -110,7 +165,7 @@ function fish_prompt
     if test $HOME != $PWD
         _print_in_color " "(prompt_pwd) blue
     end
-    __fish_git_prompt " (%s)"
+    fish_vcs_prompt " (%s)"
 
     _print_in_color "$nix_shell_info λ " (_prompt_color_for_status $last_status)
 
