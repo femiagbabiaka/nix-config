@@ -1,10 +1,5 @@
 {
   pkgs,
-  lib,
-  username,
-  homeDirectory,
-  home-manager,
-  config,
   ...
 }:
 {
@@ -15,7 +10,7 @@
       kak = "command kak -c default 2>/dev/null $argv || command kak -s default $argv";
     };
     shellAliases = {
-      vim = "kak";
+      vim = "nvim";
       gc = "git commit";
       gp = "git push";
       cat = "bat";

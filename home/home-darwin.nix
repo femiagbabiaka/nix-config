@@ -27,8 +27,8 @@ in
     ./apps/gitconfig
     ./apps/helix
     ./apps/kitty
-    ./apps/kakoune
     ./apps/alacritty
+    ./apps/neovim
   ];
 
   home = {
@@ -70,6 +70,7 @@ in
       fishPlugins.done
       fishPlugins.forgit
       fishPlugins.hydro
+      fluxcd
       fq
       fzf
       gh
@@ -104,7 +105,6 @@ in
       presenterm
       rbenv
       ripgrep
-      roswell
       rubyPackages.solargraph
       rustup
       shellcheck
