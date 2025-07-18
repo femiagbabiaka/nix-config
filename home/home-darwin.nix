@@ -22,13 +22,11 @@ let
   ];
 in
 {
-  imports = [
-    ./apps/fish
-    ./apps/gitconfig
+  imports = import ./common-imports.nix ++ [
+    ./common-packages.nix
     ./apps/helix
     ./apps/kitty
     ./apps/alacritty
-    ./apps/neovim
   ];
 
   home = {
@@ -41,91 +39,41 @@ in
   home.packages =
     with pkgs;
     [
-      aider-chat-with-playwright
-      ansible
-      ansible-language-server
-      automake
-      awscli2
-      bat
-      bat
       broot
       cloud-provider-kind
-      cmake
-      colima
-      coreutils
       crane
       ctlptl
-      curl
-      delta
       delve
       discord
       dive
       docker
       docker-compose
       docker-credential-helpers
-      dockerfile-language-server-nodejs
       fastly
-      fd
       fish
       fishPlugins.done
       fishPlugins.forgit
       fishPlugins.hydro
       fluxcd
-      fq
-      fzf
-      gh
       git
       git-crypt
-      go
-      golangci-lint
-      golangci-lint-langserver
-      gopls
       graphviz
-      helix
       helm-ls
       htop
-      jq
-      jujutsu
-      k9s
-      kakoune-lsp
       kind
-      kubectx
-      kubernetes-helm
       lima
       lldb
       myGCSDK
       myInfra
       neofetch
-      nerd-fonts.fira-code
-      nil
-      nixfmt-rfc-style
       nodejs
-      nushell
-      platinum-searcher
       presenterm
-      rbenv
-      ripgrep
-      rubyPackages.solargraph
-      rustup
-      shellcheck
       spotify
-      stern
-      terraform-docs
-      terraform-ls
-      tflint
-      tfswitch
       tilt
       uv
       vault
-      vscode-langservers-extracted
       wget
-      yaml-language-server
       zellij
-      zig
-      zls
-      zoxide
-      zoxide
-      zstd
     ]
     ++ [ dagger.packages.${system}.dagger ];
 

@@ -1,0 +1,53 @@
+{ pkgs, ... }:
+{
+  home.packages = with pkgs; [
+    aider-chat-with-playwright
+    ansible
+    ansible-language-server
+    automake
+    awscli2
+    bat
+    cmake
+    colima
+    coreutils
+    curl
+    dockerfile-language-server-nodejs
+    fd
+    fq
+    gh
+    go
+    golangci-lint
+    golangci-lint-langserver
+    gopls
+    helix
+    jq
+    jujutsu
+    k9s
+    kakoune-lsp
+    kubectx
+    kubernetes-helm
+    nerd-fonts.fira-code
+    nil
+    nixfmt-rfc-style
+    nushell
+    platinum-searcher
+    rbenv
+    ripgrep
+    rubyPackages.solargraph
+    rustup
+    shellcheck
+    stern
+    terraform-docs
+    terraform-ls
+    tflint
+    tfswitch
+    vscode-langservers-extracted
+    yaml-language-server
+    zig
+    zls
+    zoxide
+    zstd
+    fzf
+    delta
+  ];
+}
