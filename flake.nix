@@ -3,7 +3,6 @@
 
   inputs = {
     determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/*";
-
     nixpkgs.url = "github:femiagbabiaka/nixpkgs-unfree";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
     home-manager = {
@@ -23,6 +22,7 @@
     emacs-overlay.url = "github:nix-community/emacs-overlay/bb1a28197681dc640b89a9a9bec75cdcd7e8d6ec";
     nix-darwin.url = "github:nix-darwin/nix-darwin/master";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs/nixpkgs";
+    neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay";
   };
 
   outputs =
@@ -38,6 +38,7 @@
       emacs-overlay,
       nix-darwin,
       determinate,
+      neovim-nightly-overlay,
       ...
     }:
     {
@@ -57,7 +58,12 @@
                   username = "femi";
                 in
                 {
-                  inherit username self home-manager;
+                  inherit
+                    username
+                    self
+                    home-manager
+                    neovim-nightly-overlay
+                    ;
                   pkgs = inputs.nixpkgs.legacyPackages.${system};
                 };
             }
@@ -85,6 +91,7 @@
                     home-manager
                     dagger
                     system
+                    neovim-nightly-overlay
                     ;
                   pkgs = inputs.nixpkgs.legacyPackages.${system};
                 };
