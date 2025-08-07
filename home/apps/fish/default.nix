@@ -17,6 +17,7 @@
       subl = "/Applications/Sublime' 'Text.app/Contents/SharedSupport/bin/subl";
       mosdef_generate_app = "chef generate cookbook -g ~/generators/fst_generator_app_cookbook -C 'Fastly, Inc.' -m 'team-sre@fastly.com'";
       mosdef_generate_lib = "chef generate cookbook -g ~/generators/fst_generator_library_cookbook -C 'Fastly, Inc.' -m 'team-sre@fastly.com'";
+      kubectx = "${pkgs.kubeswitch}/bin/switcher";
     };
     plugins = [
       {

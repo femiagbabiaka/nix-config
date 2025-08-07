@@ -68,7 +68,6 @@ in
       fd
       fish
       fishPlugins.done
-      fishPlugins.forgit
       fishPlugins.hydro
       fluxcd
       fq
@@ -89,7 +88,7 @@ in
       k9s
       kakoune-lsp
       kind
-      kubectx
+      kubeswitch
       kubernetes-helm
       lima
       lldb

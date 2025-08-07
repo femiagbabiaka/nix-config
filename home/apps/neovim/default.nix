@@ -38,7 +38,6 @@ let
             pkgs.nodePackages.js-beautify
             pkgs.python313Packages.demjson3
             pkgs.rubyPackages.htmlbeautifier
-            pkgs.rustfmt
             pkgs.shellcheck
             pkgs.stylua
             pkgs.taplo
@@ -47,6 +46,7 @@ let
             pkgs.yq
             pkgs.zig
             pkgs.yamllint
+            pkgs.helm-ls
           ]
         }"
     '';

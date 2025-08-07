@@ -7,6 +7,7 @@ set -l NON_WORK_HOSTS laincomp nixos cassiopeia jormungand tachibana
 
 if not contains (hostname) $NON_WORK_HOSTS
     eval (cinc shell-init fish)
+    switcher init fish | source
     source ~/.kryten/fish-env
     export KITCHEN_LOCAL_YAML=.kitchen.gce.yml
     set -x FASTLY_CHEF_USERNAME fagbabiaka
