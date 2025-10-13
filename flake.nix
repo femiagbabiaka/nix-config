@@ -19,7 +19,6 @@
     mac-app-util.url = "github:hraban/mac-app-util";
     dagger.url = "github:dagger/nix";
     dagger.inputs.nixpkgs.follows = "nixpkgs/nixpkgs";
-    emacs-overlay.url = "github:nix-community/emacs-overlay/bb1a28197681dc640b89a9a9bec75cdcd7e8d6ec";
     nix-darwin.url = "github:nix-darwin/nix-darwin/master";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs/nixpkgs";
     neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay";
@@ -35,7 +34,6 @@
       nixos-wsl,
       mac-app-util,
       dagger,
-      emacs-overlay,
       nix-darwin,
       determinate,
       neovim-nightly-overlay,

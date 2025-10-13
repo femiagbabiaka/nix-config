@@ -104,7 +104,6 @@ in
       presenterm
       rbenv
       ripgrep
-      rubyPackages.solargraph
       rustup
       shellcheck
       spotify

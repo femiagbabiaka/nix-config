@@ -34,6 +34,7 @@ use-package.
 #+begin_src emacs-lisp
   (straight-use-package 'use-package)
   (eval-when-compile (require 'use-package))
+  (setq straight-use-package-by-default t)
 #+end_src
 
 ** Performance
@@ -101,6 +102,23 @@ This will prompt us when we're going to kill Emacs.
 #+end_src
 
 ** General settings
+*** Emacs
+#+begin_src emacs-lisp
+  (use-package emacs
+    :custom
+    ;; Enable context menu. `vertico-multiform-mode' adds a menu in the minibuffer
+    ;; to switch display modes.
+    (context-menu-mode t)
+    ;; Support opening new minibuffers from inside existing minibuffers.
+    (enable-recursive-minibuffers t)
+    ;; Hide commands in M-x which do not work in the current mode.  Vertico
+    ;; commands are hidden in normal buffers. This setting is useful beyond
+    ;; Vertico.
+    (read-extended-command-predicate #'command-completion-default-include-p)
+    ;; Do not allow the cursor in the minibuffer prompt
+    (minibuffer-prompt-properties
+     '(read-only t cursor-intangible t face minibuffer-prompt)))
+#+end_src
 *** Keybindings
 **** which-key
 A package that displays the available keybindings in a popup.
@@ -116,216 +134,6 @@ I can remember at any given point.
     (set-face-attribute 'which-key-local-map-description-face nil
                 :weight 'bold)
     :straight t)
-#+end_src
-
-**** dump keybindings
-A function to dump keybindings starting with a prefix to a buffer in a tree-like form.
-
-Taken from: https://sqrtminusone.xyz/configs/emacs/
-
-
-#+begin_src emacs-lisp
-  (defun my/dump-bindings-recursive (prefix &optional level buffer)
-    (dolist (key (which-key--get-bindings (kbd prefix)))
-      (with-current-buffer buffer
-        (when level
-      (insert (make-string level ? )))
-        (insert (apply #'format "%s%s%s\n" key)))
-      (when (string-match-p
-         (rx bos "+" (* nonl))
-         (substring-no-properties (elt key 2)))
-        (my/dump-bindings-recursive
-         (concat prefix " " (substring-no-properties (car key)))
-         (+ 2 (or level 0))
-         buffer))))
-
-  (defun my/dump-bindings (prefix)
-    "Dump keybindings starting with PREFIX in a tree-like form."
-    (interactive "sPrefix: ")
-    (let ((buffer (get-buffer-create "bindings")))
-      (with-current-buffer buffer
-        (erase-buffer))
-      (my/dump-bindings-recursive prefix 0 buffer)
-      (with-current-buffer buffer
-        (goto-char (point-min)))
-      (switch-to-buffer-other-window buffer)))
-#+end_src
-
-*** Editing modez
-**** Meow
-This is pretty new to me, I'm a vimmer by trade. But lets see how it goes.
-
-#+begin_src emacs-lisp
-  (defun my-meow-digit (digit)
-    (interactive)
-    (if (not (and meow--expand-nav-function
-                  (region-active-p)
-                  (meow--selection-type)))
-        (progn
-          (universal-argument)
-          (meow-digit-argument))
-      (meow-expand digit)))
-
-  (defvar meow-nav-keymap
-    (let ((keymap (make-keymap)))
-      (define-key keymap (kbd "h") #'beginning-of-line)
-      (define-key keymap (kbd "l") #'end-of-line)
-      (define-key keymap (kbd "g") #'beginning-of-buffer)
-      (define-key keymap (kbd "e") #'end-of-buffer)
-      (define-key keymap (kbd "s") #'back-to-indentation)
-      (define-key keymap (kbd "y") #'eglot-find-typeDefinition)
-      (define-key keymap (kbd "i") #'eglot-find-implementation)
-      keymap))
-
-  ;; define an alias for your keymap
-  (defalias 'meow-nav-keymap meow-nav-keymap)
-
-  (use-package meow-tree-sitter
-    :straight t
-    :requires meow
-    :init
-    (meow-tree-sitter-register-defaults))
-
-  (use-package meow
-    :config
-    (defun meow-setup () ;; from https://github.com/meow-edit/meow/blob/master/KEYBINDING_QWERTY.org
-      (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
-      (meow-motion-overwrite-define-key
-       '("j" . meow-next)
-       '("k" . meow-prev)
-       '("<escape>" . ignore))
-      (meow-leader-define-key
-       ;; SPC j/k will run the original command in MOTION state.
-       '("j" . "H-j")
-       '("k" . "H-k")
-       ;; Use SPC (0-9) for digit arguments.
-       '("1" . meow-digit-argument)
-       '("2" . meow-digit-argument)
-       '("3" . meow-digit-argument)
-       '("4" . meow-digit-argument)
-       '("5" . meow-digit-argument)
-       '("6" . meow-digit-argument)
-       '("7" . meow-digit-argument)
-       '("8" . meow-digit-argument)
-       '("9" . meow-digit-argument)
-       '("0" . meow-digit-argument)
-       '("/" . meow-keypad-describe-key)
-       '("?" . meow-cheatsheet))
-      (meow-normal-define-key
-       '("0" . (lambda () (interactive) (my-meow-digit 0)))
-       '("9" . (lambda () (interactive) (my-meow-digit 9)))
-       '("8" . (lambda () (interactive) (my-meow-digit 8)))
-       '("7" . (lambda () (interactive) (my-meow-digit 7)))
-       '("6" . (lambda () (interactive) (my-meow-digit 6)))
-       '("5" . (lambda () (interactive) (my-meow-digit 5)))
-       '("4" . (lambda () (interactive) (my-meow-digit 4)))
-       '("3" . (lambda () (interactive) (my-meow-digit 3)))
-       '("2" . (lambda () (interactive) (my-meow-digit 2)))
-       '("1" . (lambda () (interactive) (my-meow-digit 1)))
-       '("-" . negative-argument)
-       '(";" . meow-cancel-selection)
-       '("," . meow-inner-of-thing)
-       '("." . meow-bounds-of-thing)
-       '("[" . meow-beginning-of-thing)
-       '("]" . meow-end-of-thing)
-       '("a" . meow-append)
-       '("A" . meow-open-below)
-       '("b" . meow-back-word)
-       '("B" . meow-back-symbol)
-       '("c" . meow-change)
-       '("d" . meow-delete)
-       '("D" . meow-backward-delete)
-       '("e" . meow-next-word)
-       '("E" . meow-next-symbol)
-       '("f" . meow-find)
-       '("g" . meow-nav-keymap)
-       '("G" . meow-grab)
-       '("h" . meow-left)
-       '("H" . meow-left-expand)
-       '("i" . meow-insert)
-       '("I" . meow-open-above)
-       '("j" . meow-next)
-       '("J" . meow-next-expand)
-       '("k" . meow-prev)
-       '("K" . meow-prev-expand)
-       '("l" . meow-right)
-       '("L" . meow-right-expand)
-       '("m" . meow-join)
-       '("n" . meow-search)
-       '("o" . meow-block)
-       '("O" . meow-to-block)
-       '("p" . meow-yank)
-       '("q" . meow-quit)
-       '("Q" . meow-goto-line)
-       '("r" . meow-replace)
-       '("R" . meow-swap-grab)
-       '("s" . meow-kill)
-       '("t" . meow-till)
-       '("u" . meow-undo)
-       '("U" . meow-undo-in-selection)
-       '("v" . meow-visit)
-       '("w" . meow-mark-word)
-       '("W" . meow-mark-symbol)
-       '("x" . meow-line)
-       '("X" . meow-goto-line)
-       '("y" . meow-save)
-       '("Y" . meow-sync-grab)
-       '("z" . meow-pop-selection)
-       '("'" . repeat)
-       '("<escape>" . ignore)))
-    (meow-setup)
-    (meow-global-mode 1)
-    :straight t)
-#+end_src
-
-**** Evil-mode
-#+begin_src emacs-lisp
-  ;; (use-package evil
-  ;;   :straight t
-  ;;   :init
-  ;;   (setq evil-want-integration t)
-  ;;   (setq evil-want-C-u-scroll t)
-  ;;   (setq evil-want-keybinding nil)
-  ;;   (setq evil-search-module 'evil-search)
-  ;;   (setq evil-split-window-below t)
-  ;;   (setq evil-vsplit-window-right t)
-  ;;   (unless (display-graphic-p)
-  ;;     (setq evil-want-C-i-jump
-  ;;   :config
-  ;;   (evil-mode 1)
-  ;;   ;; (setq evil-respect-visual-line-mode t)
-  ;;   (evil-set-undo-system 'undo-tree))
-#+end_src
-
-
-**** xah fly keys
-#+begin_src emacs-lisp
-;;  (use-package xah-fly-keys
-;;    :config
-;;    (xah-fly-keys-set-layout "qwerty")
-;;    (define-key xah-fly-leader-key-map (kbd "p")  'nil)
-;;    (define-key xah-fly-leader-key-map (kbd "p !") 'project-shell-command)
-;;    (define-key xah-fly-leader-key-map (kbd "p &")  'project-async-shell-command)
-;;    (define-key xah-fly-leader-key-map (kbd "p f") 'project-find-file)
-;;    (define-key xah-fly-leader-key-map (kbd "p F") 'project-or-external-find-file)
-;;    (define-key xah-fly-leader-key-map (kbd "p b") 'project-switch-to-buffer)
-;;    (define-key xah-fly-leader-key-map (kbd "p s") 'project-shell)
-;;    (define-key xah-fly-leader-key-map (kbd "p d")  'project-find-dir)
-;;    (define-key xah-fly-leader-key-map (kbd "p D") 'project-dired)
-;;    (define-key xah-fly-leader-key-map (kbd "p v") 'project-vc-dir)
-;;    (define-key xah-fly-leader-key-map (kbd "p c") 'project-compile)
-;;    (define-key xah-fly-leader-key-map (kbd "p e") 'project-eshell)
-;;    (define-key xah-fly-leader-key-map (kbd "p k") 'project-kill-buffers)
-;;    (define-key xah-fly-leader-key-map (kbd "p p") 'project-switch-project)
-;;    (define-key xah-fly-leader-key-map (kbd "p g") 'project-find-regexp)
-;;    (define-key xah-fly-leader-key-map (kbd "p G") 'project-or-external-find-regexp)
-;;    (define-key xah-fly-leader-key-map (kbd "p r") 'project-query-replace-regexp)
-;;    (define-key xah-fly-leader-key-map (kbd "p x") 'project-execute-extended-command)
-;;    (define-key xah-fly-leader-key-map (kbd "p o") 'project-any-command)
-;;    (define-key xah-fly-leader-key-map (kbd "\C-b") 'project-list-buffers)
-;;    :init
-;;    (xah-fly-keys 1)
-;;    :straight t)
 #+end_src
 
 *** Theme
@@ -352,8 +160,8 @@ masterpiece of the one and only prot
 
 **** Font
 #+begin_src emacs-lisp
-  (add-to-list 'default-frame-alist '(font . "Fira Mono for Powerline 14"))
-  (set-face-attribute 'default t :font "Fira Mono for Powerline 14")
+  (add-to-list 'default-frame-alist '(font . "FiraCode Nerd Font Mono 14"))
+  (set-face-attribute 'default t :font "FiraCode Nerd Font Mono 14")
 #+end_src
 
 
@@ -747,11 +555,11 @@ Save the most recently edited place in a file.
 *** Completion
 This entire section is pretty much cargo culted. We'll see what works long term.
 **** Vertico
-Vertico is a completion framework that seeks to extend native Emacs functionality.
+Vertico is a completion framework that seeks to extend native Emacs     functionality.
 #+begin_src emacs-lisp
   (use-package vertico
     :straight t
-    :config (vertico-mode))
+    :init (vertico-mode))
 #+end_src
 
 **** orderless
@@ -760,7 +568,9 @@ Vertico is a completion framework that seeks to extend native Emacs functionalit
     :straight t
     :custom
     (completion-styles '(orderless basic))
-    (completion-category-overrides '((file (styles basic partial-completion)))))
+    (completion-category-overrides '((file (styles basic partial-completion))))
+    (completion-category-defaults nil)
+    (completion-pcm-leading-wildcard t))
 #+end_src
 
 **** marginalia
@@ -826,5 +636,11 @@ load all the icons on first boot only
 #+begin_src emacs-lisp
   (use-package all-the-icons
     :if (display-graphic-p)
+    :straight t)
+#+end_src
+
+*** epub reader
+#+begin_src emacs-lisp
+  (use-package nov
     :straight t)
 #+end_src
