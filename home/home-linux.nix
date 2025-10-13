@@ -72,7 +72,6 @@
     rbenv
     ripgrep
     roswell
-    rubyPackages.solargraph
     rustup
     shellcheck
     spotify
