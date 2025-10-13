@@ -30,7 +30,7 @@ let
       );
   });
 
-  myEmacs = (myEmacsAttrs.override { withNativeCompilation = false; });
+  myEmacs = (myEmacsAttrs.override { withNativeCompilation = true; });
 in
 {
   programs.emacs = {
