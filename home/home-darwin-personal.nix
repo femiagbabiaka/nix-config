@@ -9,6 +9,7 @@
     ./apps/gitconfig
     ./apps/kitty
     ./apps/neovim
+    ./apps/emacs
   ];
 
   home = {
@@ -22,7 +23,6 @@
   home.packages = with pkgs; [
     aider-chat-with-playwright
     ansible
-    ansible-language-server
     automake
     awscli2
     bat
@@ -65,7 +65,6 @@
     rbenv
     ripgrep
     roswell
-    rubyPackages.solargraph
     rustup
     shellcheck
     stern
