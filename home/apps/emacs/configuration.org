@@ -127,7 +127,6 @@ masterpiece of the one and only prot
 
     ;; Load the theme of your choice.
     (load-theme 'modus-vivendi)
-
     (define-key global-map (kbd "<f5>") #'modus-themes-toggle))
 #+end_src
 
@@ -146,7 +145,6 @@ masterpiece of the one and only prot
 **** Dashboard
 #+begin_src emacs-lisp
   (use-package dashboard
-
     :config
     (dashboard-setup-startup-hook))
 #+end_src
@@ -155,8 +153,7 @@ masterpiece of the one and only prot
 **** nix
 #+begin_src emacs-lisp
   (use-package nix-mode
-    :hook (nix-mode . lsp-deferred)
-    )
+    :hook (nix-mode . lsp-deferred))
 #+end_src
 
 **** Rust
@@ -173,14 +170,12 @@ masterpiece of the one and only prot
 **** Fish Shell
 #+begin_src emacs-lisp
   (use-package fish-mode
-
     :mode "\\.fish\\'")
 #+end_src
 
 **** Haskell
 #+begin_src emacs-lisp
   (use-package haskell-mode
-
     :mode "\\.hs\\'")
 #+end_src
 
@@ -198,14 +193,12 @@ masterpiece of the one and only prot
 
 **** Dockerfile
 #+begin_src emacs-lisp
-  (use-package dockerfile-mode
-    )
+  (use-package dockerfile-mode)
 #+end_src
 
 **** Groovy
 #+begin_src emacs-lisp
-  (use-package groovy-mode
-    )
+  (use-package groovy-mode)
 #+end_src
 
 **** LSP
@@ -232,10 +225,8 @@ masterpiece of the one and only prot
 **** Flycheck
 #+begin_src emacs-lisp
   (use-package flycheck
-
     :init (global-flycheck-mode))
   (use-package flycheck-eglot
-
     :after (flycheck eglot)
     :config (global-flycheck-eglot-mode 1))
 #+end_src
@@ -243,7 +234,6 @@ masterpiece of the one and only prot
 **** Company Mode
 #+begin_src emacs-lisp
   (use-package company
-
     :init (global-company-mode)
     :config
     (setq company-minimum-prefix-length 1
@@ -254,7 +244,6 @@ masterpiece of the one and only prot
 **** Typescript
 #+begin_src emacs-lisp
   (use-package typescript-mode
-
     :mode "\\.ts\\'"
     :config
     (add-hook 'typescript-mode-hook #'hs-minor-mode))
@@ -263,7 +252,6 @@ masterpiece of the one and only prot
 **** go-mode
 #+begin_src emacs-lisp
   (use-package go-mode
-
     :mode "\\.go\\'"
     :hook (before-save . gofmt-before-save)
     :custom (gofmt-command "goimports"))
@@ -272,23 +260,24 @@ masterpiece of the one and only prot
 **** yaml-mode
 #+begin_src emacs-lisp
   (use-package yaml-mode
-
     :mode "\\.yml\\'")
 #+end_src
 
 **** ruby-mode
 #+begin_src emacs-lisp
   (use-package ruby-mode
-
     :mode "\\.\\(?:cap\\|gemspec\\|irbrc\\|gemrc\\|rake\\|rb\\|ru\\|thor\\)\\'"
     :mode "\\(?:Brewfile\\|Capfile\\|Gemfile\\(?:\\.[a-zA-Z0-9._-]+\\)?\\|[rR]akefile\\)\\'")
 #+end_src
-
+**** zig-mode
+#+begin_src emacs-lisp
+  (use-package zig-mode
+    :mode "\\.\\(zig\\|zon\\)\\'")
+#+end_src
 *** Doom Modeline
 It looks cool, but IDK if I want to use it long term. Let's see!
 #+begin_src emacs-lisp
   (use-package doom-modeline
-
     :after all-the-icons
     :init
     (setq doom-modeline-env-enable-python nil)
@@ -314,7 +303,6 @@ This package reindents the file being edited after every change. Pretty useful.
 <2023-04-24 Mon> Removing this, it's hella annoying. I think if I had a projectile configuration per project it would be better.
 #+begin_src emacs-lisp
   (use-package aggressive-indent
-
     :disabled t
     :config
     (global-aggressive-indent-mode 1))
@@ -368,7 +356,6 @@ Replaces Emacs built-in sequential undo system with a tree-based one. Probably o
 
 #+begin_src emacs-lisp
   (use-package undo-tree
-
     :config
     (global-undo-tree-mode)
     (setq undo-tree-visualizer-diff t)
@@ -415,7 +402,6 @@ I come back to this and don't remember, the default prefix for project.el
 keybinds in C-x p.
 #+begin_src emacs-lisp
   (use-package projectile
-
     :disabled t
     :bind (:map projectile-mode-map
                 ("C-c p" . projectile-command-map))
@@ -433,7 +419,6 @@ keybinds in C-x p.
 Probably the most iconic Emacs program? Anyways, super good either way.
 #+begin_src emacs-lisp
   (use-package magit
-
     :commands (magit-status magit-file-dispatch)
     :config
     (setq magit-refresh-status-buffer nil)
@@ -509,7 +494,6 @@ This adds a new auth-source that forge can use that taps into the gh-cli, which 
 Shows git changes on each line, pretty nice.
 #+begin_src emacs-lisp
   (use-package git-gutter
-
     :config
     (global-git-gutter-mode +1))
 #+end_src
@@ -531,14 +515,16 @@ This entire section is pretty much cargo culted. We'll see what works long term.
 Vertico is a completion framework that seeks to extend native Emacs     functionality.
 #+begin_src emacs-lisp
   (use-package vertico
-
     :init (vertico-mode))
+  (use-package vertico-posframe
+    :requires vertico
+    :init
+    (vertico-posframe-mode 1))
 #+end_src
 
 **** orderless
 #+begin_src emacs-lisp
   (use-package orderless
-
     :custom
     (completion-styles '(orderless basic))
     (completion-category-overrides '((file (styles basic partial-completion))))
@@ -549,12 +535,18 @@ Vertico is a completion framework that seeks to extend native Emacs     function
 **** marginalia
 #+begin_src emacs-lisp
   (use-package marginalia
-
     :config
     (marginalia-mode))
 #+end_src
 
-
+*** Feed reader
+#+begin_src emacs-lisp
+  (use-package elfeed
+    :bind ("C-x w" . elfeed)
+    :config
+    (setq elfeed-feeds
+          '(("https://www.ft.com/myft/following/943acc7c-45a4-4f0d-af09-03396f264621.rss" news))))
+#+END_SRC
 
 ** UI Settings
 *** Miscellaneous
@@ -598,7 +590,6 @@ Make line numbers absolute.
 This package limits the text body width, super useful in visual mode.
 #+begin_src emacs-lisp
   (use-package olivetti
-
     :if (display-graphic-p)
     :config
     (setq-default olivetti-body-width 86))
