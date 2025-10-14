@@ -51,6 +51,7 @@ in
       broot
       cloud-provider-kind
       cmake
+      claude-code
       colima
       coreutils
       crane

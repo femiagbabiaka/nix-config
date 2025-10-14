@@ -1,10 +1,23 @@
 { pkgs, ... }:
 let
+  claude-code-ide-el = pkgs.emacsPackages.trivialBuild rec {
+    pname = "claude-code-ide.el";
+    version = "32d853e";
+    src = pkgs.fetchFromGitHub {
+      owner = "manzaltu";
+      repo = "claude-code-ide.el";
+      rev = version;
+      hash = "sha256-OrcnUZXqRijJCgf1QE5kkPKKdWSJ4oMYt47Sn/EdQy0=";
+    };
+  };
   myEmacsAttrs = pkgs.emacs-git-pgtk.overrideAttrs (previousAttrs: {
     buildInputs = previousAttrs.buildInputs ++ [
       pkgs.tree-sitter
       pkgs.jansson
       pkgs.powerline-fonts
+      pkgs.claude-code
+      pkgs.libtool
+      pkgs.gnulib
     ];
     patches =
       (previousAttrs.patches or [ ])
@@ -32,6 +45,10 @@ let
     package = myEmacsAttrs;
     alwaysTangle = true;
     alwaysEnsure = true;
+
+    extraEmacsPackages = epkgs: [
+      claude-code-ide-el
+    ];
   };
 in
 {
