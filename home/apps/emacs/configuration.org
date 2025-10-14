@@ -115,6 +115,7 @@ masterpiece of the one and only prot
 
 #+begin_src emacs-lisp
   (use-package modus-themes
+    :disabled t
 
     :config
     ;; Add all your customizations prior to loading the themes
