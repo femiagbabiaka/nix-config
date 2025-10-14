@@ -4,6 +4,7 @@ let
     buildInputs = previousAttrs.buildInputs ++ [
       pkgs.tree-sitter
       pkgs.jansson
+      pkgs.powerline-fonts
     ];
     patches =
       (previousAttrs.patches or [ ])
@@ -11,11 +12,6 @@ let
       ++ (
         if pkgs.stdenv.isDarwin then
           [
-            # Fix OS window role (needed for window managers like yabai)
-            (pkgs.fetchpatch {
-              url = "https://raw.githubusercontent.com/d12frosted/homebrew-emacs-plus/master/patches/emacs-28/fix-window-role.patch";
-              sha256 = "+z/KfsBm1lvZTZNiMbxzXQGRTjkCFO4QPlEK35upjsE=";
-            })
             (pkgs.fetchpatch {
               url = "https://raw.githubusercontent.com/d12frosted/homebrew-emacs-plus/refs/heads/master/patches/emacs-31/round-undecorated-frame.patch";
               sha256 = "WWLg7xUqSa656JnzyUJTfxqyYB/4MCAiiiZUjMOqjuY=";
@@ -30,12 +26,18 @@ let
       );
   });
 
-  myEmacs = (myEmacsAttrs.override { withNativeCompilation = false; });
+  emacsWithPkgs = pkgs.emacsWithPackagesFromUsePackage {
+    config = ./configuration.org;
+    defaultInitFile = true;
+    package = myEmacsAttrs;
+    alwaysTangle = true;
+    alwaysEnsure = true;
+  };
 in
 {
   programs.emacs = {
     enable = true;
-    package = myEmacs;
+    package = emacsWithPkgs;
   };
 
 }

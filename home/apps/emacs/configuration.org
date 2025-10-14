@@ -2,38 +2,12 @@
 #+PROPERTY: header-args:emacs-lisp :tangle yes
 * Emacs Configuration.. semi-literate
 ** Packages
-*** Bootstrap
-This section sets up straight.el, which will be used in place of package.el.
-We'll set up use-package next.
-#+begin_src emacs-lisp
-  ;;; -*- lexical-binding: t -*-
-  (defvar bootstrap-version)
-  (let ((bootstrap-file
-   (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
-  (bootstrap-version 6))
-  (unless (file-exists-p bootstrap-file)
-  (with-current-buffer
-    (url-retrieve-synchronously
-     "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
-     'silent 'inhibit-cookies)
-  (goto-char (point-max))
-  (eval-print-last-sexp)))
-  (load bootstrap-file nil 'nomessage))
-#+end_src
 *** Custom file location
 custom and the way it stores items in init.el is one of the dumber things
 emacs does. well whatever, we move it
 #+begin_src emacs-lisp
   (setq custom-file (concat user-emacs-directory "custom.el"))
   (load custom-file 'noerror)
-#+end_src
-
-*** use-package
-Pretty straight forward use-package invocation. Uses straight.el to bootstrap
-use-package.
-#+begin_src emacs-lisp
-  (straight-use-package 'use-package)
-  (eval-when-compile (require 'use-package))
 #+end_src
 
 ** Performance
@@ -43,13 +17,13 @@ Function copied from sqrtminusone's config, measures emacs startup time.
   (setq my/emacs-started nil)
 
   (add-hook 'emacs-startup-hook
-	    (lambda ()
-	      (message "*** Emacs loaded in %s with %d garbage collections."
-		       (format "%.2f seconds"
-			       (float-time
-				(time-subtract after-init-time before-init-time)))
-		       gcs-done))
-	    (setq my/emacs-started t))
+            (lambda ()
+              (message "*** Emacs loaded in %s with %d garbage collections."
+  	                   (format "%.2f seconds"
+  		                         (float-time
+  			                        (time-subtract after-init-time before-init-time)))
+  	                   gcs-done))
+            (setq my/emacs-started t))
 #+end_src
 
 *** Garbage collection
@@ -63,7 +37,7 @@ This conditionally sets the shell path based on the users configured shell path 
 Pretty good.
 #+begin_src emacs-lisp
   (use-package exec-path-from-shell
-    :straight t
+
     :init
     (require 'exec-path-from-shell)
     (dolist (var '("SSH_AUTH_SOCK" "SSH_AGENT_PID" "GPG_AGENT_INFO" "LANG" "LC_CTYPE" "NIX_SSL_CERT_FILE" "NIX_PATH"))
@@ -81,7 +55,7 @@ emacs config. But uhh yeah, emacs leaves tmp files all over and it's annoying.
 lets change that
 #+begin_src emacs-lisp
   (use-package no-littering
-    :straight t)
+    )
 #+end_src
 
 Turns out, there's a feature called file locking that's used for multi-user scenarios. That sucks.
@@ -97,10 +71,27 @@ Turns out, there's a feature called file locking that's used for multi-user scen
 This will prompt us when we're going to kill Emacs.
 #+begin_src emacs-lisp
   (unless (daemonp)
-   (setq confirm-kill-emacs 'y-or-n-p))
+    (setq confirm-kill-emacs 'y-or-n-p))
 #+end_src
 
 ** General settings
+*** Emacs
+#+begin_src emacs-lisp
+  (use-package emacs
+    :custom
+    ;; Enable context menu. `vertico-multiform-mode' adds a menu in the minibuffer
+    ;; to switch display modes.
+    (context-menu-mode t)
+    ;; Support opening new minibuffers from inside existing minibuffers.
+    (enable-recursive-minibuffers t)
+    ;; Hide commands in M-x which do not work in the current mode.  Vertico
+    ;; commands are hidden in normal buffers. This setting is useful beyond
+    ;; Vertico.
+    (read-extended-command-predicate #'command-completion-default-include-p)
+    ;; Do not allow the cursor in the minibuffer prompt
+    (minibuffer-prompt-properties
+     '(read-only t cursor-intangible t face minibuffer-prompt)))
+#+end_src
 *** Keybindings
 **** which-key
 A package that displays the available keybindings in a popup.
@@ -114,218 +105,8 @@ I can remember at any given point.
     (which-key-mode)
     (which-key-setup-side-window-bottom)
     (set-face-attribute 'which-key-local-map-description-face nil
-                :weight 'bold)
-    :straight t)
-#+end_src
-
-**** dump keybindings
-A function to dump keybindings starting with a prefix to a buffer in a tree-like form.
-
-Taken from: https://sqrtminusone.xyz/configs/emacs/
-
-
-#+begin_src emacs-lisp
-  (defun my/dump-bindings-recursive (prefix &optional level buffer)
-    (dolist (key (which-key--get-bindings (kbd prefix)))
-      (with-current-buffer buffer
-        (when level
-      (insert (make-string level ? )))
-        (insert (apply #'format "%s%s%s\n" key)))
-      (when (string-match-p
-         (rx bos "+" (* nonl))
-         (substring-no-properties (elt key 2)))
-        (my/dump-bindings-recursive
-         (concat prefix " " (substring-no-properties (car key)))
-         (+ 2 (or level 0))
-         buffer))))
-
-  (defun my/dump-bindings (prefix)
-    "Dump keybindings starting with PREFIX in a tree-like form."
-    (interactive "sPrefix: ")
-    (let ((buffer (get-buffer-create "bindings")))
-      (with-current-buffer buffer
-        (erase-buffer))
-      (my/dump-bindings-recursive prefix 0 buffer)
-      (with-current-buffer buffer
-        (goto-char (point-min)))
-      (switch-to-buffer-other-window buffer)))
-#+end_src
-
-*** Editing modez
-**** Meow
-This is pretty new to me, I'm a vimmer by trade. But lets see how it goes.
-
-#+begin_src emacs-lisp
-  (defun my-meow-digit (digit)
-    (interactive)
-    (if (not (and meow--expand-nav-function
-                  (region-active-p)
-                  (meow--selection-type)))
-        (progn
-          (universal-argument)
-          (meow-digit-argument))
-      (meow-expand digit)))
-
-  (defvar meow-nav-keymap
-    (let ((keymap (make-keymap)))
-      (define-key keymap (kbd "h") #'beginning-of-line)
-      (define-key keymap (kbd "l") #'end-of-line)
-      (define-key keymap (kbd "g") #'beginning-of-buffer)
-      (define-key keymap (kbd "e") #'end-of-buffer)
-      (define-key keymap (kbd "s") #'back-to-indentation)
-      (define-key keymap (kbd "y") #'eglot-find-typeDefinition)
-      (define-key keymap (kbd "i") #'eglot-find-implementation)
-      keymap))
-
-  ;; define an alias for your keymap
-  (defalias 'meow-nav-keymap meow-nav-keymap)
-
-  (use-package meow-tree-sitter
-    :straight t
-    :requires meow
-    :init
-    (meow-tree-sitter-register-defaults))
-
-  (use-package meow
-    :config
-    (defun meow-setup () ;; from https://github.com/meow-edit/meow/blob/master/KEYBINDING_QWERTY.org
-      (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
-      (meow-motion-overwrite-define-key
-       '("j" . meow-next)
-       '("k" . meow-prev)
-       '("<escape>" . ignore))
-      (meow-leader-define-key
-       ;; SPC j/k will run the original command in MOTION state.
-       '("j" . "H-j")
-       '("k" . "H-k")
-       ;; Use SPC (0-9) for digit arguments.
-       '("1" . meow-digit-argument)
-       '("2" . meow-digit-argument)
-       '("3" . meow-digit-argument)
-       '("4" . meow-digit-argument)
-       '("5" . meow-digit-argument)
-       '("6" . meow-digit-argument)
-       '("7" . meow-digit-argument)
-       '("8" . meow-digit-argument)
-       '("9" . meow-digit-argument)
-       '("0" . meow-digit-argument)
-       '("/" . meow-keypad-describe-key)
-       '("?" . meow-cheatsheet))
-      (meow-normal-define-key
-       '("0" . (lambda () (interactive) (my-meow-digit 0)))
-       '("9" . (lambda () (interactive) (my-meow-digit 9)))
-       '("8" . (lambda () (interactive) (my-meow-digit 8)))
-       '("7" . (lambda () (interactive) (my-meow-digit 7)))
-       '("6" . (lambda () (interactive) (my-meow-digit 6)))
-       '("5" . (lambda () (interactive) (my-meow-digit 5)))
-       '("4" . (lambda () (interactive) (my-meow-digit 4)))
-       '("3" . (lambda () (interactive) (my-meow-digit 3)))
-       '("2" . (lambda () (interactive) (my-meow-digit 2)))
-       '("1" . (lambda () (interactive) (my-meow-digit 1)))
-       '("-" . negative-argument)
-       '(";" . meow-cancel-selection)
-       '("," . meow-inner-of-thing)
-       '("." . meow-bounds-of-thing)
-       '("[" . meow-beginning-of-thing)
-       '("]" . meow-end-of-thing)
-       '("a" . meow-append)
-       '("A" . meow-open-below)
-       '("b" . meow-back-word)
-       '("B" . meow-back-symbol)
-       '("c" . meow-change)
-       '("d" . meow-delete)
-       '("D" . meow-backward-delete)
-       '("e" . meow-next-word)
-       '("E" . meow-next-symbol)
-       '("f" . meow-find)
-       '("g" . meow-nav-keymap)
-       '("G" . meow-grab)
-       '("h" . meow-left)
-       '("H" . meow-left-expand)
-       '("i" . meow-insert)
-       '("I" . meow-open-above)
-       '("j" . meow-next)
-       '("J" . meow-next-expand)
-       '("k" . meow-prev)
-       '("K" . meow-prev-expand)
-       '("l" . meow-right)
-       '("L" . meow-right-expand)
-       '("m" . meow-join)
-       '("n" . meow-search)
-       '("o" . meow-block)
-       '("O" . meow-to-block)
-       '("p" . meow-yank)
-       '("q" . meow-quit)
-       '("Q" . meow-goto-line)
-       '("r" . meow-replace)
-       '("R" . meow-swap-grab)
-       '("s" . meow-kill)
-       '("t" . meow-till)
-       '("u" . meow-undo)
-       '("U" . meow-undo-in-selection)
-       '("v" . meow-visit)
-       '("w" . meow-mark-word)
-       '("W" . meow-mark-symbol)
-       '("x" . meow-line)
-       '("X" . meow-goto-line)
-       '("y" . meow-save)
-       '("Y" . meow-sync-grab)
-       '("z" . meow-pop-selection)
-       '("'" . repeat)
-       '("<escape>" . ignore)))
-    (meow-setup)
-    (meow-global-mode 1)
-    :straight t)
-#+end_src
-
-**** Evil-mode
-#+begin_src emacs-lisp
-  ;; (use-package evil
-  ;;   :straight t
-  ;;   :init
-  ;;   (setq evil-want-integration t)
-  ;;   (setq evil-want-C-u-scroll t)
-  ;;   (setq evil-want-keybinding nil)
-  ;;   (setq evil-search-module 'evil-search)
-  ;;   (setq evil-split-window-below t)
-  ;;   (setq evil-vsplit-window-right t)
-  ;;   (unless (display-graphic-p)
-  ;;     (setq evil-want-C-i-jump
-  ;;   :config
-  ;;   (evil-mode 1)
-  ;;   ;; (setq evil-respect-visual-line-mode t)
-  ;;   (evil-set-undo-system 'undo-tree))
-#+end_src
-
-
-**** xah fly keys
-#+begin_src emacs-lisp
-;;  (use-package xah-fly-keys
-;;    :config
-;;    (xah-fly-keys-set-layout "qwerty")
-;;    (define-key xah-fly-leader-key-map (kbd "p")  'nil)
-;;    (define-key xah-fly-leader-key-map (kbd "p !") 'project-shell-command)
-;;    (define-key xah-fly-leader-key-map (kbd "p &")  'project-async-shell-command)
-;;    (define-key xah-fly-leader-key-map (kbd "p f") 'project-find-file)
-;;    (define-key xah-fly-leader-key-map (kbd "p F") 'project-or-external-find-file)
-;;    (define-key xah-fly-leader-key-map (kbd "p b") 'project-switch-to-buffer)
-;;    (define-key xah-fly-leader-key-map (kbd "p s") 'project-shell)
-;;    (define-key xah-fly-leader-key-map (kbd "p d")  'project-find-dir)
-;;    (define-key xah-fly-leader-key-map (kbd "p D") 'project-dired)
-;;    (define-key xah-fly-leader-key-map (kbd "p v") 'project-vc-dir)
-;;    (define-key xah-fly-leader-key-map (kbd "p c") 'project-compile)
-;;    (define-key xah-fly-leader-key-map (kbd "p e") 'project-eshell)
-;;    (define-key xah-fly-leader-key-map (kbd "p k") 'project-kill-buffers)
-;;    (define-key xah-fly-leader-key-map (kbd "p p") 'project-switch-project)
-;;    (define-key xah-fly-leader-key-map (kbd "p g") 'project-find-regexp)
-;;    (define-key xah-fly-leader-key-map (kbd "p G") 'project-or-external-find-regexp)
-;;    (define-key xah-fly-leader-key-map (kbd "p r") 'project-query-replace-regexp)
-;;    (define-key xah-fly-leader-key-map (kbd "p x") 'project-execute-extended-command)
-;;    (define-key xah-fly-leader-key-map (kbd "p o") 'project-any-command)
-;;    (define-key xah-fly-leader-key-map (kbd "\C-b") 'project-list-buffers)
-;;    :init
-;;    (xah-fly-keys 1)
-;;    :straight t)
+                        :weight 'bold)
+    )
 #+end_src
 
 *** Theme
@@ -333,27 +114,26 @@ This is pretty new to me, I'm a vimmer by trade. But lets see how it goes.
 masterpiece of the one and only prot
 
 #+begin_src emacs-lisp
-(use-package modus-themes
-  :straight t
-  :config
-  ;; Add all your customizations prior to loading the themes
-  (setq modus-themes-italic-constructs t
-        modus-themes-bold-constructs nil)
+  (use-package modus-themes
 
-  ;; Maybe define some palette overrides, such as by using our presets
-  (setq modus-themes-common-palette-overrides
-        modus-themes-preset-overrides-intense)
+    :config
+    ;; Add all your customizations prior to loading the themes
+    (setq modus-themes-italic-constructs t
+          modus-themes-bold-constructs nil)
 
-  ;; Load the theme of your choice.
-  (load-theme 'modus-vivendi)
+    ;; Maybe define some palette overrides, such as by using our presets
+    (setq modus-themes-common-palette-overrides
+          modus-themes-preset-overrides-intense)
 
-  (define-key global-map (kbd "<f5>") #'modus-themes-toggle))
+    ;; Load the theme of your choice.
+    (load-theme 'modus-vivendi)
+    (define-key global-map (kbd "<f5>") #'modus-themes-toggle))
 #+end_src
 
 **** Font
 #+begin_src emacs-lisp
-  (add-to-list 'default-frame-alist '(font . "Fira Mono for Powerline 14"))
-  (set-face-attribute 'default t :font "Fira Mono for Powerline 14")
+  (add-to-list 'default-frame-alist '(font . "FiraCode Nerd Font Mono 14"))
+  (set-face-attribute 'default t :font "FiraCode Nerd Font Mono 14")
 #+end_src
 
 
@@ -365,7 +145,6 @@ masterpiece of the one and only prot
 **** Dashboard
 #+begin_src emacs-lisp
   (use-package dashboard
-    :straight t
     :config
     (dashboard-setup-startup-hook))
 #+end_src
@@ -374,15 +153,14 @@ masterpiece of the one and only prot
 **** nix
 #+begin_src emacs-lisp
   (use-package nix-mode
-    :hook (nix-mode . lsp-deferred)
-    :straight t)
+    :hook (nix-mode . lsp-deferred))
 #+end_src
 
 **** Rust
 ***** rust-mode
 #+begin_src emacs-lisp
   (use-package rust-mode
-    :straight t
+
     :config
     (setq rust-format-on-save t)
     (add-hook 'rust-mode-hook (lambda () (setq indent-tabs-mode nil)))
@@ -392,21 +170,19 @@ masterpiece of the one and only prot
 **** Fish Shell
 #+begin_src emacs-lisp
   (use-package fish-mode
-    :straight t
     :mode "\\.fish\\'")
 #+end_src
 
 **** Haskell
 #+begin_src emacs-lisp
   (use-package haskell-mode
-    :straight t
     :mode "\\.hs\\'")
 #+end_src
 
 **** Terraform
 #+begin_src emacs-lisp
   (use-package terraform-mode
-    :straight t
+
     :custom (terraform-format-on-save t)
     :config
     (defun my-terraform-mode-init ()
@@ -417,63 +193,57 @@ masterpiece of the one and only prot
 
 **** Dockerfile
 #+begin_src emacs-lisp
-  (use-package dockerfile-mode
-    :straight t)
+  (use-package dockerfile-mode)
 #+end_src
 
 **** Groovy
 #+begin_src emacs-lisp
-  (use-package groovy-mode
-    :straight t)
+  (use-package groovy-mode)
 #+end_src
 
 **** LSP
 #+begin_src emacs-lisp
-      (use-package eglot
-        :straight t
-        :config
-        ;; Ensure `nil` is in your PATH.
-        (add-to-list 'eglot-server-programs '(nix-mode . ("nil")))
-        :hook
-        (nix-mode . eglot-ensure)
-        (terraform-mode . eglot-ensure)
-        (haskell-mode . eglot-ensure)
-        (rust-mode . eglot-ensure)
-        (fish-mode . eglot-ensure)
-        (typescript-mode . eglot-ensure)
-        (go-mode . eglot-ensure)
-        (yaml-mode . eglot-ensure)
-        (ruby-mode. eglot-ensure)
-        (dockerfile-mode . eglot-ensure)
-        (groovy-mode . eglot-ensure))
+  (use-package eglot
+
+    :config
+    ;; Ensure `nil` is in your PATH.
+    (add-to-list 'eglot-server-programs '(nix-mode . ("nil")))
+    :hook
+    (nix-mode . eglot-ensure)
+    (terraform-mode . eglot-ensure)
+    (haskell-mode . eglot-ensure)
+    (rust-mode . eglot-ensure)
+    (fish-mode . eglot-ensure)
+    (typescript-mode . eglot-ensure)
+    (go-mode . eglot-ensure)
+    (yaml-mode . eglot-ensure)
+    (ruby-mode. eglot-ensure)
+    (dockerfile-mode . eglot-ensure)
+    (groovy-mode . eglot-ensure))
 #+end_src
 
 **** Flycheck
 #+begin_src emacs-lisp
   (use-package flycheck
-    :straight t
     :init (global-flycheck-mode))
   (use-package flycheck-eglot
-    :straight t
     :after (flycheck eglot)
     :config (global-flycheck-eglot-mode 1))
 #+end_src
 
 **** Company Mode
 #+begin_src emacs-lisp
-   (use-package company
-     :straight t
-     :init (global-company-mode)
-     :config
-     (setq company-minimum-prefix-length 1
-           company-idle-delay 0.0) ;; default is 0.2
-     )
+  (use-package company
+    :init (global-company-mode)
+    :config
+    (setq company-minimum-prefix-length 1
+          company-idle-delay 0.0) ;; default is 0.2
+    )
 #+end_src
 
 **** Typescript
 #+begin_src emacs-lisp
   (use-package typescript-mode
-    :straight t
     :mode "\\.ts\\'"
     :config
     (add-hook 'typescript-mode-hook #'hs-minor-mode))
@@ -482,7 +252,6 @@ masterpiece of the one and only prot
 **** go-mode
 #+begin_src emacs-lisp
   (use-package go-mode
-    :straight t
     :mode "\\.go\\'"
     :hook (before-save . gofmt-before-save)
     :custom (gofmt-command "goimports"))
@@ -491,23 +260,24 @@ masterpiece of the one and only prot
 **** yaml-mode
 #+begin_src emacs-lisp
   (use-package yaml-mode
-    :straight t
     :mode "\\.yml\\'")
 #+end_src
 
 **** ruby-mode
 #+begin_src emacs-lisp
   (use-package ruby-mode
-    :straight t
     :mode "\\.\\(?:cap\\|gemspec\\|irbrc\\|gemrc\\|rake\\|rb\\|ru\\|thor\\)\\'"
     :mode "\\(?:Brewfile\\|Capfile\\|Gemfile\\(?:\\.[a-zA-Z0-9._-]+\\)?\\|[rR]akefile\\)\\'")
 #+end_src
-
+**** zig-mode
+#+begin_src emacs-lisp
+  (use-package zig-mode
+    :mode "\\.\\(zig\\|zon\\)\\'")
+#+end_src
 *** Doom Modeline
 It looks cool, but IDK if I want to use it long term. Let's see!
 #+begin_src emacs-lisp
   (use-package doom-modeline
-    :straight t
     :after all-the-icons
     :init
     (setq doom-modeline-env-enable-python nil)
@@ -533,7 +303,6 @@ This package reindents the file being edited after every change. Pretty useful.
 <2023-04-24 Mon> Removing this, it's hella annoying. I think if I had a projectile configuration per project it would be better.
 #+begin_src emacs-lisp
   (use-package aggressive-indent
-    :straight t
     :disabled t
     :config
     (global-aggressive-indent-mode 1))
@@ -547,9 +316,9 @@ This deletes trailing whitespace when the buffer is saved.
   (require 'cl-extra)
 
   (add-hook 'before-save-hook
-	    (lambda ()
-	      (unless (cl-some #'derived-mode-p my/trailing-whitespace-modes)
-		(delete-trailing-whitespace))))
+            (lambda ()
+              (unless (cl-some #'derived-mode-p my/trailing-whitespace-modes)
+  	            (delete-trailing-whitespace))))
 #+end_src
 
 ***** set tabs
@@ -587,7 +356,6 @@ Replaces Emacs built-in sequential undo system with a tree-based one. Probably o
 
 #+begin_src emacs-lisp
   (use-package undo-tree
-    :straight t
     :config
     (global-undo-tree-mode)
     (setq undo-tree-visualizer-diff t)
@@ -609,7 +377,7 @@ but seems like a nice lightweight replacement for Treemacs.
 #+begin_src emacs-lisp
   (use-package dired-sidebar
     :bind (("C-x t t" . dired-sidebar-toggle-sidebar))
-    :straight t
+
     :commands (dired-sidebar-toggle-sidebar)
     :init
     (add-hook 'dired-sidebar-mode-hook
@@ -634,10 +402,9 @@ I come back to this and don't remember, the default prefix for project.el
 keybinds in C-x p.
 #+begin_src emacs-lisp
   (use-package projectile
-    :straight t
     :disabled t
     :bind (:map projectile-mode-map
-               ("C-c p" . projectile-command-map))
+                ("C-c p" . projectile-command-map))
     :config
     (setq projectile-project-search-path '(("~/src/" . 2)))
     :init
@@ -645,14 +412,13 @@ keybinds in C-x p.
 
   (use-package counsel-projectile
     :after (counsel projectile)
-    :straight t)
+    )
 #+end_src
 
 **** Magit
 Probably the most iconic Emacs program? Anyways, super good either way.
 #+begin_src emacs-lisp
   (use-package magit
-    :straight t
     :commands (magit-status magit-file-dispatch)
     :config
     (setq magit-refresh-status-buffer nil)
@@ -671,7 +437,7 @@ Integrates with magit, used for integrations with github and the like.
 #+begin_src emacs-lisp
   (use-package forge
     :after magit
-    :straight t)
+    )
 #+end_src
 
 Copied from: https://github.com/magit/forge/discussions/544.
@@ -682,9 +448,9 @@ This adds a new auth-source that forge can use that taps into the gh-cli, which 
   ;; -----------------------------------------------------------------------------
 
   (cl-defun auth-source-ghcli-search (&rest spec
-                                      &key backend require
-                                      type max host user port
-                                      &allow-other-keys)
+                                            &key backend require
+                                            type max host user port
+                                            &allow-other-keys)
     "Given a property list SPEC, return search matches from the `:backend'.
   See `auth-source-search' for details on SPEC."
     ;; just in case, check that the type is correct (null or same as the backend)
@@ -692,19 +458,19 @@ This adds a new auth-source that forge can use that taps into the gh-cli, which 
                t "Invalid GH CLI search: %s %s")
 
     (when-let* ((hostname (string-remove-prefix "api." host))
-           ;; split ghub--ident again
-           (ghub_ident (split-string user "\\^"))
-           (username (car ghub_ident))
-           (package (cadr ghub_ident))
-           (cmd (format "gh auth token --hostname '%s'" hostname))
-           (token (when (string= package "forge") (string-trim-right (shell-command-to-string cmd))))
-           (retval (list
-                    :host hostname
-                    :user username
-                    :secret token)))
-          (auth-source-do-debug  "auth-source-ghcli: return %s as final result (plus hidden password)"
-                                      (seq-subseq retval 0 -2)) ;; remove password
-          (list retval)))
+                ;; split ghub--ident again
+                (ghub_ident (split-string user "\\^"))
+                (username (car ghub_ident))
+                (package (cadr ghub_ident))
+                (cmd (format "gh auth token --hostname '%s'" hostname))
+                (token (when (string= package "forge") (string-trim-right (shell-command-to-string cmd))))
+                (retval (list
+                         :host hostname
+                         :user username
+                         :secret token)))
+      (auth-source-do-debug  "auth-source-ghcli: return %s as final result (plus hidden password)"
+                             (seq-subseq retval 0 -2)) ;; remove password
+      (list retval)))
 
   (defvar auth-source-ghcli-backend
     (auth-source-backend
@@ -728,7 +494,6 @@ This adds a new auth-source that forge can use that taps into the gh-cli, which 
 Shows git changes on each line, pretty nice.
 #+begin_src emacs-lisp
   (use-package git-gutter
-    :straight t
     :config
     (global-git-gutter-mode +1))
 #+end_src
@@ -747,31 +512,41 @@ Save the most recently edited place in a file.
 *** Completion
 This entire section is pretty much cargo culted. We'll see what works long term.
 **** Vertico
-Vertico is a completion framework that seeks to extend native Emacs functionality.
+Vertico is a completion framework that seeks to extend native Emacs     functionality.
 #+begin_src emacs-lisp
   (use-package vertico
-    :straight t
-    :config (vertico-mode))
+    :init (vertico-mode))
+  (use-package vertico-posframe
+    :requires vertico
+    :init
+    (vertico-posframe-mode 1))
 #+end_src
 
 **** orderless
 #+begin_src emacs-lisp
   (use-package orderless
-    :straight t
     :custom
     (completion-styles '(orderless basic))
-    (completion-category-overrides '((file (styles basic partial-completion)))))
+    (completion-category-overrides '((file (styles basic partial-completion))))
+    (completion-category-defaults nil)
+    (completion-pcm-leading-wildcard t))
 #+end_src
 
 **** marginalia
 #+begin_src emacs-lisp
   (use-package marginalia
-    :straight t
     :config
     (marginalia-mode))
 #+end_src
 
-
+*** Feed reader
+#+begin_src emacs-lisp
+  (use-package elfeed
+    :bind ("C-x w" . elfeed)
+    :config
+    (setq elfeed-feeds
+          '(("https://www.ft.com/myft/following/943acc7c-45a4-4f0d-af09-03396f264621.rss" news))))
+#+END_SRC
 
 ** UI Settings
 *** Miscellaneous
@@ -815,7 +590,6 @@ Make line numbers absolute.
 This package limits the text body width, super useful in visual mode.
 #+begin_src emacs-lisp
   (use-package olivetti
-    :straight t
     :if (display-graphic-p)
     :config
     (setq-default olivetti-body-width 86))
@@ -826,5 +600,11 @@ load all the icons on first boot only
 #+begin_src emacs-lisp
   (use-package all-the-icons
     :if (display-graphic-p)
-    :straight t)
+    )
+#+end_src
+
+*** epub reader
+#+begin_src emacs-lisp
+  (use-package nov
+    )
 #+end_src
