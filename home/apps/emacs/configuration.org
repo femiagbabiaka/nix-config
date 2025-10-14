@@ -115,6 +115,7 @@ masterpiece of the one and only prot
 
 #+begin_src emacs-lisp
   (use-package modus-themes
+    :disabled t
 
     :config
     ;; Add all your customizations prior to loading the themes
@@ -129,6 +130,17 @@ masterpiece of the one and only prot
     (load-theme 'modus-vivendi)
     (define-key global-map (kbd "<f5>") #'modus-themes-toggle))
 #+end_src
+
+**** stimmung
+#+BEGIN_SRC emacs-lisp
+  (use-package stimmung-themes
+    :custom
+    (stimmung-themes-constant 'none)
+    (stimmung-themes-type 'none :italic? t)
+    (stimmung-themes-comment 'background :italic? nil)
+    :config
+    (stimmung-themes-load-light))
+#+END_SRC
 
 **** Font
 #+begin_src emacs-lisp
