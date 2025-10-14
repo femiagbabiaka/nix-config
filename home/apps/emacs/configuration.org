@@ -130,10 +130,24 @@ masterpiece of the one and only prot
     (define-key global-map (kbd "<f5>") #'modus-themes-toggle))
 #+end_src
 
+**** stimmung
+#+BEGIN_SRC emacs-lisp
+  (use-package stimmung-themes
+    :custom
+    (stimmung-themes-constant 'none)
+    (stimmung-themes-type 'none :italic? t)
+    (stimmung-themes-comment 'background :italic? nil)
+    :config
+    (setq-default mode-line-format nil)
+    (stimmung-themes-load-light))
+#+END_SRC
+
 **** Font
 #+begin_src emacs-lisp
   (add-to-list 'default-frame-alist '(font . "FiraCode Nerd Font Mono 14"))
-  (set-face-attribute 'default t :font "FiraCode Nerd Font Mono 14")
+  (set-face-attribute 'default        nil :family "FiraCode Nerd Font"            :height fixed-size    :weight 'medium)
+  (set-face-attribute 'fixed-pitch    nil :family "FiraCode Nerd Font"            :height fixed-size    :weight 'medium)
+  (set-face-attribute 'variable-pitch nil :family "FiraCode Nerd Font Mono" :height variable-size :weight 'normal)
 #+end_src
 
 
@@ -278,6 +292,7 @@ masterpiece of the one and only prot
 It looks cool, but IDK if I want to use it long term. Let's see!
 #+begin_src emacs-lisp
   (use-package doom-modeline
+    :disabled t
     :after all-the-icons
     :init
     (setq doom-modeline-env-enable-python nil)
@@ -293,6 +308,13 @@ It looks cool, but IDK if I want to use it long term. Let's see!
     (setq doom-modeline-irc nil)
     (setq doom-modeline-buffer-state-icon nil))
 #+end_src
+
+*** nano modeline
+#+BEGIN_SRC emacs-lisp
+  (use-package nano-modeline
+    :config
+    (nano-modeline-text-mode t))
+#+END_SRC
 
 
 *** Text Editing
@@ -576,7 +598,7 @@ Highlight the current line.
 Turn on line numbers mode.
 Make line numbers absolute.
 #+begin_src emacs-lisp
-  (global-display-line-numbers-mode 1)
+  (global-display-line-numbers-mode -1)
   (setq display-line-numbers-type t)
 #+end_src
 
