@@ -29,6 +29,7 @@ in
     ./apps/kitty
     ./apps/alacritty
     ./apps/neovim
+    ./apps/emacs
   ];
 
   home = {
@@ -43,7 +44,6 @@ in
     [
       aider-chat-with-playwright
       ansible
-      ansible-language-server
       automake
       awscli2
       bat
@@ -75,6 +75,7 @@ in
       gh
       git
       git-crypt
+      git-lfs
       go
       golangci-lint
       golangci-lint-langserver
