@@ -27,11 +27,11 @@ let
   });
 
   emacsWithPkgs = pkgs.emacsWithPackagesFromUsePackage {
-      config = ./configuration.org;
-      defaultInitFile = true;
-      package = myEmacsAttrs;
-      alwaysTangle = true;
-      alwaysEnsure = true;
+    config = ./configuration.org;
+    defaultInitFile = true;
+    package = myEmacsAttrs;
+    alwaysTangle = true;
+    alwaysEnsure = true;
   };
 in
 {
