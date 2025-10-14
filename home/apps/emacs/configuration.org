@@ -146,9 +146,9 @@ masterpiece of the one and only prot
 **** Font
 #+begin_src emacs-lisp
   (add-to-list 'default-frame-alist '(font . "FiraCode Nerd Font Mono 14"))
-  (set-face-attribute 'default        nil :family "FiraCode Nerd Font"            :height fixed-size    :weight 'medium)
-  (set-face-attribute 'fixed-pitch    nil :family "FiraCode Nerd Font"            :height fixed-size    :weight 'medium)
-  (set-face-attribute 'variable-pitch nil :family "FiraCode Nerd Font Mono" :height variable-size :weight 'normal)
+  (set-face-attribute 'default        nil :family "FiraCode Nerd Font"            :height 120    :weight 'medium)
+  (set-face-attribute 'fixed-pitch    nil :family "FiraCode Nerd Font"            :height 120    :weight 'medium)
+  (set-face-attribute 'variable-pitch nil :family "FiraCode Nerd Font Mono" :height 120 :weight 'normal)
 #+end_src
 
 
