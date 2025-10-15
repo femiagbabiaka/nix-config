@@ -9,6 +9,10 @@ let
       rev = version;
       hash = "sha256-OrcnUZXqRijJCgf1QE5kkPKKdWSJ4oMYt47Sn/EdQy0=";
     };
+    packageRequires = with pkgs.emacsPackages; [
+      websocket
+      web-server
+    ];
   };
   myEmacsAttrs = pkgs.emacs-git-pgtk.overrideAttrs (previousAttrs: {
     buildInputs = previousAttrs.buildInputs ++ [

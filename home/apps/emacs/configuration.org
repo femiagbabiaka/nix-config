@@ -1,5 +1,5 @@
 ;;; -*- lexical-binding: t -*-
-#+PROPERTY: header-args:emacs-lisp :tangle yes
+#+PROPERTY: header-args:emacs-lisp :tangle yes :lexical t
 * Emacs Configuration.. semi-literate
 ** Packages
 *** Custom file location
@@ -14,7 +14,8 @@ emacs does. well whatever, we move it
 *** Measuring startup speed
 Function copied from sqrtminusone's config, measures emacs startup time.
 #+begin_src emacs-lisp
-  (setq my/emacs-started nil)
+  (defvar my/emacs-started nil
+    "Flag to track whether Emacs has completed startup.")
 
   (add-hook 'emacs-startup-hook
             (lambda ()
@@ -22,8 +23,8 @@ Function copied from sqrtminusone's config, measures emacs startup time.
   	                   (format "%.2f seconds"
   		                         (float-time
   			                        (time-subtract after-init-time before-init-time)))
-  	                   gcs-done))
-            (setq my/emacs-started t))
+  	                   gcs-done)
+              (setq my/emacs-started t)))
 #+end_src
 
 *** Garbage collection
@@ -55,7 +56,11 @@ emacs config. But uhh yeah, emacs leaves tmp files all over and it's annoying.
 lets change that
 #+begin_src emacs-lisp
   (use-package no-littering
-    )
+    :demand t
+    :init
+    ;; Only load no-littering at runtime, not during byte-compilation
+    (unless (bound-and-true-p byte-compile-current-file)
+      (require 'no-littering)))
 #+end_src
 
 Turns out, there's a feature called file locking that's used for multi-user scenarios. That sucks.
@@ -291,11 +296,12 @@ masterpiece of the one and only prot
 #+end_src
 **** claude-code-ide
 #+begin_src emacs-lisp
-   (use-package claude-code-ide
-     :bind ("C-c C-'" .
-            claude-code-ide-menu) ; Set your favorite keybinding
-     :config
-     (claude-code-ide-emacs-tools-setup)) ; Optionally enable Emacs MCP tools
+  (use-package claude-code-ide
+    :bind ("C-c C-'" .
+           claude-code-ide-menu) ; Set your favorite keybinding
+    :config
+    (setq claude-code-ide-mcp-server-port 52644)
+    (claude-code-ide-emacs-tools-setup)) ; Optionally enable Emacs MCP tools
 #+END_SRC
 *** Doom Modeline
 It looks cool, but IDK if I want to use it long term. Let's see!
@@ -342,7 +348,8 @@ This package reindents the file being edited after every change. Pretty useful.
 ***** Delete trailing whitespace
 This deletes trailing whitespace when the buffer is saved.
 #+begin_src emacs-lisp
-  (setq my/trailing-whitespace-modes '(markdown-mode))
+  (defvar my/trailing-whitespace-modes '(markdown-mode)
+    "List of modes where trailing whitespace should NOT be deleted.")
 
   (require 'cl-extra)
 
@@ -468,7 +475,7 @@ Integrates with magit, used for integrations with github and the like.
 #+begin_src emacs-lisp
   (use-package forge
     :after magit
-    )
+    :defer t)
 #+end_src
 
 Copied from: https://github.com/magit/forge/discussions/544.
