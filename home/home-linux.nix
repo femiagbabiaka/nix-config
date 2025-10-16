@@ -8,10 +8,9 @@
 {
   imports = [
     ./apps/fish
-    ./apps/neovim
     ./apps/gitconfig
     ./apps/ssh
-    ./apps/kakoune
+    ./apps/emacs
   ];
 
   home = {
@@ -31,7 +30,6 @@
   home.packages = with pkgs; [
     aider-chat-with-playwright
     ansible
-    ansible-language-server
     automake
     awscli2
     bat
@@ -64,7 +62,7 @@
     kakoune-lsp
     mitschemeX11
     mosh
-    nil    
+    nil
     nixfmt-rfc-style
     nushell
     platinum-searcher
@@ -77,6 +75,7 @@
     spotify
     stern
     tailscale
+    toolbox
     _1password-gui
     yubioath-flutter
     terraform-docs
