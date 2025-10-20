@@ -157,10 +157,10 @@ masterpiece of the one and only prot
 
 **** Font
 #+begin_src emacs-lisp
-  (add-to-list 'default-frame-alist '(font . "FiraCode Nerd Font Mono 16"))
-  (set-face-attribute 'default        nil :family "FiraCode Nerd Font"            :height 120    :weight 'medium)
-  (set-face-attribute 'fixed-pitch    nil :family "FiraCode Nerd Font"            :height 120    :weight 'medium)
-  (set-face-attribute 'variable-pitch nil :family "FiraCode Nerd Font Mono" :height 120 :weight 'normal)
+  (add-to-list 'default-frame-alist '(font . "Iosevka Nerd Font Mono 16"))
+  (set-face-attribute 'default        nil :family "Iosevka Nerd Font Mono"            :height 120    :weight 'medium)
+  (set-face-attribute 'fixed-pitch    nil :family "Iosevka Nerd Font Mono"            :height 120    :weight 'medium)
+  (set-face-attribute 'variable-pitch nil :family "IosevkaTerm Nerd Font Mono" :height 120 :weight 'normal)
 #+end_src
 
 
@@ -637,11 +637,17 @@ Vertico is a completion framework that seeks to extend native Emacs     function
 #+END_SRC
 ** UI Settings
 *** Miscellaneous
+Setup ansi-color mode.
+#+BEGIN_SRC emacs-lisp
+  (use-package ansi-color
+    :hook (compilation-filter . ansi-color-compilation-filter))
+#+END_SRC
+
 Disable the annoying stuff.
 #+begin_src emacs-lisp
-  (tool-bar-mode -1)
-  (menu-bar-mode -1)
-  (scroll-bar-mode -1)
+    (tool-bar-mode -1)
+    (menu-bar-mode -1)
+    (scroll-bar-mode -1)
 #+end_src
 
 Highlight the current line.
@@ -666,7 +672,6 @@ Make line numbers absolute.
   (global-display-line-numbers-mode 1)
   (setq display-line-numbers-type 'relative)
 #+end_src
-
 
 *** Word wrapping
 #+begin_src emacs-lisp
