@@ -22,6 +22,7 @@ let
       pkgs.claude-code
       pkgs.libtool
       pkgs.gnulib
+      pkgs.yt-dlp # elfeed-tube
     ];
     patches =
       (previousAttrs.patches or [ ])
