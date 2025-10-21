@@ -97,6 +97,7 @@ This will prompt us when we're going to kill Emacs.
     (minibuffer-prompt-properties
      '(read-only t cursor-intangible t face minibuffer-prompt)))
 #+end_src
+
 *** Keybindings
 **** which-key
 A package that displays the available keybindings in a popup.
@@ -152,15 +153,15 @@ masterpiece of the one and only prot
 #+BEGIN_SRC emacs-lisp
   (use-package nano-theme
     :config
-    (load-theme 'nano t))
+    (load-theme 'nano-dark t))
 #+END_SRC
 
 **** Font
 #+begin_src emacs-lisp
-  (add-to-list 'default-frame-alist '(font . "Iosevka Nerd Font Mono 16"))
-  (set-face-attribute 'default        nil :family "Iosevka Nerd Font Mono"            :height 120    :weight 'medium)
-  (set-face-attribute 'fixed-pitch    nil :family "Iosevka Nerd Font Mono"            :height 120    :weight 'medium)
-  (set-face-attribute 'variable-pitch nil :family "IosevkaTerm Nerd Font Mono" :height 120 :weight 'normal)
+  (add-to-list 'default-frame-alist '(font . "RobotoMono Nerd Font 16"))
+  (set-face-attribute 'default        nil :family "RobotoMono Nerd Font" :height 120 :weight 'medium)
+  (set-face-attribute 'fixed-pitch    nil :family "RobotoMono Nerd Font Mono" :height 120 :weight 'medium)
+  (set-face-attribute 'variable-pitch nil :family "RobotoMono Nerd Font" :height 120 :weight 'normal)
 #+end_src
 
 
@@ -309,6 +310,14 @@ masterpiece of the one and only prot
     :config
     (setq claude-code-ide-mcp-server-port 52644)
     (claude-code-ide-emacs-tools-setup)) ; Optionally enable Emacs MCP tools
+#+END_SRC
+**** elisp
+#+BEGIN_SRC emacs-lisp
+  (use-package paredit
+    :config
+    (show-paren-mode 1)
+    :hook
+    (emacs-lisp-mode-hook . paredit-mode))
 #+END_SRC
 *** Doom Modeline
 It looks cool, but IDK if I want to use it long term. Let's see!
@@ -598,37 +607,37 @@ Vertico is a completion framework that seeks to extend native Emacs     function
 
 *** Feed reader
 #+begin_src emacs-lisp
-    (use-package elfeed
-      :bind ("C-x w" . elfeed)
-      :config
-      (setq elfeed-feeds
-            '(("https://www.ft.com/myft/following/943acc7c-45a4-4f0d-af09-03396f264621.rss" news)
-              ("https://www.computerenhance.com/feed" programming))))
+  (use-package elfeed
+    :bind ("C-x w" . elfeed)
+    :config
+    (setq elfeed-feeds
+          '(("https://www.ft.com/myft/following/943acc7c-45a4-4f0d-af09-03396f264621.rss" news)
+            ("https://www.computerenhance.com/feed" programming))))
 #+END_SRC
 *** youtube feed reader
 #+BEGIN_SRC emacs-lisp
-                  (use-package elfeed-tube
-                    :after elfeed
-                    :config
-                    ;; (setq elfeed-tube-auto-save-p nil) ; default value
-                    ;; (setq elfeed-tube-auto-fetch-p t)  ; default value
-                    (elfeed-tube-setup)
-                    (elfeed-tube-add-feeds '("https://youtube.com/@veritasium"
-                                             "jonhoo"
-                                             "netdevconf"
-                                             "XahLee"
-                                             "BillyEllis"
-                                             "trappuniversity"
-                                             "protesilaos"
-                                             "TsodingDaily"
-                                             "ALifeEngineered"))
+  (use-package elfeed-tube
+    :after elfeed
+    :config
+    ;; (setq elfeed-tube-auto-save-p nil) ; default value
+    ;; (setq elfeed-tube-auto-fetch-p t)  ; default value
+    (elfeed-tube-setup)
+    (elfeed-tube-add-feeds '("https://youtube.com/@veritasium"
+                             "jonhoo"
+                             "netdevconf"
+                             "XahLee"
+                             "BillyEllis"
+                             "trappuniversity"
+                             "protesilaos"
+                             "TsodingDaily"
+                             "ALifeEngineered"))
 
-                    :bind (:map elfeed-show-mode-map
-                                ("F" . elfeed-tube-fetch)
-                                ([remap save-buffer] . elfeed-tube-save)
-                                :map elfeed-search-mode-map
-                                ("F" . elfeed-tube-fetch)
-                                ([remap save-buffer] . elfeed-tube-save)))
+    :bind (:map elfeed-show-mode-map
+                ("F" . elfeed-tube-fetch)
+                ([remap save-buffer] . elfeed-tube-save)
+                :map elfeed-search-mode-map
+                ("F" . elfeed-tube-fetch)
+                ([remap save-buffer] . elfeed-tube-save)))
 #+END_SRC
 
 *** Terminal
@@ -645,9 +654,9 @@ Setup ansi-color mode.
 
 Disable the annoying stuff.
 #+begin_src emacs-lisp
-    (tool-bar-mode -1)
-    (menu-bar-mode -1)
-    (scroll-bar-mode -1)
+  (tool-bar-mode -1)
+  (menu-bar-mode -1)
+  (scroll-bar-mode -1)
 #+end_src
 
 Highlight the current line.
@@ -699,5 +708,12 @@ load all the icons on first boot only
 *** epub reader
 #+begin_src emacs-lisp
   (use-package nov
-    )
+    :mode ("\\.epub\\'" . nov-mode)
+    :hook (nov-mode . (lambda ()
+                        (face-remap-add-relative 'shr-h1 :height 1.8 :weight 'bold)
+                        (face-remap-add-relative 'shr-h2 :height 1.6 :weight 'bold)
+                        (face-remap-add-relative 'shr-h3 :height 1.4 :weight 'bold)
+                        (face-remap-add-relative 'shr-text :height 1.3)
+                        (face-remap-add-relative 'shr-code :height 1.2)
+                        (display-line-numbers-mode -1))))
 #+end_src
