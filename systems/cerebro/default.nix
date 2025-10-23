@@ -13,6 +13,12 @@
   boot.kernelModules = [ "kvm-amd" ];
   boot.extraModulePackages = [ ];
 
+  boot.kernelParams = [
+    "amd_iommu=off"
+    "amdgpu.gttsize=131072"
+    "ttm.pages_limit=33554432"
+  ];
+
   fileSystems."/" =
     { device = "/dev/disk/by-label/NIXROOT";
       fsType = "ext4";
