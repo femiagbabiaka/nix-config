@@ -63,6 +63,7 @@ let
       kubernetes-helm
       lima
       lldb
+      mosh
       neofetch
       nerd-fonts.fira-code
       nil
