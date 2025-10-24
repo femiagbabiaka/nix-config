@@ -17,6 +17,12 @@
   # Set your time zone.
   time.timeZone = "America/Chicago";
 
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
+
+
   # Configure network proxy if necessary
   # networking.proxy.default = "http://user:password@proxy:port/";
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
@@ -75,6 +81,8 @@
   # You can use https://search.nixos.org/ to find more packages (and options).
   environment.systemPackages = with pkgs; [
     vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
+    rocmPackages.amdsmi
+    libdrm
   #   wget
   ];
 
