@@ -15,7 +15,7 @@
   # Set your time zone.
   time.timeZone = "America/Chicago";
 
-  fonts.packages = with pkgs; [ nerd-fonts.fira-code nerd-fonts.iosevka nerd-fonts.iosevka-term ];
+  fonts.packages = with pkgs; [ nerd-fonts.fira-code nerd-fonts.iosevka nerd-fonts.iosevka-term nerd-fonts.roboto-mono ];
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.femi = {
     shell = pkgs.fish;
