@@ -268,8 +268,9 @@ masterpiece of the one and only prot
 
 **** Corfu
 #+begin_src emacs-lisp
+  (use-package corfu-terminal)
   (use-package corfu
-    :init 
+    :init
     (global-corfu-mode)
     (corfu-popupinfo-mode)
     (unless (display-graphic-p)
