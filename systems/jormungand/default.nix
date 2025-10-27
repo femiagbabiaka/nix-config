@@ -47,6 +47,9 @@
     onActivation = {
       cleanup = "zap";
     };
+    brews = [
+      "zstd"
+    ];
     casks = [
       "zoom"
       "karabiner-elements"

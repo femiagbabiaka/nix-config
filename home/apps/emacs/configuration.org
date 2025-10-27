@@ -106,6 +106,18 @@ This will prompt us when we're going to kill Emacs.
 #+end_src
 
 *** Keybindings
+**** multiple-cursors
+#+begin_src emacs-lisp
+  (use-package multiple-cursors
+    :bind
+    (("C-S-c C-S-c" . mc/edit-lines)
+     ("C->" . mc/mark-next-like-this)
+     ("C-<" . mc/mark-previous-like-this)
+     ("C-c C-<" . mc/mark-all-like-this)
+     ("C-\"" . mc/skip-to-next-like-this)
+     ("C-:" . mc/skip-to-previous-like-this)))
+#+end_src
+
 **** which-key
 A package that displays the available keybindings in a popup.
 The package is pretty useful, as Emacs seems to have more keybindings than
@@ -165,10 +177,10 @@ masterpiece of the one and only prot
 
 **** Font
 #+begin_src emacs-lisp
-  (add-to-list 'default-frame-alist '(font . "RobotoMono Nerd Font 16"))
-  (set-face-attribute 'default        nil :family "RobotoMono Nerd Font" :height 120 :weight 'medium)
-  (set-face-attribute 'fixed-pitch    nil :family "RobotoMono Nerd Font Mono" :height 120 :weight 'medium)
-  (set-face-attribute 'variable-pitch nil :family "RobotoMono Nerd Font" :height 120 :weight 'normal)
+  (add-to-list 'default-frame-alist '(font . "Berkeley Mono 16"))
+  (set-face-attribute 'default        nil :family "Berkeley Mono" :height 120 :weight 'medium)
+  (set-face-attribute 'fixed-pitch    nil :family "Berkeley Mono" :height 120 :weight 'medium)
+  (set-face-attribute 'variable-pitch nil :family "Berkeley Mono" :height 120 :weight 'normal)
 #+end_src
 
 
@@ -197,6 +209,7 @@ masterpiece of the one and only prot
   (use-package rust-mode
 
     :config
+    (setq rust-mode-treesitter-derive t)
     (setq rust-format-on-save t)
     (add-hook 'rust-mode-hook (lambda () (setq indent-tabs-mode nil)))
     (add-hook 'rust-mode-hook (lambda () (prettify-symbols-mode))))

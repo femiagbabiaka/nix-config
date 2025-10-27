@@ -5,7 +5,7 @@
     enableGitIntegration = true;
     extraConfig = import ./kitty.conf.nix { inherit config; };
     font = {
-      name = "FiraCode Nerd Font Mono";
+      name = "Berkeley Mono";
       size = 16;
     };
     themeFile = "GitHub_Dark_High_Contrast";
