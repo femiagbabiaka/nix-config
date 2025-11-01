@@ -86,31 +86,56 @@
   #   wget
   ];
 
-  services.llama-cpp = {
-    enable = true;
-    host = "0.0.0.0";
-    package = pkgs.llama-cpp-vulkan;
-    extraFlags = [
-      "-hf"
-      "/models/unsloth/Qwen3-30B-A3B-Instruct-2507-GGUF:Q4_K_XL"
-      "--jinja"
-      "-ngl"
-      "99"
-      "--threads"
-      "-1"
-      "--ctx-size"
-      "262144"
-      "--temp"
-      "0.7"
-      "--min-p"
-      "0.0"
-      "--top-p"
-      "0.80"
-      "--top-k"
-      "20"
-      "--presence-penalty"
-      "1.0"
-    ];
+  systemd.services.llama-cpp = {
+    description = "LLaMA C++ server";
+    after = [ "network.target" ];
+    wantedBy = [ "multi-user.target" ];
+
+    serviceConfig = {
+      Type = "idle";
+      KillSignal = "SIGINT";
+      ExecStart = "${pkgs.llama-cpp-vulkan}/bin/llama-server --log-disable --host 0.0.0.0 --port 8080 -hf unsloth/Qwen3-30B-A3B-Instruct-2507-GGUF:Q4_K_XL --jinja -ngl 99 --threads -1 --ctx-size 262144     --temp 0.7 --min-p 0.0 --top-p 0.80 --top-k 20 --presence-penalty 1.0";
+      Restart = "on-failure";
+      RestartSec = 300;
+
+      # for GPU acceleration
+      PrivateDevices = false;
+
+      # hardening
+      DynamicUser = true;
+      CapabilityBoundingSet = "";
+      RestrictAddressFamilies = [
+        "AF_INET"
+        "AF_INET6"
+        "AF_UNIX"
+      ];
+      NoNewPrivileges = true;
+      PrivateMounts = true;
+      PrivateTmp = true;
+      PrivateUsers = true;
+      ProtectClock = true;
+      ProtectControlGroups = true;
+      ProtectHome = true;
+      ProtectKernelLogs = true;
+      ProtectKernelModules = true;
+      ProtectKernelTunables = true;
+      ProtectSystem = "strict";
+      MemoryDenyWriteExecute = true;
+      LockPersonality = true;
+      RemoveIPC = true;
+      RestrictNamespaces = true;
+      RestrictRealtime = true;
+      RestrictSUIDSGID = true;
+      SystemCallArchitectures = "native";
+      SystemCallFilter = [
+        "@system-service"
+        "~@privileged"
+      ];
+      SystemCallErrorNumber = "EPERM";
+      ProtectProc = "invisible";
+      ProtectHostname = true;
+      ProcSubset = "pid";
+    };
   };
 
   # Some programs need SUID wrappers, can be configured further or are
