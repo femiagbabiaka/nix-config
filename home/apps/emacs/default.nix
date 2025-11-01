@@ -22,7 +22,9 @@ let
       pkgs.claude-code
       pkgs.libtool
       pkgs.gnulib
-      pkgs.yt-dlp # elfeed-tube
+      pkgs.tree-sitter-grammars.tree-sitter-nix
+      pkgs.tree-sitter-grammars.tree-sitter-rust
+      pkgs.tree-sitter-grammars.tree-sitter-go
     ];
     patches =
       (previousAttrs.patches or [ ])
@@ -53,6 +55,7 @@ let
 
     extraEmacsPackages = epkgs: [
       claude-code-ide-el
+      epkgs.treesit-grammars.with-all-grammars
     ];
   };
 in

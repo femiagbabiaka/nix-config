@@ -30,6 +30,11 @@
       options = [ "fmask=0022" "dmask=0022" ];
     };
 
+  fileSystem."/models" =
+    { device = "/dev/disk/by-label/MODELS";
+      fsType = "xfs";
+    };
+
   swapDevices = [ ];
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";

@@ -187,6 +187,8 @@ masterpiece of the one and only prot
 **** Default Frame Parameters
 #+begin_src emacs-lisp
   (add-to-list 'default-frame-alist '(fullscreen . maximized))
+  (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
+  (add-to-list 'default-frame-alist '(ns-appearance . dark))
 #+end_src
 
 **** Dashboard
@@ -200,7 +202,10 @@ masterpiece of the one and only prot
 **** nix
 #+begin_src emacs-lisp
   (use-package nix-mode
+    :mode "\\.nix\\'"
     :hook (nix-mode . lsp-deferred))
+  (use-package nix-ts-mode
+    :mode "\\.nix\\'")
 #+end_src
 
 **** Rust

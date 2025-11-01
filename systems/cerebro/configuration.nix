@@ -83,9 +83,35 @@
     vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
     rocmPackages.amdsmi
     libdrm
-    llama-cpp-vulkan
   #   wget
   ];
+
+  services.llama-cpp = {
+    enable = true;
+    host = "0.0.0.0";
+    package = pkgs.llama-cpp-vulkan;
+    extraFlags = [
+      "-hf"
+      "/models/unsloth/Qwen3-30B-A3B-Instruct-2507-GGUF:Q4_K_XL"
+      "--jinja"
+      "-ngl"
+      "99"
+      "--threads"
+      "-1"
+      "--ctx-size"
+      "262144"
+      "--temp"
+      "0.7"
+      "--min-p"
+      "0.0"
+      "--top-p"
+      "0.80"
+      "--top-k"
+      "20"
+      "--presence-penalty"
+      "1.0"
+    ];
+  };
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
