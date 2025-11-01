@@ -98,6 +98,21 @@
       Restart = "on-failure";
       RestartSec = 300;
 
+      ReadWritePaths = [ "/models" ];
+
+      # Give the service proper writable homes (created with correct perms)
+      StateDirectory = "llama-cpp";
+      CacheDirectory = "llama-cpp";
+      LogsDirectory  = "llama-cpp";
+
+      # Make XDG paths explicit so the app doesn’t guess dumb locations
+      Environment = [
+        "XDG_STATE_HOME=/var/lib/llama-cpp"
+        "XDG_CACHE_HOME=/var/cache/llama-cpp"
+        "XDG_DATA_HOME=/var/lib/llama-cpp"
+        "XDG_RUNTIME_DIR=/run/llama-cpp"
+      ];
+
       # for GPU acceleration
       PrivateDevices = false;
 
