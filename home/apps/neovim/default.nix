@@ -9,7 +9,7 @@ let
   nvimConfig = pkgs.writeText "init.lua" initLua;
   neovimWrapper = pkgs.symlinkJoin {
     name = "neovim-for-femi";
-    paths = [ neovim-nightly-overlay.packages.${pkgs.system}.default ];
+    paths = [ neovim-nightly-overlay.packages.${pkgs.stdenv.hostPlatform.system}.default ];
     buildInputs = [ pkgs.makeWrapper ];
 
     postBuild = ''
