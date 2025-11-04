@@ -39,7 +39,7 @@ let
       dive
       docker
       docker-compose
-      dockerfile-language-server-nodejs
+      dockerfile-language-server
       fd
       fish
       fishPlugins.done

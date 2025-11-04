@@ -1,29 +1,5 @@
 { pkgs, ... }:
 let
-  claude-code-ide-el = pkgs.emacsPackages.trivialBuild rec {
-    pname = "claude-code-ide.el";
-    version = "32d853e";
-    src = pkgs.fetchFromGitHub {
-      owner = "manzaltu";
-      repo = "claude-code-ide.el";
-      rev = version;
-      hash = "sha256-OrcnUZXqRijJCgf1QE5kkPKKdWSJ4oMYt47Sn/EdQy0=";
-    };
-    packageRequires = with pkgs.emacsPackages; [
-      websocket
-      web-server
-    ];
-  };
-  simpc-mode = pkgs.emacsPackages.trivialBuild rec {
-    pname = "simpc-mode";
-    version = "958aeb9";
-    src = pkgs.fetchFromGitHub {
-      owner = "rexim";
-      repo = "simpc-mode";
-      rev = version;
-      hash = "sha256-l+6/XDhdvX6JWK61hKcOvPll4xZrNM3l87fWzBKO7BU=";
-    };
-  };
   myEmacsAttrs = pkgs.emacs-git-pgtk.overrideAttrs (previousAttrs: {
     buildInputs = previousAttrs.buildInputs ++ [
       pkgs.tree-sitter
@@ -63,11 +39,38 @@ let
     alwaysTangle = true;
     alwaysEnsure = true;
 
-    extraEmacsPackages = epkgs: [
-      claude-code-ide-el
-      simpc-mode
-      epkgs.treesit-grammars.with-all-grammars
-    ];
+    extraEmacsPackages = epkgs:
+      let
+        claude-code-ide = epkgs.trivialBuild rec {
+          pname = "claude-code-ide";
+          version = "32d853e";
+          src = pkgs.fetchFromGitHub {
+            owner = "manzaltu";
+            repo = "claude-code-ide.el";
+            rev = version;
+            hash = "sha256-OrcnUZXqRijJCgf1QE5kkPKKdWSJ4oMYt47Sn/EdQy0=";
+          };
+          packageRequires = with epkgs; [
+            websocket
+            web-server
+          ];
+        };
+        simpc-mode = epkgs.trivialBuild rec {
+          pname = "simpc-mode";
+          version = "958aeb9";
+          src = pkgs.fetchFromGitHub {
+            owner = "rexim";
+            repo = "simpc-mode";
+            rev = version;
+            hash = "sha256-l+6/XDhdvX6JWK61hKcOvPll4xZrNM3l87fWzBKO7BU=";
+          };
+        };
+      in
+      [
+        claude-code-ide
+        simpc-mode
+        epkgs.treesit-grammars.with-all-grammars
+      ];
   };
 in
 {

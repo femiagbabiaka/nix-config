@@ -37,7 +37,7 @@
     colima
     coreutils
     curl
-    dockerfile-language-server-nodejs
+    dockerfile-language-server
     fastly
     fd
     fq

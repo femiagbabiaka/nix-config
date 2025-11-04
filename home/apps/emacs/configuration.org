@@ -379,6 +379,7 @@ masterpiece of the one and only prot
 **** ruby-mode
 #+begin_src emacs-lisp
   (use-package ruby-mode
+    :ensure nil
     :mode "\\.\\(?:cap\\|gemspec\\|irbrc\\|gemrc\\|rake\\|rb\\|ru\\|thor\\)\\'"
     :mode "\\(?:Brewfile\\|Capfile\\|Gemfile\\(?:\\.[a-zA-Z0-9._-]+\\)?\\|[rR]akefile\\)\\'")
 #+end_src
@@ -736,6 +737,7 @@ Vertico is a completion framework that seeks to extend native Emacs     function
 Setup ansi-color mode.
 #+BEGIN_SRC emacs-lisp
   (use-package ansi-color
+    :ensure nil
     :hook (compilation-filter . ansi-color-compilation-filter))
 #+END_SRC
 
