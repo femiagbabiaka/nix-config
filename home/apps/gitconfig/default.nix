@@ -17,12 +17,11 @@
 
   programs.git = {
     enable = true;
-    userName = "Femi Agbabiaka";
-    userEmail = "femi@femiagbabiaka.xyz";
-    delta = {
-      enable = true;
-    };
-    extraConfig = {
+    settings = {
+      user = {
+        name = "Femi Agbabiaka";
+        email = "femi@femiagbabiaka.xyz";
+      };
       core = {
         editor = "hx";
         excludesFile = "~/.gitignore";
@@ -31,10 +30,10 @@
         user = "femiagbabiaka";
       };
       push = {
-        autoSetupRemote = "true";
+        autoSetupRemote = true;
       };
       pull = {
-        rebase = "true";
+        rebase = true;
       };
       url = {
         "git@github.com:fastly" = {
@@ -43,4 +42,9 @@
       };
     };
   };
-}
+
+  programs.delta = {
+    enable = true;
+    enableGitIntegration = true;
+  };
+};
