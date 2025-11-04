@@ -57,6 +57,14 @@
       "yubico-authenticator"
       "signal"
       "zen"
+      {
+        name = "thebrowsercompany-dia";
+        greedy = true;
+      }
+      {
+        name = "chatgpt-atlas";
+        greedy = true;
+      }
       "plexamp"
       "zed"
       "discord"

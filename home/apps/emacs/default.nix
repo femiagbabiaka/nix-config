@@ -14,6 +14,16 @@ let
       web-server
     ];
   };
+  simpc-mode = pkgs.emacsPackages.trivialBuild rec {
+    pname = "simpc-mode";
+    version = "958aeb9";
+    src = pkgs.fetchFromGitHub {
+      owner = "rexim";
+      repo = "simpc-mode";
+      rev = version;
+      hash = "sha256-l+6/XDhdvX6JWK61hKcOvPll4xZrNM3l87fWzBKO7BU=";
+    };
+  };
   myEmacsAttrs = pkgs.emacs-git-pgtk.overrideAttrs (previousAttrs: {
     buildInputs = previousAttrs.buildInputs ++ [
       pkgs.tree-sitter
@@ -55,6 +65,7 @@ let
 
     extraEmacsPackages = epkgs: [
       claude-code-ide-el
+      simpc-mode
       epkgs.treesit-grammars.with-all-grammars
     ];
   };

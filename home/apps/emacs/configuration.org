@@ -50,19 +50,6 @@ Pretty good.
 #+end_src
 
 ** Config Files
-*** No littering
-I actually didn't know about this package until reading through sqrtminusone's
-emacs config. But uhh yeah, emacs leaves tmp files all over and it's annoying.
-lets change that
-#+begin_src emacs-lisp
-  (use-package no-littering
-    :demand t
-    :init
-    ;; Only load no-littering at runtime, not during byte-compilation
-    (unless (bound-and-true-p byte-compile-current-file)
-      (require 'no-littering)))
-#+end_src
-
 Turns out, there's a feature called file locking that's used for multi-user scenarios. That sucks.
 #+begin_src emacs-lisp
   (setq lock-file-name-transforms
@@ -72,6 +59,7 @@ Turns out, there's a feature called file locking that's used for multi-user scen
   (setq backup-directory-alist
         '((".*" . "~/.emacs.d/.cache/")))
 #+end_src
+
 *** Make it harder to kill emacs
 This will prompt us when we're going to kill Emacs.
 #+begin_src emacs-lisp
@@ -172,7 +160,7 @@ masterpiece of the one and only prot
 #+BEGIN_SRC emacs-lisp
   (use-package nano-theme
     :config
-    (load-theme 'nano-dark t))
+    (load-theme 'nano-light t))
 #+END_SRC
 
 **** Font
@@ -199,6 +187,12 @@ masterpiece of the one and only prot
 #+end_src
 
 *** Programming Modes
+**** C/C++
+#+begin_src emacs-lisp
+  (use-package simpc-mode
+    :mode "\\.[hc]\\(pp\\)?\\'")
+#+end_src
+
 **** nix
 #+begin_src emacs-lisp
   (use-package nix-mode
@@ -257,7 +251,6 @@ masterpiece of the one and only prot
 **** LSP
 #+begin_src emacs-lisp
   (use-package eglot
-
     :config
     ;; Ensure `nil` is in your PATH.
     (add-to-list 'eglot-server-programs '(nix-mode . ("nil")))
@@ -272,8 +265,12 @@ masterpiece of the one and only prot
     (yaml-mode . eglot-ensure)
     (ruby-mode. eglot-ensure)
     (dockerfile-mode . eglot-ensure)
-    (groovy-mode . eglot-ensure))
+    (groovy-mode . eglot-ensure)
+    (zig-mode . eglot-ensure))
 #+end_src
+
+#+RESULTS:
+| eglot-ensure |
 
 **** Flycheck
 #+begin_src emacs-lisp
@@ -292,10 +289,69 @@ masterpiece of the one and only prot
     (global-corfu-mode)
     (corfu-popupinfo-mode)
     (unless (display-graphic-p)
-        (corfu-terminal-mode +1))
+      (corfu-terminal-mode +1))
     :config
     (setq corfu-auto t
           corfu-quit-no-match 'separator))
+  (use-package cape
+    ;; Bind prefix keymap providing all Cape commands under a mnemonic key.
+    ;; Press C-c p ? to for help.
+    :bind ("C-c p" . cape-prefix-map) ;; Alternative key: M-<tab>, M-p, M-+
+    ;; Alternatively bind Cape commands individually.
+    ;; :bind (("C-c p d" . cape-dabbrev)
+    ;;        ("C-c p h" . cape-history)
+    ;;        ("C-c p f" . cape-file)
+    ;;        ...)
+    :init
+    ;; Add to the global default value of `completion-at-point-functions' which is
+    ;; used by `completion-at-point'.  The order of the functions matters, the
+    ;; first function returning a result wins.  Note that the list of buffer-local
+    ;; completion functions takes precedence over the global list.
+    (add-hook 'completion-at-point-functions #'cape-dabbrev)
+    (add-hook 'completion-at-point-functions #'cape-file)
+    (add-hook 'completion-at-point-functions #'cape-elisp-block)
+    ;; (add-hook 'completion-at-point-functions #'cape-history)
+    ;; ...
+    )
+#+end_src
+
+**** minuet (ai autocomplete)
+#+begin_src emacs-lisp
+  (use-package minuet
+    :config
+    (setq minuet-provider 'openai-fim-compatible)
+    (setq minuet-n-completions 1) ; recommended for Local LLM for resource saving
+    ;; I recommend beginning with a small context window size and incrementally
+    ;; expanding it, depending on your local computing power. A context window
+    ;; of 512, serves as an good starting point to estimate your computing
+    ;; power. Once you have a reliable estimate of your local computing power,
+    ;; you should adjust the context window to a larger value.
+    (setq minuet-context-window 8192)
+    (plist-put minuet-openai-fim-compatible-options :end-point "http://cerebro:8080/v1/completions")
+    ;; an arbitrary non-null environment variable as placeholder
+    ;; For Windows users, TERM may not be present in environment variables.
+    ;; Consider using APPDATA instead.
+    (plist-put minuet-openai-fim-compatible-options :name "Llama.cpp")
+    (plist-put minuet-openai-fim-compatible-options :api-key "TERM")
+    ;; The model is set by the llama-cpp server and cannot be altered
+    ;; post-launch.
+    (plist-put minuet-openai-fim-compatible-options :model "PLACEHOLDER")
+
+    ;; Llama.cpp does not support the `suffix` option in FIM completion.
+    ;; Therefore, we must disable it and manually populate the special
+    ;; tokens required for FIM completion.
+    (minuet-set-nested-plist minuet-openai-fim-compatible-options nil :template :suffix)
+    (minuet-set-optional-options
+     minuet-openai-fim-compatible-options
+     :prompt
+     (defun minuet-llama-cpp-fim-qwen-prompt-function (ctx)
+       (format "<|fim_prefix|>%s\n%s<|fim_suffix|>%s<|fim_middle|>"
+               (plist-get ctx :language-and-tab)
+               (plist-get ctx :before-cursor)
+               (plist-get ctx :after-cursor)))
+     :template)
+
+    (minuet-set-optional-options minuet-openai-fim-compatible-options :max_tokens 56))
 #+end_src
 
 **** Typescript
@@ -329,6 +385,8 @@ masterpiece of the one and only prot
 **** zig-mode
 #+begin_src emacs-lisp
   (use-package zig-mode
+    :mode "\\.\\(zig\\|zon\\)\\'")
+  (use-package zig-ts-mode
     :mode "\\.\\(zig\\|zon\\)\\'")
 #+end_src
 **** claude-code-ide
