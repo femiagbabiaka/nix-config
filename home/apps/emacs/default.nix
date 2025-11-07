@@ -1,7 +1,13 @@
 { pkgs, ... }:
 let
-  myEmacsAttrs = pkgs.emacs-git-pgtk.overrideAttrs (previousAttrs: {
-    buildInputs = previousAttrs.buildInputs ++ [
+  baseEmacs =
+    if pkgs.stdenv.isDarwin then
+      pkgs.emacs-macport
+    else
+      pkgs.emacs-git;
+
+  myEmacsAttrs = baseEmacs.overrideAttrs (previousAttrs: {
+    buildInputs = (previousAttrs.buildInputs or [ ]) ++ [
       pkgs.tree-sitter
       pkgs.jansson
       pkgs.powerline-fonts
@@ -12,24 +18,6 @@ let
       pkgs.tree-sitter-grammars.tree-sitter-rust
       pkgs.tree-sitter-grammars.tree-sitter-go
     ];
-    patches =
-      (previousAttrs.patches or [ ])
-      # Only add the patches when condition is true
-      ++ (
-        if pkgs.stdenv.isDarwin then
-          [
-            (pkgs.fetchpatch {
-              url = "https://raw.githubusercontent.com/d12frosted/homebrew-emacs-plus/refs/heads/master/patches/emacs-31/round-undecorated-frame.patch";
-              sha256 = "WWLg7xUqSa656JnzyUJTfxqyYB/4MCAiiiZUjMOqjuY=";
-            })
-            (pkgs.fetchpatch {
-              url = "https://raw.githubusercontent.com/d12frosted/homebrew-emacs-plus/refs/heads/master/patches/emacs-31/system-appearance.patch";
-              sha256 = "4+2U+4+2tpuaThNJfZOjy1JPnneGcsoge9r+WpgNDko=";
-            })
-          ]
-        else
-          [ ]
-      );
   });
 
   emacsWithPkgs = pkgs.emacsWithPackagesFromUsePackage {
