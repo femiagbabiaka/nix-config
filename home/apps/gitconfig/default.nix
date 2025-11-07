@@ -47,4 +47,4 @@
     enable = true;
     enableGitIntegration = true;
   };
-};
+}

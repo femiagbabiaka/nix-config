@@ -106,6 +106,13 @@ This will prompt us when we're going to kill Emacs.
      ("C-:" . mc/skip-to-previous-like-this)))
 #+end_src
 
+**** zap mode
+very useful replacement for dt<char> from vim
+#+begin_src emacs-lisp
+  (global-set-key [remap zap-to-char]
+                  'zap-up-to-char)
+#+end_src
+
 **** which-key
 A package that displays the available keybindings in a popup.
 The package is pretty useful, as Emacs seems to have more keybindings than
@@ -121,46 +128,34 @@ I can remember at any given point.
                         :weight 'bold)
     )
 #+end_src
-
-*** Theme
-**** modus-theme
-masterpiece of the one and only prot
-
+**** dumb-jump / xref
 #+begin_src emacs-lisp
-  (use-package modus-themes
-    :disabled t
-
+  (use-package dumb-jump
     :config
-    ;; Add all your customizations prior to loading the themes
-    (setq modus-themes-italic-constructs t
-          modus-themes-bold-constructs nil)
-
-    ;; Maybe define some palette overrides, such as by using our presets
-    (setq modus-themes-common-palette-overrides
-          modus-themes-preset-overrides-intense)
-
-    ;; Load the theme of your choice.
-    (load-theme 'modus-vivendi)
-    (define-key global-map (kbd "<f5>") #'modus-themes-toggle))
+    (add-hook 'xref-backend-functions #'dumb-jump-xref-activate)
+    (setq xref-show-definitions-function #'xref-show-definitions-completing-read))
+  (setq xref-search-program 'ripgrep)
 #+end_src
 
-**** stimmung
-#+BEGIN_SRC emacs-lisp
-  (use-package stimmung-themes
-    :custom
-    (stimmung-themes-constant 'none)
-    (stimmung-themes-type 'none :italic? t)
-    (stimmung-themes-comment 'background :italic? nil)
-    :config
-    (setq-default mode-line-format nil))
-;;    (stimmung-themes-load-dark))
-#+END_SRC
-
+*** Theme
 **** nano
 #+BEGIN_SRC emacs-lisp
   (use-package nano-theme
     :config
-    (load-theme 'nano-light t))
+    (load-theme 'nano-light t)
+    (add-hook 'prog-mode-hook            #'nano-modeline-prog-mode)
+    (add-hook 'text-mode-hook            #'nano-modeline-text-mode)
+    (add-hook 'org-mode-hook             #'nano-modeline-org-mode)
+    (add-hook 'pdf-view-mode-hook        #'nano-modeline-pdf-mode)
+    (add-hook 'mu4e-headers-mode-hook    #'nano-modeline-mu4e-headers-mode)
+    (add-hook 'mu4e-view-mode-hook       #'nano-modeline-mu4e-message-mode)
+    (add-hook 'elfeed-show-mode-hook     #'nano-modeline-elfeed-entry-mode)
+    (add-hook 'elfeed-search-mode-hook   #'nano-modeline-elfeed-search-mode)
+    (add-hook 'term-mode-hook            #'nano-modeline-term-mode)
+    (add-hook 'xwidget-webkit-mode-hook  #'nano-modeline-xwidget-mode)
+    (add-hook 'messages-buffer-mode-hook #'nano-modeline-message-mode)
+    (add-hook 'org-capture-mode-hook     #'nano-modeline-org-capture-mode)
+    (add-hook 'org-agenda-mode-hook      #'nano-modeline-org-agenda-mode))
 #+END_SRC
 
 **** Font
@@ -179,6 +174,15 @@ masterpiece of the one and only prot
   (add-to-list 'default-frame-alist '(ns-appearance . dark))
 #+end_src
 
+**** visual bell only
+#+begin_src emacs-lisp
+  (setq ring-bell-function 'ignore)
+  (setq visible-bell t)
+#+end_src
+
+#+RESULTS:
+: visual-bell
+
 **** Dashboard
 #+begin_src emacs-lisp
   (use-package dashboard
@@ -190,6 +194,7 @@ masterpiece of the one and only prot
 **** C/C++
 #+begin_src emacs-lisp
   (use-package simpc-mode
+    :ensure nil
     :mode "\\.[hc]\\(pp\\)?\\'")
 #+end_src
 
@@ -269,9 +274,6 @@ masterpiece of the one and only prot
     (zig-mode . eglot-ensure))
 #+end_src
 
-#+RESULTS:
-| eglot-ensure |
-
 **** Flycheck
 #+begin_src emacs-lisp
   (use-package flycheck
@@ -292,7 +294,12 @@ masterpiece of the one and only prot
       (corfu-terminal-mode +1))
     :config
     (setq corfu-auto t
-          corfu-quit-no-match 'separator))
+          corfu-quit-no-match 'separator
+          corfu-auto-delay 0.2
+          corfu-min-width 20
+          corfu-max-width 80
+          corfu-bar-width 0
+          corfu-border-width 1))
   (use-package cape
     ;; Bind prefix keymap providing all Cape commands under a mnemonic key.
     ;; Press C-c p ? to for help.
@@ -313,45 +320,45 @@ masterpiece of the one and only prot
     ;; (add-hook 'completion-at-point-functions #'cape-history)
     ;; ...
     )
-#+end_src
+                  #+end_src
 
 **** minuet (ai autocomplete)
 #+begin_src emacs-lisp
-  (use-package minuet
-    :config
-    (setq minuet-provider 'openai-fim-compatible)
-    (setq minuet-n-completions 1) ; recommended for Local LLM for resource saving
-    ;; I recommend beginning with a small context window size and incrementally
-    ;; expanding it, depending on your local computing power. A context window
-    ;; of 512, serves as an good starting point to estimate your computing
-    ;; power. Once you have a reliable estimate of your local computing power,
-    ;; you should adjust the context window to a larger value.
-    (setq minuet-context-window 8192)
-    (plist-put minuet-openai-fim-compatible-options :end-point "http://cerebro:8080/v1/completions")
-    ;; an arbitrary non-null environment variable as placeholder
-    ;; For Windows users, TERM may not be present in environment variables.
-    ;; Consider using APPDATA instead.
-    (plist-put minuet-openai-fim-compatible-options :name "Llama.cpp")
-    (plist-put minuet-openai-fim-compatible-options :api-key "TERM")
-    ;; The model is set by the llama-cpp server and cannot be altered
-    ;; post-launch.
-    (plist-put minuet-openai-fim-compatible-options :model "PLACEHOLDER")
+  ;; (use-package minuet
+  ;;   :config
+  ;;   (setq minuet-provider 'openai-fim-compatible)
+  ;;   (setq minuet-n-completions 1) ; recommended for Local LLM for resource saving
+  ;;   ;; I recommend beginning with a small context window size and incrementally
+  ;;   ;; expanding it, depending on your local computing power. A context window
+  ;;   ;; of 512, serves as an good starting point to estimate your computing
+  ;;   ;; power. Once you have a reliable estimate of your local computing power,
+  ;;   ;; you should adjust the context window to a larger value.
+  ;;   (setq minuet-context-window 8192)
+  ;;   (plist-put minuet-openai-fim-compatible-options :end-point "http://cerebro:8080/v1/completions")
+  ;;   ;; an arbitrary non-null environment variable as placeholder
+  ;;   ;; For Windows users, TERM may not be present in environment variables.
+  ;;   ;; Consider using APPDATA instead.
+  ;;   (plist-put minuet-openai-fim-compatible-options :name "Llama.cpp")
+  ;;   (plist-put minuet-openai-fim-compatible-options :api-key "TERM")
+  ;;   ;; The model is set by the llama-cpp server and cannot be altered
+  ;;   ;; post-launch.
+  ;;   (plist-put minuet-openai-fim-compatible-options :model "PLACEHOLDER")
 
-    ;; Llama.cpp does not support the `suffix` option in FIM completion.
-    ;; Therefore, we must disable it and manually populate the special
-    ;; tokens required for FIM completion.
-    (minuet-set-nested-plist minuet-openai-fim-compatible-options nil :template :suffix)
-    (minuet-set-optional-options
-     minuet-openai-fim-compatible-options
-     :prompt
-     (defun minuet-llama-cpp-fim-qwen-prompt-function (ctx)
-       (format "<|fim_prefix|>%s\n%s<|fim_suffix|>%s<|fim_middle|>"
-               (plist-get ctx :language-and-tab)
-               (plist-get ctx :before-cursor)
-               (plist-get ctx :after-cursor)))
-     :template)
+  ;;   ;; Llama.cpp does not support the `suffix` option in FIM completion.
+  ;;   ;; Therefore, we must disable it and manually populate the special
+  ;;   ;; tokens required for FIM completion.
+  ;;   (minuet-set-nested-plist minuet-openai-fim-compatible-options nil :template :suffix)
+  ;;   (minuet-set-optional-options
+  ;;    minuet-openai-fim-compatible-options
+  ;;    :prompt
+  ;;    (defun minuet-llama-cpp-fim-qwen-prompt-function (ctx)
+  ;;      (format "<|fim_prefix|>%s\n%s<|fim_suffix|>%s<|fim_middle|>"
+  ;;              (plist-get ctx :language-and-tab)
+  ;;              (plist-get ctx :before-cursor)
+  ;;              (plist-get ctx :after-cursor)))
+  ;;    :template)
 
-    (minuet-set-optional-options minuet-openai-fim-compatible-options :max_tokens 56))
+  ;;   (minuet-set-optional-options minuet-openai-fim-compatible-options :max_tokens 56))
 #+end_src
 
 **** Typescript
@@ -393,6 +400,7 @@ masterpiece of the one and only prot
 **** claude-code-ide
 #+begin_src emacs-lisp
   (use-package claude-code-ide
+    :ensure nil
     :bind ("C-c C-'" .
            claude-code-ide-menu) ; Set your favorite keybinding
     :config
@@ -407,25 +415,9 @@ masterpiece of the one and only prot
     :hook
     (emacs-lisp-mode-hook . paredit-mode))
 #+END_SRC
-*** Doom Modeline
-It looks cool, but IDK if I want to use it long term. Let's see!
+**** delimiters
 #+begin_src emacs-lisp
-  (use-package doom-modeline
-    :disabled t
-    :after all-the-icons
-    :init
-    (setq doom-modeline-env-enable-python nil)
-    (setq doom-modeline-env-enable-go nil)
-    (setq doom-modeline-buffer-encoding 'nondefault)
-    (setq doom-modeline-hud t)
-    (setq doom-modeline-persp-icon nil)
-    (setq doom-modeline-persp-name nil)
-    (setq doom-modeline-display-misc-in-all-mode-lines nil)
-    (doom-modeline-mode 1)
-    :config
-    (setq doom-modeline-minor-modes nil)
-    (setq doom-modeline-irc nil)
-    (setq doom-modeline-buffer-state-icon nil))
+  (electric-pair-mode 1)
 #+end_src
 
 *** nano modeline
@@ -662,6 +654,30 @@ Save the most recently edited place in a file.
 #+begin_src emacs-lisp
   (save-place-mode nil)
 #+end_src
+**** org-mode and org-agenda
+#+begin_src emacs-lisp
+  (use-package org
+    :bind ("C-x a" . org-agenda)
+    :config
+    (setq org-agenda-files (list "~/src/femiagbabiaka/agenda")))
+  (use-package org-modern
+    :config
+    (setq
+     ;; Edit settings
+     org-auto-align-tags nil
+     org-tags-column 0
+     org-catch-invisible-edits 'show-and-error
+     org-special-ctrl-a/e t
+     org-insert-heading-respect-content t
+
+     ;; Org styling, hide markup etc.
+     org-hide-emphasis-markers t
+     org-pretty-entities t
+     org-agenda-tags-column 0
+     org-ellipsis "…")
+
+    (global-org-modern-mode))
+#+end_src
 
 *** Completion
 This entire section is pretty much cargo culted. We'll see what works long term.
@@ -673,8 +689,15 @@ Vertico is a completion framework that seeks to extend native Emacs     function
   (use-package vertico-posframe
     :requires vertico
     :init
-    (vertico-posframe-mode 1))
+    (vertico-posframe-mode 1)
+    :config
+    (add-to-list 'default-frame-alist '(resize-pixelwise . t))
+    (setq frame-resize-pixelwise t)
+    (setq vertico-posframe-truncate-lines t))
 #+end_src
+
+#+RESULTS:
+: t
 
 **** orderless
 #+begin_src emacs-lisp
@@ -747,6 +770,8 @@ Disable the annoying stuff.
   (menu-bar-mode -1)
   (scroll-bar-mode -1)
 #+end_src
+
+#+RESULTS:
 
 Highlight the current line.
 #+begin_src emacs-lisp
