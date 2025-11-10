@@ -8,15 +8,11 @@ let
 
   myEmacsAttrs = baseEmacs.overrideAttrs (previousAttrs: {
     buildInputs = (previousAttrs.buildInputs or [ ]) ++ [
-      pkgs.tree-sitter
       pkgs.jansson
       pkgs.powerline-fonts
       pkgs.claude-code
       pkgs.libtool
       pkgs.gnulib
-      pkgs.tree-sitter-grammars.tree-sitter-nix
-      pkgs.tree-sitter-grammars.tree-sitter-rust
-      pkgs.tree-sitter-grammars.tree-sitter-go
     ];
   });
 
