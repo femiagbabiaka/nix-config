@@ -690,10 +690,33 @@ Save the most recently edited place in a file.
 #+end_src
 **** org-mode and org-agenda
 #+begin_src emacs-lisp
+  ;; org-roam deps
+  (use-package dash)
+  (use-package f)
+  (use-package s)
+  (use-package emacsql)
+  (use-package magit-section)
   (use-package org
-    :bind ("C-x a" . org-agenda)
+    :bind ("C-c a" . org-agenda)
     :config
-    (setq org-agenda-files (list "~/src/femiagbabiaka/agenda")))
+    (setq org-agenda-files (list "~/src/femiagbabiaka/org/agenda")))
+  (use-package org-roam
+    :ensure t
+    :custom
+    (org-roam-directory (file-truename "~/src/femiagbabiaka/org/notes"))
+    :bind (("C-c r l" . org-roam-buffer-toggle)
+           ("C-c r f" . org-roam-node-find)
+           ("C-c r g" . org-roam-graph)
+           ("C-c r i" . org-roam-node-insert)
+           ("C-c r c" . org-roam-capture)
+           ;; Dailies
+           ("C-c r j" . org-roam-dailies-capture-today))
+    :config
+    ;; If you're using a vertical completion framework, you might want a more informative completion interface
+    (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
+    (org-roam-db-autosync-mode)
+    ;; If using org-roam-protocol
+    (require 'org-roam-protocol))
   (use-package org-modern
     :config
     (setq
@@ -752,13 +775,16 @@ Vertico is a completion framework that seeks to extend native Emacs     function
 
 *** Feed reader
 #+begin_src emacs-lisp
-  (use-package elfeed
-    :bind ("C-x w" . elfeed)
-    :config
-    (setq elfeed-feeds
-          '(("https://www.ft.com/myft/following/943acc7c-45a4-4f0d-af09-03396f264621.rss" news)
-            ("https://www.computerenhance.com/feed" programming))))
+    (use-package elfeed
+      :bind ("C-x w" . elfeed)
+      :config
+      (setq elfeed-feeds
+            '(("https://www.computerenhance.com/feed" programming)
+              ("https://jyn.dev/atom.xml" programming)
+              ("https://ansuz.sooke.bc.ca/rss" programming)
+              ("https://andreyor.st/feed.xml" programming))))
 #+END_SRC
+
 *** youtube feed reader
 #+BEGIN_SRC emacs-lisp
   (use-package elfeed-tube
@@ -767,12 +793,10 @@ Vertico is a completion framework that seeks to extend native Emacs     function
     ;; (setq elfeed-tube-auto-save-p nil) ; default value
     ;; (setq elfeed-tube-auto-fetch-p t)  ; default value
     (elfeed-tube-setup)
-    (elfeed-tube-add-feeds '("https://youtube.com/@veritasium"
-                             "jonhoo"
+    (elfeed-tube-add-feeds '("veritasium"
                              "netdevconf"
                              "XahLee"
                              "BillyEllis"
-                             "trappuniversity"
                              "protesilaos"
                              "TsodingDaily"
                              "ALifeEngineered"))
