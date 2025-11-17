@@ -17,20 +17,19 @@ let
     ../apps/kitty
     ../apps/neovim
     ../apps/emacs
-    ../apps/ghostty
   ];
 
   basePackages =
     with pkgs;
     [
-      aider-chat-with-playwright
       ansible
       automake
       awscli2
       bat
       broot
       cmake
-      colima
+      claude-code
+      codex
       coreutils
       crane
       curl
@@ -39,11 +38,11 @@ let
       dive
       docker
       docker-compose
-      dockerfile-language-server
       fd
       fish
       fishPlugins.done
       fishPlugins.hydro
+      fontconfig
       fq
       fzf
       gh
@@ -62,7 +61,6 @@ let
       k9s
       kakoune-lsp
       kubernetes-helm
-      lima
       lldb
       mosh
       neofetch
@@ -72,6 +70,7 @@ let
       nodejs
       nushell
       platinum-searcher
+      racket-minimal
       rbenv
       ripgrep
       rustup

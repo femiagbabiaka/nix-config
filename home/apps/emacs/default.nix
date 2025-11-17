@@ -13,6 +13,7 @@ let
       pkgs.claude-code
       pkgs.libtool
       pkgs.gnulib
+      pkgs.git
     ];
   });
 

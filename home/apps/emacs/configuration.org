@@ -169,7 +169,14 @@ I can remember at any given point.
     (add-hook 'org-capture-mode-hook     #'nano-modeline-org-capture-mode)
     (add-hook 'org-agenda-mode-hook      #'nano-modeline-org-agenda-mode))
 #+END_SRC
-
+**** theme switcher
+#+begin_src emacs-lisp
+  (use-package auto-dark
+    :init
+    (auto-dark-mode)
+    :custom
+    (auto-dark-themes '((nano-dark) (nano-light))))
+            #+end_src
 **** Font
 #+begin_src emacs-lisp
   (add-to-list 'default-frame-alist '(font . "Berkeley Mono 16"))
@@ -332,7 +339,7 @@ I can remember at any given point.
     ;; (add-hook 'completion-at-point-functions #'cape-history)
     ;; ...
     )
-                  #+end_src
+#+end_src
 
 **** minuet (ai autocomplete)
 #+begin_src emacs-lisp
@@ -409,6 +416,11 @@ I can remember at any given point.
   (use-package zig-ts-mode
     :mode "\\.\\(zig\\|zon\\)\\'")
 #+end_src
+**** racket-mode
+#+begin_src emacs-lisp
+  (use-package racket-mode)
+  (use-package scribble-mode)
+#+end_src
 **** claude-code-ide
 #+begin_src emacs-lisp
   (use-package claude-code-ide
@@ -425,7 +437,8 @@ I can remember at any given point.
     :config
     (show-paren-mode 1)
     :hook
-    (emacs-lisp-mode-hook . paredit-mode))
+    (emacs-lisp-mode-hook . paredit-mode)
+    (racket-mode . paredit-mode))
 #+END_SRC
 
 **** treesitter
