@@ -112,7 +112,7 @@
     vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
   ];
 
-    # 1. The Radicle Node Service (The P2P Engine)
+  # 1. The Radicle Node Service (The P2P Engine)
   systemd.services.radicle-seed-node = {
     description = "Radicle Private Seed Node";
     wantedBy = [ "multi-user.target" ];
