@@ -122,6 +122,11 @@
       Environment = "RAD_HOME=/var/lib/radicle-seed";
       ExecStart = "${pkgs.radicle-node}/bin/radicle-node start";
       Restart = "always";
+      PrivateTmp = true;
+      NoNewPrivileges = true;
+      ProtectSystem = "strict";
+      ProtectHome = true;
+      ReadWritePaths = [ "/var/lib/radicle-seed" ];
     };
   };
 
