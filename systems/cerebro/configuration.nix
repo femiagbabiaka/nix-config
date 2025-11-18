@@ -152,7 +152,6 @@
       ''}";
       Restart = "always";
       PrivateTmp = true;
-      NoNewPrivileges = true;
       ProtectSystem = "strict";
       ProtectHome = true;
       ReadWritePaths = [ "/var/lib/radicle-seed" ];
