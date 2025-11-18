@@ -30,7 +30,7 @@
       options = [ "fmask=0022" "dmask=0022" ];
     };
 
-  fileSystem."/models" =
+  fileSystems."/models" =
     { device = "/dev/disk/by-label/MODELS";
       fsType = "xfs";
     };

@@ -75,6 +75,15 @@
     ];
   };
 
+  users.users.tramp = {
+    isNormalUser = true;
+    extraGroups = ["wheel"];
+    shell = pkgs.bash;
+    packages = with pkgs; [
+      git
+    ];
+  };
+
   # programs.firefox.enable = true;
 
   # List packages installed in system profile.
@@ -83,6 +92,14 @@
     vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
     rocmPackages.amdsmi
     libdrm
+    git
+    go
+    gopls
+    racket
+    rustup
+    delve
+    ripgrep
+    gotools
   #   wget
   ];
 
@@ -94,7 +111,7 @@
     serviceConfig = {
       Type = "idle";
       KillSignal = "SIGINT";
-      ExecStart = "${pkgs.llama-cpp-vulkan}/bin/llama-server --log-disable --host 0.0.0.0 --port 8080 -hf unsloth/Qwen3-30B-A3B-Instruct-2507-GGUF:Q4_K_XL --jinja -ngl 99 --threads -1 --ctx-size 262144     --temp 0.7 --min-p 0.0 --top-p 0.80 --top-k 20 --presence-penalty 1.0";
+      ExecStart = "${pkgs.llama-cpp-vulkan}/bin/llama-server --log-disable --host 0.0.0.0 --port 8080 -hf unsloth/Qwen3-30B-A3B-Instruct-2507-GGUF:Q8_0 --jinja -ngl 99 --threads -1 --ctx-size 262144     --temp 0.7 --min-p 0.0 --top-p 0.80 --top-k 20 --presence-penalty 1.0";
       Restart = "on-failure";
       RestartSec = 300;
 
