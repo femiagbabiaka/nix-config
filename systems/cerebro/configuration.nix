@@ -129,12 +129,15 @@
   systemd.services.radicle-httpd = {
     description = "Radicle Web Interface";
     wantedBy = [ "multi-user.target" ];
-    after = [ "radicle-seed-node.service" ];
+    after = [ "radicle-seed-node.service" "tailscaled.service" ];
     serviceConfig = {
       User = "radicle";
       Environment = "RAD_HOME=/var/lib/radicle-seed";
-      # Listen on Tailscale IP so you can access http://100.x.y.z:8081/
-      ExecStart = "${pkgs.radicle-httpd}/bin/radicle-httpd --listen 100.107.59.106:8081";
+      # Dynamically determine Tailscale IP at service start
+      ExecStart = pkgs.writeShellScript "radicle-httpd-start" ''
+        TAILSCALE_IP=$(${pkgs.tailscale}/bin/tailscale ip -4)
+        exec ${pkgs.radicle-httpd}/bin/radicle-httpd --listen $TAILSCALE_IP:8081
+      '';
       Restart = "always";
     };
   };
