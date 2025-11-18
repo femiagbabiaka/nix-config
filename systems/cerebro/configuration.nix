@@ -4,6 +4,9 @@
 
 { config, lib, pkgs, ... }:
 
+let
+  radHome = "/var/lib/radicle-seed";
+in
 {
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
@@ -87,7 +90,7 @@
   users.users.radicle = {
     isSystemUser = true;
     group = "radicle";
-    home = "/var/lib/radicle-seed";
+    home = radHome;
     createHome = true;
   };
   users.groups.radicle = {};
@@ -119,14 +122,14 @@
     after = [ "network.target" "tailscaled.service" ];
     serviceConfig = {
       User = "radicle";
-      Environment = "RAD_HOME=/var/lib/radicle-seed";
+      Environment = "RAD_HOME=${radHome}";
       ExecStart = "${pkgs.radicle-node}/bin/radicle-node start";
       Restart = "always";
       PrivateTmp = true;
       NoNewPrivileges = true;
       ProtectSystem = "strict";
       ProtectHome = true;
-      ReadWritePaths = [ "/var/lib/radicle-seed" ];
+      ReadWritePaths = [ radHome ];
     };
   };
 
@@ -137,7 +140,7 @@
     after = [ "radicle-seed-node.service" "tailscaled.service" ];
     serviceConfig = {
       User = "radicle";
-      Environment = "RAD_HOME=/var/lib/radicle-seed";
+      Environment = "RAD_HOME=${radHome}";
       # Dynamically determine Tailscale IP at service start
       ExecStart = "${pkgs.writeShellScript "radicle-httpd-start" ''
         TAILSCALE_IP=$(${pkgs.tailscale}/bin/tailscale ip -4) || {
