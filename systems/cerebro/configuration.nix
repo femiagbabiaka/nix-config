@@ -4,6 +4,9 @@
 
 { config, lib, pkgs, ... }:
 
+let
+  radHome = "/var/lib/radicle-seed";
+in
 {
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
@@ -88,7 +91,7 @@
     isSystemUser = true;
     group = "radicle";
     extraGroups = [ "tailscale" ];
-    home = "/var/lib/radicle-seed";
+    home = radHome;
     createHome = true;
   };
   users.groups.radicle = {};
@@ -113,16 +116,21 @@
     vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
   ];
 
-    # 1. The Radicle Node Service (The P2P Engine)
+  # 1. The Radicle Node Service (The P2P Engine)
   systemd.services.radicle-seed-node = {
     description = "Radicle Private Seed Node";
     wantedBy = [ "multi-user.target" ];
     after = [ "network.target" "tailscaled.service" ];
     serviceConfig = {
       User = "radicle";
-      Environment = "RAD_HOME=/var/lib/radicle-seed";
+      Environment = "RAD_HOME=${config.users.users.radicle.home}";
       ExecStart = "${pkgs.radicle-node}/bin/radicle-node start";
       Restart = "always";
+      PrivateTmp = true;
+      NoNewPrivileges = true;
+      ProtectSystem = "strict";
+      ProtectHome = true;
+      ReadWritePaths = [ radHome ];
     };
   };
 
@@ -133,13 +141,24 @@
     after = [ "radicle-seed-node.service" "tailscaled.service" ];
     serviceConfig = {
       User = "radicle";
-      Environment = "RAD_HOME=/var/lib/radicle-seed";
+      Environment = "RAD_HOME=${config.users.users.radicle.home}";
       # Dynamically determine Tailscale IP at service start
-      ExecStart = pkgs.writeShellScript "radicle-httpd-start" ''
-        TAILSCALE_IP=$(${pkgs.tailscale}/bin/tailscale ip -4)
+      ExecStart = "${pkgs.writeShellScript "radicle-httpd-start" ''
+        TAILSCALE_IP=$(${pkgs.tailscale}/bin/tailscale ip -4) || {
+          echo "Failed to get Tailscale IP" >&2
+          exit 1
+        }
+        [ -n "$TAILSCALE_IP" ] || {
+          echo "Tailscale IP is empty" >&2
+          exit 1
+        }
         exec ${pkgs.radicle-httpd}/bin/radicle-httpd --listen $TAILSCALE_IP:8081
-      '';
+      ''}";
       Restart = "always";
+      PrivateTmp = true;
+      ProtectSystem = "strict";
+      ProtectHome = true;
+      ReadWritePaths = [ "/var/lib/radicle-seed" ];
     };
   };
 
