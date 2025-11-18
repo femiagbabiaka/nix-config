@@ -126,7 +126,7 @@
   services.pcscd.enable = true;
   services.tailscale.enable = true;
 
-  fonts.packages = with pkgs; [ (nerdfonts.override { fonts = [ "FiraCode" ]; }) ];
+  fonts.packages = with pkgs; [ nerd-fonts.fira-code ];
 
   services.xserver.displayManager.sessionCommands = ''
      ${pkgs.xorg.xrdb}/bin/xrdb -merge <<EOF
@@ -170,9 +170,15 @@
     EOF
   '';
 
-  # Enable sound.
-  sound.enable = true;
-  hardware.pulseaudio.enable = true;
+  # Configure audio stack via PipeWire (PulseAudio compatibility layer enabled).
+  services.pipewire = {
+    enable = true;
+    audio.enable = true;
+    pulse.enable = true;
+    alsa.enable = true;
+    jack.enable = true;
+  };
+  services.pulseaudio.enable = false;
 
   environment.systemPackages = with pkgs; [
     vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.

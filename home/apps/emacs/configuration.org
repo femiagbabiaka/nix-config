@@ -1,5 +1,5 @@
 ;;; -*- lexical-binding: t -*-
-#+PROPERTY: header-args:emacs-lisp :tangle yes
+#+PROPERTY: header-args:emacs-lisp :tangle yes :lexical t
 * Emacs Configuration.. semi-literate
 ** Packages
 *** Custom file location
@@ -14,7 +14,8 @@ emacs does. well whatever, we move it
 *** Measuring startup speed
 Function copied from sqrtminusone's config, measures emacs startup time.
 #+begin_src emacs-lisp
-  (setq my/emacs-started nil)
+  (defvar my/emacs-started nil
+    "Flag to track whether Emacs has completed startup.")
 
   (add-hook 'emacs-startup-hook
             (lambda ()
@@ -22,8 +23,8 @@ Function copied from sqrtminusone's config, measures emacs startup time.
   	                   (format "%.2f seconds"
   		                         (float-time
   			                        (time-subtract after-init-time before-init-time)))
-  	                   gcs-done))
-            (setq my/emacs-started t))
+  	                   gcs-done)
+              (setq my/emacs-started t)))
 #+end_src
 
 *** Garbage collection
@@ -49,15 +50,6 @@ Pretty good.
 #+end_src
 
 ** Config Files
-*** No littering
-I actually didn't know about this package until reading through sqrtminusone's
-emacs config. But uhh yeah, emacs leaves tmp files all over and it's annoying.
-lets change that
-#+begin_src emacs-lisp
-  (use-package no-littering
-    )
-#+end_src
-
 Turns out, there's a feature called file locking that's used for multi-user scenarios. That sucks.
 #+begin_src emacs-lisp
   (setq lock-file-name-transforms
@@ -67,6 +59,7 @@ Turns out, there's a feature called file locking that's used for multi-user scen
   (setq backup-directory-alist
         '((".*" . "~/.emacs.d/.cache/")))
 #+end_src
+
 *** Make it harder to kill emacs
 This will prompt us when we're going to kill Emacs.
 #+begin_src emacs-lisp
@@ -90,9 +83,36 @@ This will prompt us when we're going to kill Emacs.
     (read-extended-command-predicate #'command-completion-default-include-p)
     ;; Do not allow the cursor in the minibuffer prompt
     (minibuffer-prompt-properties
-     '(read-only t cursor-intangible t face minibuffer-prompt)))
+     '(read-only t cursor-intangible t face minibuffer-prompt))
+    ;; Enable indentation+completion using the TAB key.
+    ;; `completion-at-point' is often bound to M-TAB.
+    (tab-always-indent 'complete)
+
+    ;; Emacs 30 and newer: Disable Ispell completion function.
+    ;; Try `cape-dict' as an alternative.
+    (text-mode-ispell-word-completion nil))
 #+end_src
+
 *** Keybindings
+**** multiple-cursors
+#+begin_src emacs-lisp
+  (use-package multiple-cursors
+    :bind
+    (("C-S-c C-S-c" . mc/edit-lines)
+     ("C->" . mc/mark-next-like-this)
+     ("C-<" . mc/mark-previous-like-this)
+     ("C-c C-<" . mc/mark-all-like-this)
+     ("C-\"" . mc/skip-to-next-like-this)
+     ("C-:" . mc/skip-to-previous-like-this)))
+#+end_src
+
+**** zap mode
+very useful replacement for dt<char> from vim
+#+begin_src emacs-lisp
+  (global-set-key [remap zap-to-char]
+                  'zap-up-to-char)
+#+end_src
+
 **** which-key
 A package that displays the available keybindings in a popup.
 The package is pretty useful, as Emacs seems to have more keybindings than
@@ -108,39 +128,79 @@ I can remember at any given point.
                         :weight 'bold)
     )
 #+end_src
-
-*** Theme
-**** modus-theme
-masterpiece of the one and only prot
-
+**** dumb-jump / xref
 #+begin_src emacs-lisp
-  (use-package modus-themes
-
+  (use-package dumb-jump
     :config
-    ;; Add all your customizations prior to loading the themes
-    (setq modus-themes-italic-constructs t
-          modus-themes-bold-constructs nil)
-
-    ;; Maybe define some palette overrides, such as by using our presets
-    (setq modus-themes-common-palette-overrides
-          modus-themes-preset-overrides-intense)
-
-    ;; Load the theme of your choice.
-    (load-theme 'modus-vivendi)
-    (define-key global-map (kbd "<f5>") #'modus-themes-toggle))
+    (add-hook 'xref-backend-functions #'dumb-jump-xref-activate)
+    (setq xref-show-definitions-function #'xref-show-definitions-completing-read))
+  (setq xref-search-program 'ripgrep)
 #+end_src
 
+***** expand-region
+#+begin_src emacs-lisp
+  (use-package expand-region
+    :bind
+    ("C-=" . er/expand-region))
+        #+end_src
+***** keep alt key as meta
+#+begin_src emacs-lisp
+  (when (eq system-type 'darwin)
+    (setq mac-option-modifier 'meta)    ;; Use Option/Alt as Meta
+    (setq mac-command-modifier 'super))  ;; Use Command as Super (optional)
+#+end_src
+*** Theme
+**** nano
+#+BEGIN_SRC emacs-lisp
+  (use-package nano-theme
+    :config
+    (load-theme 'nano-light t)
+    (add-hook 'prog-mode-hook            #'nano-modeline-prog-mode)
+    (add-hook 'text-mode-hook            #'nano-modeline-text-mode)
+    (add-hook 'org-mode-hook             #'nano-modeline-org-mode)
+    (add-hook 'pdf-view-mode-hook        #'nano-modeline-pdf-mode)
+    (add-hook 'mu4e-headers-mode-hook    #'nano-modeline-mu4e-headers-mode)
+    (add-hook 'mu4e-view-mode-hook       #'nano-modeline-mu4e-message-mode)
+    (add-hook 'elfeed-show-mode-hook     #'nano-modeline-elfeed-entry-mode)
+    (add-hook 'elfeed-search-mode-hook   #'nano-modeline-elfeed-search-mode)
+    (add-hook 'term-mode-hook            #'nano-modeline-term-mode)
+    (add-hook 'xwidget-webkit-mode-hook  #'nano-modeline-xwidget-mode)
+    (add-hook 'messages-buffer-mode-hook #'nano-modeline-message-mode)
+    (add-hook 'org-capture-mode-hook     #'nano-modeline-org-capture-mode)
+    (add-hook 'org-agenda-mode-hook      #'nano-modeline-org-agenda-mode))
+#+END_SRC
+**** theme switcher
+#+begin_src emacs-lisp
+  (use-package auto-dark
+    :init
+    (auto-dark-mode)
+    :custom
+    (auto-dark-themes '((nano-dark) (nano-light))))
+            #+end_src
 **** Font
 #+begin_src emacs-lisp
-  (add-to-list 'default-frame-alist '(font . "FiraCode Nerd Font Mono 14"))
-  (set-face-attribute 'default t :font "FiraCode Nerd Font Mono 14")
+  (add-to-list 'default-frame-alist '(font . "Berkeley Mono 16"))
+  (set-face-attribute 'default        nil :family "Berkeley Mono" :height 120 :weight 'medium)
+  (set-face-attribute 'fixed-pitch    nil :family "Berkeley Mono" :height 120 :weight 'medium)
+  (set-face-attribute 'variable-pitch nil :family "Berkeley Mono" :height 120 :weight 'normal)
 #+end_src
 
 
 **** Default Frame Parameters
 #+begin_src emacs-lisp
   (add-to-list 'default-frame-alist '(fullscreen . maximized))
+  (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
+  (add-to-list 'default-frame-alist '(ns-appearance . dark))
 #+end_src
+
+**** visual bell only
+#+begin_src emacs-lisp
+  (setq ring-bell-function 'ignore)
+  (setq visible-bell t)
+#+end_src
+
+#+RESULTS:
+: visual-bell
 
 **** Dashboard
 #+begin_src emacs-lisp
@@ -150,10 +210,20 @@ masterpiece of the one and only prot
 #+end_src
 
 *** Programming Modes
+**** C/C++
+#+begin_src emacs-lisp
+  (use-package simpc-mode
+    :ensure nil
+    :mode "\\.[hc]\\(pp\\)?\\'")
+#+end_src
+
 **** nix
 #+begin_src emacs-lisp
   (use-package nix-mode
+    :mode "\\.nix\\'"
     :hook (nix-mode . lsp-deferred))
+  (use-package nix-ts-mode
+    :mode "\\.nix\\'")
 #+end_src
 
 **** Rust
@@ -162,6 +232,7 @@ masterpiece of the one and only prot
   (use-package rust-mode
 
     :config
+    (setq rust-mode-treesitter-derive t)
     (setq rust-format-on-save t)
     (add-hook 'rust-mode-hook (lambda () (setq indent-tabs-mode nil)))
     (add-hook 'rust-mode-hook (lambda () (prettify-symbols-mode))))
@@ -204,7 +275,6 @@ masterpiece of the one and only prot
 **** LSP
 #+begin_src emacs-lisp
   (use-package eglot
-
     :config
     ;; Ensure `nil` is in your PATH.
     (add-to-list 'eglot-server-programs '(nix-mode . ("nil")))
@@ -219,7 +289,8 @@ masterpiece of the one and only prot
     (yaml-mode . eglot-ensure)
     (ruby-mode. eglot-ensure)
     (dockerfile-mode . eglot-ensure)
-    (groovy-mode . eglot-ensure))
+    (groovy-mode . eglot-ensure)
+    (zig-mode . eglot-ensure))
 #+end_src
 
 **** Flycheck
@@ -231,14 +302,82 @@ masterpiece of the one and only prot
     :config (global-flycheck-eglot-mode 1))
 #+end_src
 
-**** Company Mode
+**** Corfu
 #+begin_src emacs-lisp
-  (use-package company
-    :init (global-company-mode)
+  (use-package corfu-terminal)
+  (use-package corfu
+    :init
+    (global-corfu-mode)
+    (corfu-popupinfo-mode)
+    (unless (display-graphic-p)
+      (corfu-terminal-mode +1))
     :config
-    (setq company-minimum-prefix-length 1
-          company-idle-delay 0.0) ;; default is 0.2
+    (setq corfu-auto t
+          corfu-quit-no-match 'separator
+          corfu-auto-delay 0.2
+          corfu-min-width 20
+          corfu-max-width 80
+          corfu-bar-width 0
+          corfu-border-width 1))
+  (use-package cape
+    ;; Bind prefix keymap providing all Cape commands under a mnemonic key.
+    ;; Press C-c p ? to for help.
+    :bind ("C-c p" . cape-prefix-map) ;; Alternative key: M-<tab>, M-p, M-+
+    ;; Alternatively bind Cape commands individually.
+    ;; :bind (("C-c p d" . cape-dabbrev)
+    ;;        ("C-c p h" . cape-history)
+    ;;        ("C-c p f" . cape-file)
+    ;;        ...)
+    :init
+    ;; Add to the global default value of `completion-at-point-functions' which is
+    ;; used by `completion-at-point'.  The order of the functions matters, the
+    ;; first function returning a result wins.  Note that the list of buffer-local
+    ;; completion functions takes precedence over the global list.
+    (add-hook 'completion-at-point-functions #'cape-dabbrev)
+    (add-hook 'completion-at-point-functions #'cape-file)
+    (add-hook 'completion-at-point-functions #'cape-elisp-block)
+    ;; (add-hook 'completion-at-point-functions #'cape-history)
+    ;; ...
     )
+#+end_src
+
+**** minuet (ai autocomplete)
+#+begin_src emacs-lisp
+  (use-package minuet
+    :config
+    (setq minuet-provider 'openai-fim-compatible)
+    (setq minuet-n-completions 1) ; recommended for Local LLM for resource saving
+    ;; I recommend beginning with a small context window size and incrementally
+    ;; expanding it, depending on your local computing power. A context window
+    ;; of 512, serves as an good starting point to estimate your computing
+    ;; power. Once you have a reliable estimate of your local computing power,
+    ;; you should adjust the context window to a larger value.
+    (setq minuet-context-window 8192)
+    (plist-put minuet-openai-fim-compatible-options :end-point "http://cerebro:8080/v1/completions")
+    ;; an arbitrary non-null environment variable as placeholder
+    ;; For Windows users, TERM may not be present in environment variables.
+    ;; Consider using APPDATA instead.
+    (plist-put minuet-openai-fim-compatible-options :name "Llama.cpp")
+    (plist-put minuet-openai-fim-compatible-options :api-key "TERM")
+    ;; The model is set by the llama-cpp server and cannot be altered
+    ;; post-launch.
+    (plist-put minuet-openai-fim-compatible-options :model "PLACEHOLDER")
+
+    ;; Llama.cpp does not support the `suffix` option in FIM completion.
+    ;; Therefore, we must disable it and manually populate the special
+    ;; tokens required for FIM completion.
+    (minuet-set-nested-plist minuet-openai-fim-compatible-options nil :template :suffix)
+    (minuet-set-optional-options
+     minuet-openai-fim-compatible-options
+     :prompt
+     (defun minuet-llama-cpp-fim-qwen-prompt-function (ctx)
+       (format "<|fim_prefix|>%s\n%s<|fim_suffix|>%s<|fim_middle|>"
+               (plist-get ctx :language-and-tab)
+               (plist-get ctx :before-cursor)
+               (plist-get ctx :after-cursor)))
+     :template)
+
+    (minuet-set-optional-options minuet-openai-fim-compatible-options :max_tokens 56))
 #+end_src
 
 **** Typescript
@@ -266,6 +405,7 @@ masterpiece of the one and only prot
 **** ruby-mode
 #+begin_src emacs-lisp
   (use-package ruby-mode
+    :ensure nil
     :mode "\\.\\(?:cap\\|gemspec\\|irbrc\\|gemrc\\|rake\\|rb\\|ru\\|thor\\)\\'"
     :mode "\\(?:Brewfile\\|Capfile\\|Gemfile\\(?:\\.[a-zA-Z0-9._-]+\\)?\\|[rR]akefile\\)\\'")
 #+end_src
@@ -273,33 +413,72 @@ masterpiece of the one and only prot
 #+begin_src emacs-lisp
   (use-package zig-mode
     :mode "\\.\\(zig\\|zon\\)\\'")
+  (use-package zig-ts-mode
+    :mode "\\.\\(zig\\|zon\\)\\'")
 #+end_src
-*** Doom Modeline
-It looks cool, but IDK if I want to use it long term. Let's see!
+**** racket-mode
 #+begin_src emacs-lisp
-  (use-package doom-modeline
-    :after all-the-icons
-    :init
-    (setq doom-modeline-env-enable-python nil)
-    (setq doom-modeline-env-enable-go nil)
-    (setq doom-modeline-buffer-encoding 'nondefault)
-    (setq doom-modeline-hud t)
-    (setq doom-modeline-persp-icon nil)
-    (setq doom-modeline-persp-name nil)
-    (setq doom-modeline-display-misc-in-all-mode-lines nil)
-    (doom-modeline-mode 1)
-    :config
-    (setq doom-modeline-minor-modes nil)
-    (setq doom-modeline-irc nil)
-    (setq doom-modeline-buffer-state-icon nil))
+  (use-package racket-mode)
+  (use-package scribble-mode)
 #+end_src
+**** claude-code-ide
+#+begin_src emacs-lisp
+  (use-package claude-code-ide
+    :ensure nil
+    :bind ("C-c C-'" .
+           claude-code-ide-menu) ; Set your favorite keybinding
+    :config
+    (setq claude-code-ide-mcp-server-port 52644)
+    (claude-code-ide-emacs-tools-setup)) ; Optionally enable Emacs MCP tools
+#+END_SRC
+**** elisp
+#+BEGIN_SRC emacs-lisp
+  (use-package paredit
+    :config
+    (show-paren-mode 1)
+    :hook
+    (emacs-lisp-mode-hook . paredit-mode)
+    (racket-mode . paredit-mode))
+#+END_SRC
+
+**** treesitter
+#+begin_src emacs-lisp
+  (use-package treesit-auto
+    :custom
+    (treesit-auto-install 'prompt)
+    :config
+    (treesit-auto-add-to-auto-mode-alist 'all)
+    (global-treesit-auto-mode))
+#+end_src
+**** delimiters
+#+begin_src emacs-lisp
+  (electric-pair-mode 1)
+#+end_src
+
+*** nano modeline
+#+BEGIN_SRC emacs-lisp
+  (use-package nano-modeline
+    :config
+    (add-hook 'prog-mode-hook            #'nano-modeline-prog-mode)
+    (add-hook 'text-mode-hook            #'nano-modeline-text-mode)
+    (add-hook 'org-mode-hook             #'nano-modeline-org-mode)
+    (add-hook 'pdf-view-mode-hook        #'nano-modeline-pdf-mode)
+    (add-hook 'mu4e-headers-mode-hook    #'nano-modeline-mu4e-headers-mode)
+    (add-hook 'mu4e-view-mode-hook       #'nano-modeline-mu4e-message-mode)
+    (add-hook 'elfeed-show-mode-hook     #'nano-modeline-elfeed-entry-mode)
+    (add-hook 'elfeed-search-mode-hook   #'nano-modeline-elfeed-search-mode)
+    (add-hook 'term-mode-hook            #'nano-modeline-term-mode)
+    (add-hook 'xwidget-webkit-mode-hook  #'nano-modeline-xwidget-mode)
+    (add-hook 'messages-buffer-mode-hook #'nano-modeline-message-mode)
+    (add-hook 'org-capture-mode-hook     #'nano-modeline-org-capture-mode)
+    (add-hook 'org-agenda-mode-hook      #'nano-modeline-org-agenda-mode))
+#+END_SRC
 
 
 *** Text Editing
 **** indentation and whitespace
 ***** aggressive indent
 This package reindents the file being edited after every change. Pretty useful.
-
 <2023-04-24 Mon> Removing this, it's hella annoying. I think if I had a projectile configuration per project it would be better.
 #+begin_src emacs-lisp
   (use-package aggressive-indent
@@ -311,7 +490,8 @@ This package reindents the file being edited after every change. Pretty useful.
 ***** Delete trailing whitespace
 This deletes trailing whitespace when the buffer is saved.
 #+begin_src emacs-lisp
-  (setq my/trailing-whitespace-modes '(markdown-mode))
+  (defvar my/trailing-whitespace-modes '(markdown-mode)
+    "List of modes where trailing whitespace should NOT be deleted.")
 
   (require 'cl-extra)
 
@@ -367,6 +547,14 @@ Replaces Emacs built-in sequential undo system with a tree-based one. Probably o
     (setq undo-outer-limit 1006632960))
 
 #+end_src
+**** Move Text
+allows for movement of text line under point, nifty
+#+BEGIN_SRC emacs-lisp
+  (use-package move-text
+    :bind (
+           ("M-n" . move-text-down)
+           ("M-p" . move-text-up)))
+#+END_SRC
 *** Project Management
 Packages related to managing projects and files.
 
@@ -437,7 +625,7 @@ Integrates with magit, used for integrations with github and the like.
 #+begin_src emacs-lisp
   (use-package forge
     :after magit
-    )
+    :defer t)
 #+end_src
 
 Copied from: https://github.com/magit/forge/discussions/544.
@@ -491,13 +679,18 @@ This adds a new auth-source that forge can use that taps into the gh-cli, which 
 #+end_src
 
 **** Git gutter
-Shows git changes on each line, pretty nice.
-#+begin_src emacs-lisp
+Make things pretty.
+#+BEGIN_SRC emacs-lisp
   (use-package git-gutter
+    :hook (prog-mode . git-gutter-mode)
     :config
-    (global-git-gutter-mode +1))
-#+end_src
-
+    (setq git-gutter:update-interval 0.02))
+  (use-package git-gutter-fringe
+    :config
+    (define-fringe-bitmap 'git-gutter-fr:added [224] nil nil '(center repeated))
+    (define-fringe-bitmap 'git-gutter-fr:modified [224] nil nil '(center repeated))
+    (define-fringe-bitmap 'git-gutter-fr:deleted [128 192 224 240] nil nil 'bottom))
+#+END_SRC
 **** Editing files
 Remember recently edited files.
 #+begin_src emacs-lisp
@@ -507,6 +700,53 @@ Remember recently edited files.
 Save the most recently edited place in a file.
 #+begin_src emacs-lisp
   (save-place-mode nil)
+#+end_src
+**** org-mode and org-agenda
+#+begin_src emacs-lisp
+  ;; org-roam deps
+  (use-package dash)
+  (use-package f)
+  (use-package s)
+  (use-package emacsql)
+  (use-package magit-section)
+  (use-package org
+    :bind ("C-c a" . org-agenda)
+    :config
+    (setq org-agenda-files (list "~/src/femiagbabiaka/org/agenda")))
+  (use-package org-roam
+    :ensure t
+    :custom
+    (org-roam-directory (file-truename "~/src/femiagbabiaka/org/notes"))
+    :bind (("C-c r l" . org-roam-buffer-toggle)
+           ("C-c r f" . org-roam-node-find)
+           ("C-c r g" . org-roam-graph)
+           ("C-c r i" . org-roam-node-insert)
+           ("C-c r c" . org-roam-capture)
+           ;; Dailies
+           ("C-c r j" . org-roam-dailies-capture-today))
+    :config
+    ;; If you're using a vertical completion framework, you might want a more informative completion interface
+    (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
+    (org-roam-db-autosync-mode)
+    ;; If using org-roam-protocol
+    (require 'org-roam-protocol))
+  (use-package org-modern
+    :config
+    (setq
+     ;; Edit settings
+     org-auto-align-tags nil
+     org-tags-column 0
+     org-catch-invisible-edits 'show-and-error
+     org-special-ctrl-a/e t
+     org-insert-heading-respect-content t
+
+     ;; Org styling, hide markup etc.
+     org-hide-emphasis-markers t
+     org-pretty-entities t
+     org-agenda-tags-column 0
+     org-ellipsis "…")
+
+    (global-org-modern-mode))
 #+end_src
 
 *** Completion
@@ -519,8 +759,15 @@ Vertico is a completion framework that seeks to extend native Emacs     function
   (use-package vertico-posframe
     :requires vertico
     :init
-    (vertico-posframe-mode 1))
+    (vertico-posframe-mode 1)
+    :config
+    (add-to-list 'default-frame-alist '(resize-pixelwise . t))
+    (setq frame-resize-pixelwise t)
+    (setq vertico-posframe-truncate-lines t))
 #+end_src
+
+#+RESULTS:
+: t
 
 **** orderless
 #+begin_src emacs-lisp
@@ -541,21 +788,61 @@ Vertico is a completion framework that seeks to extend native Emacs     function
 
 *** Feed reader
 #+begin_src emacs-lisp
-  (use-package elfeed
-    :bind ("C-x w" . elfeed)
-    :config
-    (setq elfeed-feeds
-          '(("https://www.ft.com/myft/following/943acc7c-45a4-4f0d-af09-03396f264621.rss" news))))
+    (use-package elfeed
+      :bind ("C-x w" . elfeed)
+      :config
+      (setq elfeed-feeds
+            '(("https://www.computerenhance.com/feed" programming)
+              ("https://jyn.dev/atom.xml" programming)
+              ("https://ansuz.sooke.bc.ca/rss" programming)
+              ("https://andreyor.st/feed.xml" programming))))
 #+END_SRC
 
+*** youtube feed reader
+#+BEGIN_SRC emacs-lisp
+  (use-package elfeed-tube
+    :after elfeed
+    :config
+    ;; (setq elfeed-tube-auto-save-p nil) ; default value
+    ;; (setq elfeed-tube-auto-fetch-p t)  ; default value
+    (elfeed-tube-setup)
+    (elfeed-tube-add-feeds '("veritasium"
+                             "netdevconf"
+                             "XahLee"
+                             "BillyEllis"
+                             "protesilaos"
+                             "TsodingDaily"
+                             "ALifeEngineered"))
+
+    :bind (:map elfeed-show-mode-map
+                ("F" . elfeed-tube-fetch)
+                ([remap save-buffer] . elfeed-tube-save)
+                :map elfeed-search-mode-map
+                ("F" . elfeed-tube-fetch)
+                ([remap save-buffer] . elfeed-tube-save)))
+#+END_SRC
+
+*** Terminal
+#+BEGIN_SRC emacs-lisp
+  (use-package vterm)
+#+END_SRC
 ** UI Settings
 *** Miscellaneous
+Setup ansi-color mode.
+#+BEGIN_SRC emacs-lisp
+  (use-package ansi-color
+    :ensure nil
+    :hook (compilation-filter . ansi-color-compilation-filter))
+#+END_SRC
+
 Disable the annoying stuff.
 #+begin_src emacs-lisp
   (tool-bar-mode -1)
   (menu-bar-mode -1)
   (scroll-bar-mode -1)
 #+end_src
+
+#+RESULTS:
 
 Highlight the current line.
 #+begin_src emacs-lisp
@@ -577,7 +864,7 @@ Turn on line numbers mode.
 Make line numbers absolute.
 #+begin_src emacs-lisp
   (global-display-line-numbers-mode 1)
-  (setq display-line-numbers-type t)
+  (setq display-line-numbers-type 'relative)
 #+end_src
 
 *** Word wrapping
@@ -606,5 +893,12 @@ load all the icons on first boot only
 *** epub reader
 #+begin_src emacs-lisp
   (use-package nov
-    )
+    :mode ("\\.epub\\'" . nov-mode)
+    :hook (nov-mode . (lambda ()
+                        (face-remap-add-relative 'shr-h1 :height 1.8 :weight 'bold)
+                        (face-remap-add-relative 'shr-h2 :height 1.6 :weight 'bold)
+                        (face-remap-add-relative 'shr-h3 :height 1.4 :weight 'bold)
+                        (face-remap-add-relative 'shr-text :height 1.3)
+                        (face-remap-add-relative 'shr-code :height 1.2)
+                        (display-line-numbers-mode -1))))
 #+end_src

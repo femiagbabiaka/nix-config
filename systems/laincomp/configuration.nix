@@ -37,7 +37,7 @@ with lib;
   networking.hostName = "laincomp"; # Define your hostname.
   networking.networkmanager.enable = true; # Easiest to use and most distros use this by default.
   hardware.bluetooth.enable = true;
-  hardware.pulseaudio.enable = true;
+  services.pulseaudio.enable = false;
 
   # Set your time zone.
   time.timeZone = "America/Los_Angeles";
@@ -66,7 +66,7 @@ with lib;
     '';
   };
 
-  fonts.packages = with pkgs; [ (nerdfonts.override { fonts = [ "FiraCode" ]; }) ];
+  fonts.packages = with pkgs; [ nerd-fonts.fira-code ];
 
   services.xserver.displayManager.sessionCommands = ''
      ${pkgs.xorg.xrdb}/bin/xrdb -merge <<EOF
@@ -110,8 +110,14 @@ with lib;
     EOF
   '';
 
-  # Enable sound.
-  sound.enable = true;
+  # Configure audio stack via PipeWire with PulseAudio compatibility.
+  services.pipewire = {
+    enable = true;
+    audio.enable = true;
+    pulse.enable = true;
+    alsa.enable = true;
+    jack.enable = true;
+  };
 
   # Enable touchpad support (enabled default in most desktopManager).
   services.xserver.libinput.enable = true;

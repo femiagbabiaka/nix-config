@@ -1,29 +1,20 @@
 { pkgs, ... }:
 let
-  myEmacsAttrs = pkgs.emacs-git-pgtk.overrideAttrs (previousAttrs: {
-    buildInputs = previousAttrs.buildInputs ++ [
-      pkgs.tree-sitter
+  baseEmacs =
+    if pkgs.stdenv.isDarwin then
+      pkgs.emacs-macport
+    else
+      pkgs.emacs-git;
+
+  myEmacsAttrs = baseEmacs.overrideAttrs (previousAttrs: {
+    buildInputs = (previousAttrs.buildInputs or [ ]) ++ [
       pkgs.jansson
       pkgs.powerline-fonts
+      pkgs.claude-code
+      pkgs.libtool
+      pkgs.gnulib
+      pkgs.git
     ];
-    patches =
-      (previousAttrs.patches or [ ])
-      # Only add the patches when condition is true
-      ++ (
-        if pkgs.stdenv.isDarwin then
-          [
-            (pkgs.fetchpatch {
-              url = "https://raw.githubusercontent.com/d12frosted/homebrew-emacs-plus/refs/heads/master/patches/emacs-31/round-undecorated-frame.patch";
-              sha256 = "WWLg7xUqSa656JnzyUJTfxqyYB/4MCAiiiZUjMOqjuY=";
-            })
-            (pkgs.fetchpatch {
-              url = "https://raw.githubusercontent.com/d12frosted/homebrew-emacs-plus/refs/heads/master/patches/emacs-31/system-appearance.patch";
-              sha256 = "4+2U+4+2tpuaThNJfZOjy1JPnneGcsoge9r+WpgNDko=";
-            })
-          ]
-        else
-          [ ]
-      );
   });
 
   emacsWithPkgs = pkgs.emacsWithPackagesFromUsePackage {
@@ -32,6 +23,39 @@ let
     package = myEmacsAttrs;
     alwaysTangle = true;
     alwaysEnsure = true;
+
+    extraEmacsPackages = epkgs:
+      let
+        claude-code-ide = epkgs.trivialBuild rec {
+          pname = "claude-code-ide";
+          version = "32d853e";
+          src = pkgs.fetchFromGitHub {
+            owner = "manzaltu";
+            repo = "claude-code-ide.el";
+            rev = version;
+            hash = "sha256-OrcnUZXqRijJCgf1QE5kkPKKdWSJ4oMYt47Sn/EdQy0=";
+          };
+          packageRequires = with epkgs; [
+            websocket
+            web-server
+          ];
+        };
+        simpc-mode = epkgs.trivialBuild rec {
+          pname = "simpc-mode";
+          version = "958aeb9";
+          src = pkgs.fetchFromGitHub {
+            owner = "rexim";
+            repo = "simpc-mode";
+            rev = version;
+            hash = "sha256-l+6/XDhdvX6JWK61hKcOvPll4xZrNM3l87fWzBKO7BU=";
+          };
+        };
+      in
+      [
+        claude-code-ide
+        simpc-mode
+        epkgs.treesit-grammars.with-all-grammars
+      ];
   };
 in
 {
