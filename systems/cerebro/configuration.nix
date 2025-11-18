@@ -90,6 +90,7 @@ in
   users.users.radicle = {
     isSystemUser = true;
     group = "radicle";
+    extraGroups = [ "tailscale" ];
     home = radHome;
     createHome = true;
   };
