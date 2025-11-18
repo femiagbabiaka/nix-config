@@ -158,7 +158,7 @@ in
       PrivateTmp = true;
       ProtectSystem = "strict";
       ProtectHome = true;
-      ReadWritePaths = [ "/var/lib/radicle-seed" ];
+      ReadWritePaths = [ radHome ];
     };
   };
 
