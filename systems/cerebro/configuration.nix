@@ -134,10 +134,10 @@
       User = "radicle";
       Environment = "RAD_HOME=/var/lib/radicle-seed";
       # Dynamically determine Tailscale IP at service start
-      ExecStart = pkgs.writeShellScript "radicle-httpd-start" ''
+      ExecStart = "${pkgs.writeShellScript "radicle-httpd-start" ''
         TAILSCALE_IP=$(${pkgs.tailscale}/bin/tailscale ip -4)
         exec ${pkgs.radicle-httpd}/bin/radicle-httpd --listen $TAILSCALE_IP:8081
-      '';
+      ''}";
       Restart = "always";
     };
   };
