@@ -87,6 +87,7 @@
   users.users.radicle = {
     isSystemUser = true;
     group = "radicle";
+    extraGroups = [ "tailscale" ];
     home = "/var/lib/radicle-seed";
     createHome = true;
   };
