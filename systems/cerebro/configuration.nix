@@ -119,7 +119,7 @@
     after = [ "network.target" "tailscaled.service" ];
     serviceConfig = {
       User = "radicle";
-      Environment = "RAD_HOME=/var/lib/radicle-seed";
+      Environment = "RAD_HOME=${config.users.users.radicle.home}";
       ExecStart = "${pkgs.radicle-node}/bin/radicle-node start";
       Restart = "always";
     };
@@ -132,7 +132,7 @@
     after = [ "radicle-seed-node.service" "tailscaled.service" ];
     serviceConfig = {
       User = "radicle";
-      Environment = "RAD_HOME=/var/lib/radicle-seed";
+      Environment = "RAD_HOME=${config.users.users.radicle.home}";
       # Dynamically determine Tailscale IP at service start
       ExecStart = pkgs.writeShellScript "radicle-httpd-start" ''
         TAILSCALE_IP=$(${pkgs.tailscale}/bin/tailscale ip -4)
