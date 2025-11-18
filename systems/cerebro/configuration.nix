@@ -151,6 +151,11 @@
         exec ${pkgs.radicle-httpd}/bin/radicle-httpd --listen $TAILSCALE_IP:8081
       ''}";
       Restart = "always";
+      PrivateTmp = true;
+      NoNewPrivileges = true;
+      ProtectSystem = "strict";
+      ProtectHome = true;
+      ReadWritePaths = [ "/var/lib/radicle-seed" ];
     };
   };
 
