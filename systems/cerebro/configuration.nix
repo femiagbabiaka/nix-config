@@ -84,24 +84,60 @@
     ];
   };
 
+  users.users.radicle = {
+    isSystemUser = true;
+    group = "radicle";
+    home = "/var/lib/radicle-seed";
+    createHome = true;
+  };
+  users.groups.radicle = {};
+
   # programs.firefox.enable = true;
 
   # List packages installed in system profile.
   # You can use https://search.nixos.org/ to find more packages (and options).
   environment.systemPackages = with pkgs; [
-    vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-    rocmPackages.amdsmi
-    libdrm
+    delve
     git
     go
     gopls
-    racket
-    rustup
-    delve
-    ripgrep
     gotools
-  #   wget
+    libdrm
+    racket
+    radicle-node
+    radicle-httpd
+    ripgrep
+    rocmPackages.amdsmi
+    rustup
+    vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
   ];
+
+    # 1. The Radicle Node Service (The P2P Engine)
+  systemd.services.radicle-seed-node = {
+    description = "Radicle Private Seed Node";
+    wantedBy = [ "multi-user.target" ];
+    after = [ "network.target" "tailscaled.service" ];
+    serviceConfig = {
+      User = "radicle";
+      Environment = "RAD_HOME=/var/lib/radicle-seed";
+      ExecStart = "${pkgs.radicle-node}/bin/radicle-node start";
+      Restart = "always";
+    };
+  };
+
+  # 2. The Radicle HTTP Service (The "Forgejo" Web UI)
+  systemd.services.radicle-httpd = {
+    description = "Radicle Web Interface";
+    wantedBy = [ "multi-user.target" ];
+    after = [ "radicle-seed-node.service" ];
+    serviceConfig = {
+      User = "radicle";
+      Environment = "RAD_HOME=/var/lib/radicle-seed";
+      # Listen on Tailscale IP so you can access http://100.x.y.z:8081/
+      ExecStart = "${pkgs.radicle-httpd}/bin/radicle-httpd --listen 100.107.59.106:8081";
+      Restart = "always";
+    };
+  };
 
   systemd.services.llama-cpp = {
     description = "LLaMA C++ server";
