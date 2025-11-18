@@ -4,6 +4,9 @@
 
 { config, lib, pkgs, ... }:
 
+let
+  radHome = "/var/lib/radicle-seed";
+in
 {
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
@@ -84,24 +87,80 @@
     ];
   };
 
+  users.users.radicle = {
+    isSystemUser = true;
+    group = "radicle";
+    extraGroups = [ "tailscale" ];
+    home = radHome;
+    createHome = true;
+  };
+  users.groups.radicle = {};
+
   # programs.firefox.enable = true;
 
   # List packages installed in system profile.
   # You can use https://search.nixos.org/ to find more packages (and options).
   environment.systemPackages = with pkgs; [
-    vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-    rocmPackages.amdsmi
-    libdrm
+    delve
     git
     go
     gopls
-    racket
-    rustup
-    delve
-    ripgrep
     gotools
-  #   wget
+    libdrm
+    racket
+    radicle-node
+    radicle-httpd
+    ripgrep
+    rocmPackages.amdsmi
+    rustup
+    vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
   ];
+
+  # 1. The Radicle Node Service (The P2P Engine)
+  systemd.services.radicle-seed-node = {
+    description = "Radicle Private Seed Node";
+    wantedBy = [ "multi-user.target" ];
+    after = [ "network.target" "tailscaled.service" ];
+    serviceConfig = {
+      User = "radicle";
+      Environment = "RAD_HOME=${config.users.users.radicle.home}";
+      ExecStart = "${pkgs.radicle-node}/bin/radicle-node start";
+      Restart = "always";
+      PrivateTmp = true;
+      NoNewPrivileges = true;
+      ProtectSystem = "strict";
+      ProtectHome = true;
+      ReadWritePaths = [ radHome ];
+    };
+  };
+
+  # 2. The Radicle HTTP Service (The "Forgejo" Web UI)
+  systemd.services.radicle-httpd = {
+    description = "Radicle Web Interface";
+    wantedBy = [ "multi-user.target" ];
+    after = [ "radicle-seed-node.service" "tailscaled.service" ];
+    serviceConfig = {
+      User = "radicle";
+      Environment = "RAD_HOME=${config.users.users.radicle.home}";
+      # Dynamically determine Tailscale IP at service start
+      ExecStart = "${pkgs.writeShellScript "radicle-httpd-start" ''
+        TAILSCALE_IP=$(${pkgs.tailscale}/bin/tailscale ip -4) || {
+          echo "Failed to get Tailscale IP" >&2
+          exit 1
+        }
+        [ -n "$TAILSCALE_IP" ] || {
+          echo "Tailscale IP is empty" >&2
+          exit 1
+        }
+        exec ${pkgs.radicle-httpd}/bin/radicle-httpd --listen $TAILSCALE_IP:8081
+      ''}";
+      Restart = "always";
+      PrivateTmp = true;
+      ProtectSystem = "strict";
+      ProtectHome = true;
+      ReadWritePaths = [ radHome ];
+    };
+  };
 
   systemd.services.llama-cpp = {
     description = "LLaMA C++ server";
