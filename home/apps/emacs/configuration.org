@@ -668,7 +668,7 @@ This adds a new auth-source that forge can use that taps into the gh-cli, which 
 #+end_src
 
 ***** jj-vcs
-allows the built in project.el and vcs.el modes
+allows the built in project.el and vc.el modes
 #+begin_src emacs-lisp
   (use-package vc-jj)
   (use-package jj-mode)
