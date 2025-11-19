@@ -38,6 +38,7 @@ let
       dive
       docker
       docker-compose
+      elan
       fd
       fish
       fishPlugins.done
