@@ -70,6 +70,8 @@ let
       nodejs
       nushell
       platinum-searcher
+      radicle-tui
+      radicle-node
       racket-minimal
       rbenv
       ripgrep
