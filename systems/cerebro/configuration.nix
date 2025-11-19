@@ -123,8 +123,8 @@ in
     after = [ "network.target" "tailscaled.service" ];
     serviceConfig = {
       User = "radicle";
-      Environment = "RAD_HOME=${config.users.users.radicle.home}";
-      ExecStart = "${pkgs.radicle-node}/bin/radicle-node start";
+      Environment = "RAD_HOME=${config.users.users.radicle.home}/.radicle";
+      ExecStart = "${pkgs.radicle-node}/bin/radicle-node --force";
       Restart = "always";
       PrivateTmp = true;
       NoNewPrivileges = true;
@@ -141,7 +141,7 @@ in
     after = [ "radicle-seed-node.service" "tailscaled.service" ];
     serviceConfig = {
       User = "radicle";
-      Environment = "RAD_HOME=${config.users.users.radicle.home}";
+      Environment = "RAD_HOME=${config.users.users.radicle.home}/.radicle";
       # Dynamically determine Tailscale IP at service start
       ExecStart = "${pkgs.writeShellScript "radicle-httpd-start" ''
         TAILSCALE_IP=$(${pkgs.tailscale}/bin/tailscale ip -4) || {
@@ -152,7 +152,7 @@ in
           echo "Tailscale IP is empty" >&2
           exit 1
         }
-        exec ${pkgs.radicle-httpd}/bin/radicle-httpd --listen $TAILSCALE_IP:8081
+        exec ${pkgs.radicle-httpd}/bin/radicle-httpd --listen 0.0.0.0:8080
       ''}";
       Restart = "always";
       PrivateTmp = true;
@@ -170,7 +170,7 @@ in
     serviceConfig = {
       Type = "idle";
       KillSignal = "SIGINT";
-      ExecStart = "${pkgs.llama-cpp-vulkan}/bin/llama-server --log-disable --host 0.0.0.0 --port 8080 -hf unsloth/Qwen3-30B-A3B-Instruct-2507-GGUF:Q8_0 --jinja -ngl 99 --threads -1 --ctx-size 262144     --temp 0.7 --min-p 0.0 --top-p 0.80 --top-k 20 --presence-penalty 1.0";
+      ExecStart = "${pkgs.llama-cpp-vulkan}/bin/llama-server --log-disable --host 0.0.0.0 --port 8081 -hf unsloth/Qwen3-30B-A3B-Instruct-2507-GGUF:Q8_0 --jinja -ngl 99 --threads -1 --ctx-size 262144     --temp 0.7 --min-p 0.0 --top-p 0.80 --top-k 20 --presence-penalty 1.0";
       Restart = "on-failure";
       RestartSec = 300;
 
@@ -229,6 +229,54 @@ in
     };
   };
 
+  services.nginx = {
+    enable = true;
+    # Recommended Nginx optimizations
+    recommendedGzipSettings = true;
+    recommendedOptimisation = true;
+    recommendedProxySettings = true;
+    recommendedTlsSettings = true;
+    virtualHosts."cerebro.tail601e.ts.net" = {
+      # Replace 'radicle.local' with your domain or IP
+      serverName = "cerebro.tail601e.ts.net";
+
+      serverAliases = [];
+
+      # --- SSL / Let's Encrypt Setup ---
+      forceSSL = true;
+      enableACME = false;
+      sslCertificate = "/var/lib/tailscale/certs/cerebro.tail601e.ts.net.crt";
+      sslCertificateKey = "/var/lib/tailscale/certs/cerebro.tail601e.ts.net.key";
+      # The root directory is the installed package path
+      root = "${pkgs.radicle-explorer}";
+
+      locations."/" = {
+        # Essential for SPAs: try the file, directory, then fallback to index.html
+        tryFiles = "$uri $uri/ /index.html =404";
+      };
+
+      # --- API Proxy (Connect UI to Backend) ---
+      # The UI sends requests to /api/v1/...
+      # We proxy these to your local daemon on port 8081.
+      locations."/api/" = {
+        # The trailing slash at the end of the URL is CRITICAL.
+        # It tells Nginx to strip "/api/" before passing to the backend.
+        # Request: https://domain/api/v1/projects -> http://127.0.0.1:8081/v1/projects
+        proxyPass = "http://127.0.0.1:8080";
+
+        # WebSockets are often required for real-time updates
+        proxyWebsockets = true;
+      };
+
+      # --- Git Smart HTTP Proxy (Optional) ---
+      # Allows: git clone https://radicle.your-domain.com/git/urn:rad:...
+      locations."/git/" = {
+        proxyPass = "http://127.0.0.1:8080/git/";
+        proxyWebsockets = true;
+      };
+    };
+  };
+
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
   # programs.mtr.enable = true;
@@ -253,8 +301,19 @@ in
     };
   };
 
+  systemd.tmpfiles.rules = [
+    # Syntax: Type Path Mode User Group Age Argument
+
+    # Allow nginx to "search" (x) inside /var/lib/tailscale
+    "a+ /var/lib/tailscale - - - - u:nginx:x"
+
+    # Allow nginx to "read and search" (rx) inside /var/lib/tailscale/certs
+    "a+ /var/lib/tailscale/certs - - - - u:nginx:rx"
+  ];
+
   services.tailscale = {
     enable = true;
+    permitCertUid = "nginx";
   };
 
   # Enable the OpenSSH daemon.
