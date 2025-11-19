@@ -16,7 +16,6 @@ let
       pkgs.claude-code
       pkgs.libtool
       pkgs.gnulib
-      pkgs.git
     ];
   });
 
@@ -63,9 +62,9 @@ let
             hash = "sha256-6XFcyqSTx1CwNWqQvIc25cuQMwh3YXnbgr5cDiOCxBk=";
           };
           packageRequires = with epkgs; [
-            epkgs.dash
-            epkgs.lsp-mode
-            epkgs.magit-section
+            dash
+            lsp-mode
+            magit-section
           ];
         };
         jj-mode = epkgs.trivialBuild rec {
@@ -78,7 +77,7 @@ let
             hash = "sha256-jgJnXJRrMhZBx1sSVk5vHAn9dolCtl8pS4y+vq9L8VQ=";
           };
           packageRequires = with epkgs; [
-            epkgs.magit
+            magit
           ];
         };
       in
@@ -90,10 +89,14 @@ let
         epkgs.treesit-grammars.with-all-grammars
       ];
 
-    override = final: prev: {
-      default = prev.default.overrideAttrs(old: {
-        nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ prev.git ];
-      });
+    override = final: prev: { # this is literally _just_ for forge, which needs git at runtime
+      trivialBuild = args:
+        if args.pname == "default" then
+          prev.trivialBuild (args // {
+            nativeBuildInputs = (args.nativeBuildInputs or [ ]) ++ [ pkgs.git ];
+          })
+        else
+          prev.trivialBuild args;
     };
   };
 in

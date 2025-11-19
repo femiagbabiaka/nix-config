@@ -442,7 +442,8 @@ I can remember at any given point.
 #+end_src
 **** lean
 #+begin_src emacs-lisp
-  (use-package lean4-mode)
+  (use-package lean4-mode
+    :ensure nil)
 #+end_src
 *** nano modeline
 #+BEGIN_SRC emacs-lisp
@@ -613,8 +614,7 @@ Probably the most iconic Emacs program? Anyways, super good either way.
 Integrates with magit, used for integrations with github and the like.
 #+begin_src emacs-lisp
   (use-package forge
-    :after magit
-    :defer t)
+    :after magit)
 #+end_src
 
 Copied from: https://github.com/magit/forge/discussions/544.
@@ -671,7 +671,8 @@ This adds a new auth-source that forge can use that taps into the gh-cli, which 
 allows the built in project.el and vc.el modes
 #+begin_src emacs-lisp
   (use-package vc-jj)
-  (use-package jj-mode)
+  (use-package jj-mode
+    :ensure nil)
 #+end_src
 
 **** Git gutter
