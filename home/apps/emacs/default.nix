@@ -106,4 +106,10 @@ in
     package = emacsWithPkgs;
   };
 
+  # This writes the early-init.el to ~/.config/emacs/early-init.el
+  xdg.configFile."emacs/early-init.el".text = ''
+    ;; Increase GC threshold to infinity during startup
+    (setq gc-cons-threshold most-positive-fixnum)
+  '';
+
 }
