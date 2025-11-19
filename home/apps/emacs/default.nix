@@ -83,6 +83,7 @@ let
       in
       [
         claude-code-ide
+        epkgs.esup
         lean4-mode
         simpc-mode
         jj-mode
