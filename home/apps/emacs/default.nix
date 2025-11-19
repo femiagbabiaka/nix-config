@@ -7,13 +7,15 @@ let
       pkgs.emacs-git;
 
   myEmacsAttrs = baseEmacs.overrideAttrs (previousAttrs: {
+    nativeBuildInputs = (previousAttrs.nativeBuildInputs or [ ]) ++ [
+      pkgs.git
+    ];
     buildInputs = (previousAttrs.buildInputs or [ ]) ++ [
       pkgs.jansson
       pkgs.powerline-fonts
       pkgs.claude-code
       pkgs.libtool
       pkgs.gnulib
-      pkgs.git
     ];
   });
 
@@ -50,12 +52,52 @@ let
             hash = "sha256-l+6/XDhdvX6JWK61hKcOvPll4xZrNM3l87fWzBKO7BU=";
           };
         };
+        lean4-mode = epkgs.trivialBuild rec {
+          pname = "lean4-mode";
+          version = "1388f9d";
+          src = pkgs.fetchFromGitHub {
+            owner = "leanprover-community";
+            repo = "lean4-mode";
+            rev = version;
+            hash = "sha256-6XFcyqSTx1CwNWqQvIc25cuQMwh3YXnbgr5cDiOCxBk=";
+          };
+          packageRequires = with epkgs; [
+            dash
+            lsp-mode
+            magit-section
+          ];
+        };
+        jj-mode = epkgs.trivialBuild rec {
+          pname = "jj-mode";
+          version = "f35439f";
+          src = pkgs.fetchFromGitHub {
+            owner = "bolivier";
+            repo = "jj-mode.el";
+            rev = version;
+            hash = "sha256-jgJnXJRrMhZBx1sSVk5vHAn9dolCtl8pS4y+vq9L8VQ=";
+          };
+          packageRequires = with epkgs; [
+            magit
+          ];
+        };
       in
       [
         claude-code-ide
+        lean4-mode
         simpc-mode
+        jj-mode
         epkgs.treesit-grammars.with-all-grammars
       ];
+
+    override = final: prev: { # this is literally _just_ for forge, which needs git at runtime
+      trivialBuild = args:
+        if args.pname == "default" then
+          prev.trivialBuild (args // {
+            nativeBuildInputs = (args.nativeBuildInputs or [ ]) ++ [ pkgs.git ];
+          })
+        else
+          prev.trivialBuild args;
+    };
   };
 in
 {

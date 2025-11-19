@@ -38,6 +38,7 @@ let
       dive
       docker
       docker-compose
+      elan
       fd
       fish
       fishPlugins.done
@@ -70,6 +71,8 @@ let
       nodejs
       nushell
       platinum-searcher
+      radicle-node
+      radicle-tui
       racket-minimal
       rbenv
       ripgrep
