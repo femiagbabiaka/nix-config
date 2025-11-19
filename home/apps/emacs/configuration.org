@@ -24,30 +24,35 @@ Function copied from sqrtminusone's config, measures emacs startup time.
   		                         (float-time
   			                        (time-subtract after-init-time before-init-time)))
   	                   gcs-done)
+              (setq gc-cons-threshold 100000000)
               (setq my/emacs-started t)))
+  (use-package benchmark-init
+    :config
+    ;; To disable collection of benchmark data after init is done.
+    (add-hook 'after-init-hook 'benchmark-init/deactivate))
 #+end_src
 
 *** Garbage collection
 #+begin_src emacs-lisp
-  (setq gc-cons-threshold 100000000)
+  (setq gc-cons-threshold most-positive-fixnum)
   (setq read-process-output-max (* 1024 1024))
 #+end_src
 
 *** exec-path-from-shell
 This conditionally sets the shell path based on the users configured shell path on boot.
 Pretty good.
-#+begin_src emacs-lisp
-  (use-package exec-path-from-shell
+#  #+begin_src emacs-lisp
+#   (use-package exec-path-from-shell
 
-    :init
-    (require 'exec-path-from-shell)
-    (dolist (var '("SSH_AUTH_SOCK" "SSH_AGENT_PID" "GPG_AGENT_INFO" "LANG" "LC_CTYPE" "NIX_SSL_CERT_FILE" "NIX_PATH"))
-      (add-to-list 'exec-path-from-shell-variables var))
-    (when (daemonp)
-      (exec-path-from-shell-initialize))
-    (when (memq window-system '(mac ns x))
-      (exec-path-from-shell-initialize)))
-#+end_src
+#     :init
+#     (require 'exec-path-from-shell)
+#     (dolist (var '("SSH_AUTH_SOCK" "SSH_AGENT_PID" "GPG_AGENT_INFO" "LANG" "LC_CTYPE" "NIX_SSL_CERT_FILE" "NIX_PATH"))
+#       (add-to-list 'exec-path-from-shell-variables var))
+#     (when (daemonp)
+#       (exec-path-from-shell-initialize))
+#     (when (memq window-system '(mac ns x))
+#       (exec-path-from-shell-initialize)))
+# #+end_src
 
 ** Config Files
 Turns out, there's a feature called file locking that's used for multi-user scenarios. That sucks.
@@ -71,6 +76,32 @@ This will prompt us when we're going to kill Emacs.
 *** Emacs
 #+begin_src emacs-lisp
   (use-package emacs
+    :config
+    (setq major-mode-remap-alist
+          '(
+            ;; Languages explicitly in your config
+            (nix-mode . nix-ts-mode)              ;;
+            (rust-mode . rust-ts-mode)            ;;
+            (go-mode . go-ts-mode)                ;;
+            (yaml-mode . yaml-ts-mode)            ;;
+            (ruby-mode . ruby-ts-mode)            ;;
+            (dockerfile-mode . dockerfile-ts-mode);;
+            (typescript-mode . typescript-ts-mode);;
+            (zig-mode . zig-ts-mode)              ;;
+
+            ;; Standard formats you likely encounter given your stack
+            (js-mode . js-ts-mode)
+            (json-mode . json-ts-mode)
+            (css-mode . css-ts-mode)
+            (sh-mode . bash-ts-mode)              ;; Covers .sh files
+            (conf-toml-mode . toml-ts-mode)       ;; Useful for Cargo.toml etc.
+
+            ;; C/C++ (Note: Your simpc-mode config takes precedence for .c/.h files
+            ;; due to explicit :mode regex, but this handles fallbacks)
+            (c-mode . c-ts-mode)
+            (c++-mode . c++-ts-mode)
+            (c-or-c++-mode . c-or-c++-ts-mode)
+            ))
     :custom
     ;; Enable context menu. `vertico-multiform-mode' adds a menu in the minibuffer
     ;; to switch display modes.
@@ -189,11 +220,15 @@ I can remember at any given point.
 : visual-bell
 
 **** Dashboard
-#+begin_src emacs-lisp
-  (use-package dashboard
-    :config
-    (dashboard-setup-startup-hook))
-#+end_src
+# #+begin_src emacs-lisp
+#   (use-package dashboard
+#     :config
+#     (dashboard-setup-startup-hook)
+#     (setq dashboard-set-file-icons nil)    ; Disable icons (avoids all-the-icons loading)
+#     (setq dashboard-set-heading-icons nil)
+#     (setq dashboard-projects-backend 'none) ; Don't look for projects
+#     (setq dashboard-items '((recents  . 5))))
+# #+end_src
 
 *** Programming Modes
 **** C/C++
@@ -206,23 +241,22 @@ I can remember at any given point.
 **** nix
 #+begin_src emacs-lisp
   (use-package nix-mode
-    :mode "\\.nix\\'"
-    :hook (nix-mode . lsp-deferred))
+    :defer t)
   (use-package nix-ts-mode
-    :mode "\\.nix\\'")
-#+end_src
+    :mode "\\.nix\'")
+    #+end_src
 
 **** Rust
 ***** rust-mode
 #+begin_src emacs-lisp
   (use-package rust-mode
-
+    :defer t
     :config
     (setq rust-mode-treesitter-derive t)
     (setq rust-format-on-save t)
     (add-hook 'rust-mode-hook (lambda () (setq indent-tabs-mode nil)))
     (add-hook 'rust-mode-hook (lambda () (prettify-symbols-mode))))
-#+end_src
+    #+end_src
 
 **** Fish Shell
 #+begin_src emacs-lisp
@@ -264,6 +298,7 @@ I can remember at any given point.
     :config
     ;; Ensure `nil` is in your PATH.
     (add-to-list 'eglot-server-programs '(nix-mode . ("nil")))
+    (add-to-list 'eglot-server-programs '(nix-ts-mode . ("nil")))
     :hook
     (nix-mode . eglot-ensure)
     (terraform-mode . eglot-ensure)
@@ -404,8 +439,10 @@ I can remember at any given point.
 #+end_src
 **** racket-mode
 #+begin_src emacs-lisp
-  (use-package racket-mode)
-  (use-package scribble-mode)
+  (use-package racket-mode
+    :defer t)
+  (use-package scribble-mode
+    :defer t)
 #+end_src
 **** claude-code-ide
 #+begin_src emacs-lisp
@@ -428,14 +465,16 @@ I can remember at any given point.
 #+END_SRC
 
 **** treesitter
-#+begin_src emacs-lisp
-  (use-package treesit-auto
-    :custom
-    (treesit-auto-install 'prompt)
-    :config
-    (treesit-auto-add-to-auto-mode-alist 'all)
-    (global-treesit-auto-mode))
-#+end_src
+# #+begin_src emacs-lisp
+#   (use-package treesit-auto
+#     :custom
+#     (treesit-auto-install 'prompt)
+#     :config
+#     (treesit-auto-add-to-auto-mode-alist
+#      '(nix rust fish haskell terraform dockerfile groovy
+#            typescript go yaml ruby zig c cpp json toml markdown))
+#     (global-treesit-auto-mode))
+# #+end_src
 **** delimiters
 #+begin_src emacs-lisp
   (electric-pair-mode 1)
@@ -443,7 +482,8 @@ I can remember at any given point.
 **** lean
 #+begin_src emacs-lisp
   (use-package lean4-mode
-    :ensure nil)
+    :ensure nil
+    :defer t)
 #+end_src
 *** nano modeline
 #+BEGIN_SRC emacs-lisp
@@ -670,9 +710,14 @@ This adds a new auth-source that forge can use that taps into the gh-cli, which 
 ***** jj-vcs
 allows the built in project.el and vc.el modes
 #+begin_src emacs-lisp
-  (use-package vc-jj)
-  (use-package jj-mode
-    :ensure nil)
+    (use-package vc-jj
+      :defer t)
+    (use-package jj-mode
+      :defer t
+      :ensure nil
+      ;; Prevent it from adding itself to vc-handled-backends at startup
+      ;; if that's what's triggering the load
+      (setq vc-handled-backends (delq 'JJ vc-handled-backends)))
 #+end_src
 
 **** Git gutter
@@ -691,7 +736,10 @@ Make things pretty.
 **** Editing files
 Remember recently edited files.
 #+begin_src emacs-lisp
-  (recentf-mode 1)
+  (use-package recentf
+    :config
+    (setq recentf-auto-cleanup 'never)
+    (recentf-mode 1))
 #+end_src
 
 Save the most recently edited place in a file.
@@ -711,7 +759,7 @@ Save the most recently edited place in a file.
     :config
     (setq org-agenda-files (list "~/src/femiagbabiaka/org/agenda")))
   (use-package org-roam
-    :ensure t
+    :defer t
     :custom
     (org-roam-directory (file-truename "~/src/femiagbabiaka/org/notes"))
     :bind (("C-c r l" . org-roam-buffer-toggle)
@@ -728,6 +776,7 @@ Save the most recently edited place in a file.
     ;; If using org-roam-protocol
     (require 'org-roam-protocol))
   (use-package org-modern
+    :hook (org-mode . org-modern-mode)
     :config
     (setq
      ;; Edit settings
@@ -741,9 +790,7 @@ Save the most recently edited place in a file.
      org-hide-emphasis-markers t
      org-pretty-entities t
      org-agenda-tags-column 0
-     org-ellipsis "…")
-
-    (global-org-modern-mode))
+     org-ellipsis "…"))
 #+end_src
 
 *** Completion
@@ -785,14 +832,14 @@ Vertico is a completion framework that seeks to extend native Emacs     function
 
 *** Feed reader
 #+begin_src emacs-lisp
-    (use-package elfeed
-      :bind ("C-x w" . elfeed)
-      :config
-      (setq elfeed-feeds
-            '(("https://www.computerenhance.com/feed" programming)
-              ("https://jyn.dev/atom.xml" programming)
-              ("https://ansuz.sooke.bc.ca/rss" programming)
-              ("https://andreyor.st/feed.xml" programming))))
+  (use-package elfeed
+    :bind ("C-x w" . elfeed)
+    :config
+    (setq elfeed-feeds
+          '(("https://www.computerenhance.com/feed" programming)
+            ("https://jyn.dev/atom.xml" programming)
+            ("https://ansuz.sooke.bc.ca/rss" programming)
+            ("https://andreyor.st/feed.xml" programming))))
 #+END_SRC
 
 *** youtube feed reader
@@ -821,7 +868,8 @@ Vertico is a completion framework that seeks to extend native Emacs     function
 
 *** Terminal
 #+BEGIN_SRC emacs-lisp
-  (use-package vterm)
+  (use-package vterm
+    :defer t)
 #+END_SRC
 ** UI Settings
 *** Miscellaneous

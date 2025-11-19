@@ -1,4 +1,4 @@
-{
+  {
   description = "some config";
 
   inputs = {
@@ -243,4 +243,3 @@
       };
     };
 }
-
