@@ -161,7 +161,7 @@ I can remember at any given point.
     (auto-dark-mode)
     :custom
     (auto-dark-themes '((doric-light) (doric-marble))))
-           #+end_src
+#+end_src
 **** Font
 #+begin_src emacs-lisp
   (add-to-list 'default-frame-alist '(font . "Berkeley Mono 16"))
