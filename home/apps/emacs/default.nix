@@ -16,6 +16,23 @@ let
       pkgs.claude-code
       pkgs.libtool
       pkgs.gnulib
+      pkgs.nix
+      pkgs.nil
+      pkgs.delve
+      pkgs.go
+      pkgs.golangci-lint
+      pkgs.golangci-lint-langserver
+      pkgs.gopls
+      pkgs.helm-ls
+      pkgs.nixfmt-rfc-style
+      pkgs.kubernetes-helm
+      pkgs.rust-analyzer
+      pkgs.terraform-ls
+      pkgs.vscode-langservers-extracted
+      pkgs.yaml-language-server
+      pkgs.zls
+      pkgs.tflint
+      pkgs.ripgrep
     ];
   });
 
@@ -82,12 +99,12 @@ let
         };
         poly-helm-mode = epkgs.trivialBuild rec {
           pname = "poly-helm-mode";
-          version = "38926c42aaa8ec41d16447b8ef31abf37ad8fa01";
+          version = "b30c522";
           src = pkgs.fetchFromGitHub {
-            owner = "necaris";
+            owner = "femiagbabiaka";
             repo = "poly-helm-mode";
             rev = version;
-            hash = "sha256-iTilFeWd1Mlg4OgmzE/ZXY/awhWgAC1CM1tbRKXtn14=";
+            hash = "sha256-rjDki/XZJLX7Qi9rrlbJPFMT5dIQj37ONAhulykdEVM=";
           };
           packageRequires = with epkgs; [
             polymode
@@ -98,27 +115,29 @@ let
       [
         claude-code-ide
         epkgs.esup
-        lean4-mode
-        simpc-mode
-        poly-helm-mode
-        jj-mode
         epkgs.treesit-grammars.with-all-grammars
-        pkgs.nil
+        jj-mode
+        lean4-mode
+        pkgs.claude-code
         pkgs.delve
         pkgs.go
         pkgs.golangci-lint
         pkgs.golangci-lint-langserver
         pkgs.gopls
         pkgs.helm-ls
-        pkgs.nixfmt-rfc-style
         pkgs.kubernetes-helm
+        pkgs.nil
+        pkgs.nix
+        pkgs.nixfmt-rfc-style
+        pkgs.ripgrep
         pkgs.rust-analyzer
         pkgs.terraform-ls
+        pkgs.tflint
         pkgs.vscode-langservers-extracted
         pkgs.yaml-language-server
         pkgs.zls
-        pkgs.tflint
-        pkgs.ripgrep
+        poly-helm-mode
+        simpc-mode
       ];
 
     override = final: prev: { # this is literally _just_ for forge, which needs git at runtime

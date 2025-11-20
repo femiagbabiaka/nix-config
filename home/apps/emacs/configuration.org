@@ -285,7 +285,6 @@ I can remember at any given point.
 **** Helm
 #+begin_src emacs-lisp
   (use-package poly-helm-mode
-    :defer t
     :ensure nil)
 #+end_src
 **** Groovy
