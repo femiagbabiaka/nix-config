@@ -1,4 +1,4 @@
-;;; -**- lexical-binding: t -**-
+;;; -*- lexical-binding: t -*-
 #+PROPERTY: header-args:emacs-lisp :tangle yes :lexical t
 * Emacs Configuration.. semi-literate
 ** Packages
