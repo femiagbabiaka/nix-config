@@ -16,6 +16,23 @@ let
       pkgs.claude-code
       pkgs.libtool
       pkgs.gnulib
+      pkgs.nix
+      pkgs.nil
+      pkgs.delve
+      pkgs.go
+      pkgs.golangci-lint
+      pkgs.golangci-lint-langserver
+      pkgs.gopls
+      pkgs.helm-ls
+      pkgs.nixfmt-rfc-style
+      pkgs.kubernetes-helm
+      pkgs.rust-analyzer
+      pkgs.terraform-ls
+      pkgs.vscode-langservers-extracted
+      pkgs.yaml-language-server
+      pkgs.zls
+      pkgs.tflint
+      pkgs.ripgrep
     ];
   });
 
@@ -65,7 +82,7 @@ let
             dash
             lsp-mode
             magit-section
-          ];
+         ];
         };
         jj-mode = epkgs.trivialBuild rec {
           pname = "jj-mode";
@@ -80,13 +97,47 @@ let
             magit
           ];
         };
+        poly-helm-mode = epkgs.trivialBuild rec {
+          pname = "poly-helm-mode";
+          version = "b30c522";
+          src = pkgs.fetchFromGitHub {
+            owner = "femiagbabiaka";
+            repo = "poly-helm-mode";
+            rev = version;
+            hash = "sha256-rjDki/XZJLX7Qi9rrlbJPFMT5dIQj37ONAhulykdEVM=";
+          };
+          packageRequires = with epkgs; [
+            polymode
+            yaml-mode
+          ];
+        };
       in
       [
         claude-code-ide
-        lean4-mode
-        simpc-mode
-        jj-mode
+        epkgs.esup
         epkgs.treesit-grammars.with-all-grammars
+        jj-mode
+        lean4-mode
+        pkgs.claude-code
+        pkgs.delve
+        pkgs.go
+        pkgs.golangci-lint
+        pkgs.golangci-lint-langserver
+        pkgs.gopls
+        pkgs.helm-ls
+        pkgs.kubernetes-helm
+        pkgs.nil
+        pkgs.nix
+        pkgs.nixfmt-rfc-style
+        pkgs.ripgrep
+        pkgs.rust-analyzer
+        pkgs.terraform-ls
+        pkgs.tflint
+        pkgs.vscode-langservers-extracted
+        pkgs.yaml-language-server
+        pkgs.zls
+        poly-helm-mode
+        simpc-mode
       ];
 
     override = final: prev: { # this is literally _just_ for forge, which needs git at runtime
