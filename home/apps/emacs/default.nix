@@ -65,7 +65,7 @@ let
             dash
             lsp-mode
             magit-section
-          ];
+         ];
         };
         jj-mode = epkgs.trivialBuild rec {
           pname = "jj-mode";
@@ -80,14 +80,45 @@ let
             magit
           ];
         };
+        poly-helm-mode = epkgs.trivialBuild rec {
+          pname = "poly-helm-mode";
+          version = "38926c42aaa8ec41d16447b8ef31abf37ad8fa01";
+          src = pkgs.fetchFromGitHub {
+            owner = "necaris";
+            repo = "poly-helm-mode";
+            rev = version;
+            hash = "sha256-iTilFeWd1Mlg4OgmzE/ZXY/awhWgAC1CM1tbRKXtn14=";
+          };
+          packageRequires = with epkgs; [
+            polymode
+            yaml-mode
+          ];
+        };
       in
       [
         claude-code-ide
         epkgs.esup
         lean4-mode
         simpc-mode
+        poly-helm-mode
         jj-mode
         epkgs.treesit-grammars.with-all-grammars
+        pkgs.nil
+        pkgs.delve
+        pkgs.go
+        pkgs.golangci-lint
+        pkgs.golangci-lint-langserver
+        pkgs.gopls
+        pkgs.helm-ls
+        pkgs.nixfmt-rfc-style
+        pkgs.kubernetes-helm
+        pkgs.rust-analyzer
+        pkgs.terraform-ls
+        pkgs.vscode-langservers-extracted
+        pkgs.yaml-language-server
+        pkgs.zls
+        pkgs.tflint
+        pkgs.ripgrep
       ];
 
     override = final: prev: { # this is literally _just_ for forge, which needs git at runtime

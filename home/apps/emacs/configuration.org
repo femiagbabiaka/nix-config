@@ -1,4 +1,4 @@
-;;; -*- lexical-binding: t -*-
+;;; -**- lexical-binding: t -**-
 #+PROPERTY: header-args:emacs-lisp :tangle yes :lexical t
 * Emacs Configuration.. semi-literate
 ** Packages
@@ -34,25 +34,17 @@ Function copied from sqrtminusone's config, measures emacs startup time.
 
 *** Garbage collection
 #+begin_src emacs-lisp
-  (setq gc-cons-threshold most-positive-fixnum)
   (setq read-process-output-max (* 1024 1024))
 #+end_src
 
-*** exec-path-from-shell
-This conditionally sets the shell path based on the users configured shell path on boot.
-Pretty good.
-#  #+begin_src emacs-lisp
-#   (use-package exec-path-from-shell
-
-#     :init
-#     (require 'exec-path-from-shell)
-#     (dolist (var '("SSH_AUTH_SOCK" "SSH_AGENT_PID" "GPG_AGENT_INFO" "LANG" "LC_CTYPE" "NIX_SSL_CERT_FILE" "NIX_PATH"))
-#       (add-to-list 'exec-path-from-shell-variables var))
-#     (when (daemonp)
-#       (exec-path-from-shell-initialize))
-#     (when (memq window-system '(mac ns x))
-#       (exec-path-from-shell-initialize)))
-# #+end_src
+*** tramp
+This defers tramp loading on boot.
+#+begin_src emacs-lisp
+  (use-package tramp
+    :defer t
+    :config
+    (setq tramp-default-method "ssh"))
+#+end_src
 
 ** Config Files
 Turns out, there's a feature called file locking that's used for multi-user scenarios. That sucks.
@@ -191,7 +183,7 @@ I can remember at any given point.
     :init
     (auto-dark-mode)
     :custom
-    (auto-dark-themes '((doric-light) (doric-marble))))
+    (auto-dark-themes '((doric-valley) (doric-marble))))
 #+end_src
 **** Font
 #+begin_src emacs-lisp
@@ -261,19 +253,21 @@ I can remember at any given point.
 **** Fish Shell
 #+begin_src emacs-lisp
   (use-package fish-mode
+    :defer t
     :mode "\\.fish\\'")
 #+end_src
 
 **** Haskell
 #+begin_src emacs-lisp
   (use-package haskell-mode
+    :defer t
     :mode "\\.hs\\'")
 #+end_src
 
 **** Terraform
 #+begin_src emacs-lisp
   (use-package terraform-mode
-
+    :defer t
     :custom (terraform-format-on-save t)
     :config
     (defun my-terraform-mode-init ()
@@ -284,12 +278,20 @@ I can remember at any given point.
 
 **** Dockerfile
 #+begin_src emacs-lisp
-  (use-package dockerfile-mode)
+  (use-package dockerfile-mode
+    :defer t)
 #+end_src
 
+**** Helm
+#+begin_src emacs-lisp
+  (use-package poly-helm-mode
+    :defer t
+    :ensure nil)
+#+end_src
 **** Groovy
 #+begin_src emacs-lisp
-  (use-package groovy-mode)
+  (use-package groovy-mode
+    :defer t)
 #+end_src
 
 **** LSP
