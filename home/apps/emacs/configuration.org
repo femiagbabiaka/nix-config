@@ -17,6 +17,8 @@ Function copied from sqrtminusone's config, measures emacs startup time.
   (defvar my/emacs-started nil
     "Flag to track whether Emacs has completed startup.")
 
+  (setq gc-cons-threshold most-positive-fixnum)
+
   (add-hook 'emacs-startup-hook
             (lambda ()
               (message "*** Emacs loaded in %s with %d garbage collections."
@@ -30,7 +32,7 @@ Function copied from sqrtminusone's config, measures emacs startup time.
     :config
     ;; To disable collection of benchmark data after init is done.
     (add-hook 'after-init-hook 'benchmark-init/deactivate))
-#+end_src
+    #+end_src
 
 *** Garbage collection
 #+begin_src emacs-lisp
@@ -40,10 +42,10 @@ Function copied from sqrtminusone's config, measures emacs startup time.
 *** tramp
 This defers tramp loading on boot.
 #+begin_src emacs-lisp
-  (use-package tramp
-    :defer t
-    :config
-    (setq tramp-default-method "ssh"))
+  ;; (use-package tramp
+  ;;   :defer t
+  ;;   :config
+  ;;   (setq tramp-default-method "ssh"))
 #+end_src
 
 ** Config Files
@@ -165,12 +167,19 @@ I can remember at any given point.
   (use-package expand-region
     :bind
     ("C-=" . er/expand-region))
-        #+end_src
+#+end_src
 ***** keep alt key as meta
 #+begin_src emacs-lisp
   (when (eq system-type 'darwin)
     (setq mac-option-modifier 'meta)    ;; Use Option/Alt as Meta
     (setq mac-command-modifier 'super))  ;; Use Command as Super (optional)
+#+end_src
+
+**** ace-window (better jump)
+#+begin_src emacs-lisp
+  (use-package ace-window
+    :bind
+    ("M-o" . ace-window))
 #+end_src
 *** Theme
 **** doric
@@ -181,7 +190,8 @@ I can remember at any given point.
 #+begin_src emacs-lisp
   (use-package auto-dark
     :init
-    (auto-dark-mode)
+    (when (display-graphic-p)
+      (auto-dark-mode))
     :custom
     (auto-dark-themes '((doric-valley) (doric-marble))))
 #+end_src
@@ -236,7 +246,7 @@ I can remember at any given point.
     :defer t)
   (use-package nix-ts-mode
     :mode "\\.nix\'")
-    #+end_src
+   #+end_src
 
 **** Rust
 ***** rust-mode
@@ -285,6 +295,7 @@ I can remember at any given point.
 **** Helm
 #+begin_src emacs-lisp
   (use-package poly-helm-mode
+    :defer t
     :ensure nil)
 #+end_src
 **** Groovy
@@ -301,18 +312,18 @@ I can remember at any given point.
     (add-to-list 'eglot-server-programs '(nix-mode . ("nil")))
     (add-to-list 'eglot-server-programs '(nix-ts-mode . ("nil")))
     :hook
-    (nix-mode . eglot-ensure)
+    (nix-ts-mode . eglot-ensure)
     (terraform-mode . eglot-ensure)
     (haskell-mode . eglot-ensure)
-    (rust-mode . eglot-ensure)
+    (rust-ts-mode . eglot-ensure)
     (fish-mode . eglot-ensure)
     (typescript-mode . eglot-ensure)
-    (go-mode . eglot-ensure)
+    (go-ts-mode . eglot-ensure)
     (yaml-mode . eglot-ensure)
     (ruby-mode. eglot-ensure)
     (dockerfile-mode . eglot-ensure)
     (groovy-mode . eglot-ensure)
-    (zig-mode . eglot-ensure))
+    (zig-ts-mode . eglot-ensure))
 #+end_src
 
 **** Flycheck
@@ -418,12 +429,6 @@ I can remember at any given point.
     :custom (gofmt-command "goimports"))
 #+end_src
 
-**** yaml-mode
-#+begin_src emacs-lisp
-  (use-package yaml-mode
-    :mode "\\.yml\\'")
-#+end_src
-
 **** ruby-mode
 #+begin_src emacs-lisp
   (use-package ruby-mode
@@ -441,6 +446,7 @@ I can remember at any given point.
 **** racket-mode
 #+begin_src emacs-lisp
   (use-package racket-mode
+    :mode "\\.rkt\\'"
     :defer t)
   (use-package scribble-mode
     :defer t)
@@ -483,8 +489,9 @@ I can remember at any given point.
 **** lean
 #+begin_src emacs-lisp
   (use-package lean4-mode
-    :ensure nil
-    :defer t)
+    :defer t
+    :mode "\\.lean\\'"
+    :ensure nil)
 #+end_src
 *** nano modeline
 #+BEGIN_SRC emacs-lisp
@@ -711,14 +718,15 @@ This adds a new auth-source that forge can use that taps into the gh-cli, which 
 ***** jj-vcs
 allows the built in project.el and vc.el modes
 #+begin_src emacs-lisp
-    (use-package vc-jj
-      :defer t)
-    (use-package jj-mode
-      :defer t
-      :ensure nil
-      ;; Prevent it from adding itself to vc-handled-backends at startup
-      ;; if that's what's triggering the load
-      (setq vc-handled-backends (delq 'JJ vc-handled-backends)))
+  (use-package vc-jj
+    :defer t)
+  (use-package jj-mode
+    :defer t
+    :ensure nil
+    :config
+    ;; Prevent it from adding itself to vc-handled-backends at startup
+    ;; if that's what's triggering the load
+    (setq vc-handled-backends (delq 'JJ vc-handled-backends)))
 #+end_src
 
 **** Git gutter

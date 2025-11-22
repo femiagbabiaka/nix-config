@@ -17,6 +17,7 @@ let
     ../apps/kitty
     ../apps/neovim
     ../apps/emacs
+    ../apps/kakoune
   ];
 
   basePackages =

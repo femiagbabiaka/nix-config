@@ -10,30 +10,6 @@ let
     nativeBuildInputs = (previousAttrs.nativeBuildInputs or [ ]) ++ [
       pkgs.git
     ];
-    buildInputs = (previousAttrs.buildInputs or [ ]) ++ [
-      pkgs.jansson
-      pkgs.powerline-fonts
-      pkgs.claude-code
-      pkgs.libtool
-      pkgs.gnulib
-      pkgs.nix
-      pkgs.nil
-      pkgs.delve
-      pkgs.go
-      pkgs.golangci-lint
-      pkgs.golangci-lint-langserver
-      pkgs.gopls
-      pkgs.helm-ls
-      pkgs.nixfmt-rfc-style
-      pkgs.kubernetes-helm
-      pkgs.rust-analyzer
-      pkgs.terraform-ls
-      pkgs.vscode-langservers-extracted
-      pkgs.yaml-language-server
-      pkgs.zls
-      pkgs.tflint
-      pkgs.ripgrep
-    ];
   });
 
   emacsWithPkgs = pkgs.emacsWithPackagesFromUsePackage {
@@ -72,6 +48,10 @@ let
         lean4-mode = epkgs.trivialBuild rec {
           pname = "lean4-mode";
           version = "1388f9d";
+          # Add this block to copy the data directory
+          postInstall = ''
+            cp -r data $out/share/emacs/site-lisp/
+          '';
           src = pkgs.fetchFromGitHub {
             owner = "leanprover-community";
             repo = "lean4-mode";
@@ -121,20 +101,24 @@ let
         pkgs.claude-code
         pkgs.delve
         pkgs.go
+        pkgs.gotools
         pkgs.golangci-lint
         pkgs.golangci-lint-langserver
         pkgs.gopls
         pkgs.helm-ls
+        pkgs.jj
         pkgs.kubernetes-helm
         pkgs.nil
         pkgs.nix
         pkgs.nixfmt-rfc-style
+        pkgs.racket-minimal
         pkgs.ripgrep
         pkgs.rust-analyzer
         pkgs.terraform-ls
         pkgs.tflint
         pkgs.vscode-langservers-extracted
         pkgs.yaml-language-server
+        pkgs.zig
         pkgs.zls
         poly-helm-mode
         simpc-mode
