@@ -39,17 +39,10 @@ Function copied from sqrtminusone's config, measures emacs startup time.
   (setq read-process-output-max (* 1024 1024))
 #+end_src
 
-*** tramp
-This defers tramp loading on boot.
-#+begin_src emacs-lisp
-  ;; (use-package tramp
-  ;;   :defer t
-  ;;   :config
-  ;;   (setq tramp-default-method "ssh"))
-#+end_src
 * dired-x
 #+begin_src emacs-lisp
   (use-package dired-x
+    :ensure nil
     :config
     (setq dired-dwim-target t)
     (setq dired-listing-switches "-lah"))
@@ -162,6 +155,7 @@ I can remember at any given point.
 **** dumb-jump / xref
 #+begin_src emacs-lisp
   (use-package dumb-jump
+    :defer t
     :config
     (add-hook 'xref-backend-functions #'dumb-jump-xref-activate)
     (setq xref-show-definitions-function #'xref-show-definitions-completing-read))
@@ -575,22 +569,6 @@ Default tab settings, namely, no tabs, and also, a tab equaling four spaces.
   (setq auto-save-default nil)
 #+end_src
 
-**** Undo Tree
-Replaces Emacs built-in sequential undo system with a tree-based one. Probably one of the greatest options of Emacs as a text editor.
-
-#+begin_src emacs-lisp
-  (use-package undo-tree
-    :config
-    (global-undo-tree-mode)
-    (setq undo-tree-visualizer-diff t)
-    (setq undo-tree-visualizer-timestamps t)
-    (setq undo-tree-auto-save-history nil)
-    (fset 'undo-auto-amalgamate 'ignore)
-    (setq undo-limit 6710886400)
-    (setq undo-strong-limit 100663296)
-    (setq undo-outer-limit 1006632960))
-
-#+end_src
 **** Move Text
 allows for movement of text line under point, nifty
 #+BEGIN_SRC emacs-lisp
@@ -651,6 +629,7 @@ keybinds in C-x p.
 Probably the most iconic Emacs program? Anyways, super good either way.
 #+begin_src emacs-lisp
   (use-package magit
+    :defer t
     :commands (magit-status magit-file-dispatch)
     :config
     (setq magit-refresh-status-buffer nil)
@@ -742,24 +721,32 @@ Make things pretty.
     :hook (prog-mode . git-gutter-mode)
     :config
     (setq git-gutter:update-interval 0.02))
-  (use-package git-gutter-fringe
-    :config
-    (define-fringe-bitmap 'git-gutter-fr:added [224] nil nil '(center repeated))
-    (define-fringe-bitmap 'git-gutter-fr:modified [224] nil nil '(center repeated))
-    (define-fringe-bitmap 'git-gutter-fr:deleted [128 192 224 240] nil nil 'bottom))
 #+END_SRC
 **** Editing files
 Remember recently edited files.
 #+begin_src emacs-lisp
   (use-package recentf
-    :config
-    (setq recentf-auto-cleanup 'never)
-    (recentf-mode 1))
+   :ensure nil
+   :init
+   (recentf-mode 1)
+   :custom
+   (recentf-auto-cleanup 'never)
+   :config
+   (add-to-list 'recentf-exclude "\\`/\\w+:")
+   (add-to-list 'recentf-exclude "/ssh:")
+   (add-to-list 'recentf-exclude "/sudo:")
+   (add-to-list 'recentf-exclude "/docker:"))
 #+end_src
 
 Save the most recently edited place in a file.
 #+begin_src emacs-lisp
-  (save-place-mode nil)
+  (use-package saveplace
+    :ensure nil
+    :init
+    (save-place-mode 1)
+    :custom
+    ;; Ignore any path that starts with /method: (like /ssh:, /sudo:, /docker:)
+    (save-place-ignore-files-regexp "\\`/\\(?:ssh\\|scp\\|ftp\\|sudo\\|docker\\):"))
 #+end_src
 **** org-mode and org-agenda
 #+begin_src emacs-lisp
@@ -943,14 +930,6 @@ This package limits the text body width, super useful in visual mode.
     :if (display-graphic-p)
     :config
     (setq-default olivetti-body-width 86))
-#+end_src
-
-*** Icons
-load all the icons on first boot only
-#+begin_src emacs-lisp
-  (use-package all-the-icons
-    :if (display-graphic-p)
-    )
 #+end_src
 
 *** epub reader
