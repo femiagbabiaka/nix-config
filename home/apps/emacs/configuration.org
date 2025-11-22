@@ -47,7 +47,13 @@ This defers tramp loading on boot.
   ;;   :config
   ;;   (setq tramp-default-method "ssh"))
 #+end_src
-
+* dired-x
+#+begin_src emacs-lisp
+  (use-package dired-x
+    :config
+    (setq dired-dwim-target t)
+    (setq dired-listing-switches "-lah"))
+          #+end_src
 ** Config Files
 Turns out, there's a feature called file locking that's used for multi-user scenarios. That sucks.
 #+begin_src emacs-lisp
@@ -246,7 +252,7 @@ I can remember at any given point.
     :defer t)
   (use-package nix-ts-mode
     :mode "\\.nix\'")
-   #+end_src
+#+end_src
 
 **** Rust
 ***** rust-mode
@@ -258,7 +264,7 @@ I can remember at any given point.
     (setq rust-format-on-save t)
     (add-hook 'rust-mode-hook (lambda () (setq indent-tabs-mode nil)))
     (add-hook 'rust-mode-hook (lambda () (prettify-symbols-mode))))
-    #+end_src
+#+end_src
 
 **** Fish Shell
 #+begin_src emacs-lisp
