@@ -39,7 +39,7 @@ Function copied from sqrtminusone's config, measures emacs startup time.
   (setq read-process-output-max (* 1024 1024))
 #+end_src
 
-* dired-x
+*** dired-x
 #+begin_src emacs-lisp
   (use-package dired-x
     :ensure nil
@@ -115,6 +115,20 @@ This will prompt us when we're going to kill Emacs.
     ;; Emacs 30 and newer: Disable Ispell completion function.
     ;; Try `cape-dict' as an alternative.
     (text-mode-ispell-word-completion nil))
+#+end_src
+
+**** exec-path-from-shell
+here we use bash instead of fish shell because I don't have anything installed ther and it's faster
+#+begin_src emacs-lisp
+  (use-package exec-path-from-shell
+    :if (memq window-system '(mac ns x))
+    :defer t
+    :hook
+    (window-setup-hook . exec-path-from-shell-initialize)
+    :config
+    (setq exec-path-from-shell-variables
+          '("PATH" "MANPATH" "NIX_PATH" "NIX_SSL_CERT_FILE"))
+    (setq exec-path-from-shell-shell-name "/bin/bash"))
 #+end_src
 
 *** Keybindings
@@ -451,15 +465,21 @@ I can remember at any given point.
   (use-package scribble-mode
     :defer t)
 #+end_src
-**** claude-code-ide
+**** gptel
 #+begin_src emacs-lisp
-  (use-package claude-code-ide
-    :ensure nil
-    :bind ("C-c C-'" .
-           claude-code-ide-menu) ; Set your favorite keybinding
+  (use-package gptel
+    :defer t
     :config
-    (setq claude-code-ide-mcp-server-port 52644)
-    (claude-code-ide-emacs-tools-setup)) ; Optionally enable Emacs MCP tools
+    (setq gptel-model 'zai-glm-4.6
+          gptel-backend
+          (gptel-make-openai "Cerebras"
+                             :host "api.cerebras.ai"
+                             :endpoint "/v1/chat/completions"
+                             :stream nil
+                             :key #'gptel-api-key
+                             :models '(qwen-3-235b-a22b-instruct-2507
+                                       zai-glm-4.6
+                                       gpt-oss-120b))))
 #+END_SRC
 **** elisp
 #+BEGIN_SRC emacs-lisp
