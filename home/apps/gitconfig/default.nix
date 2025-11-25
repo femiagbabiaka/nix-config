@@ -36,8 +36,8 @@
         rebase = true;
       };
       url = {
-        "git@github.com:fastly" = {
-          insteadof = "https://github.com/fastly";
+        "ssh://git@github.com/" = {
+          insteadof = "https://github.com/";
         };
       };
     };

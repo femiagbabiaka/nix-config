@@ -12,6 +12,7 @@ let
   inherit (lib) unique;
 
   sharedImports = [
+    ../apps/bash
     ../apps/fish
     ../apps/gitconfig
     ../apps/kitty
