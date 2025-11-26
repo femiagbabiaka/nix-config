@@ -27,7 +27,8 @@ Emacs custom.el is notoriously messy. Keep it separate from init.el.
 Maximize GC threshold during startup, then use GCMH for intelligent GC during idle.
 Also set process output max for better LSP performance.
 #+begin_src emacs-lisp
-  ;; Maximize GC threshold during startup (restored by gcmh)
+  ;; Maximize GC threshold during startup; remains at maximum until after initialization,
+  ;; when gcmh-mode is activated (via after-init-hook) and restores it to a reasonable value (16MB).
   (setq gc-cons-threshold most-positive-fixnum)
 
   ;; Log startup time
@@ -248,7 +249,8 @@ is faster than set-face-attribute at startup.
 ** Frame Parameters
 macOS-specific frame appearance settings are in early-init.el.
 #+begin_src emacs-lisp :tangle no
-  ;; Moved to early-init.el for faster startup
+  ;; Moved to early-init.el to prevent visual flash during startup before theme loads,
+  ;; and for faster startup.
   ;; (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
   ;; (add-to-list 'default-frame-alist '(ns-appearance . dark))
 #+end_src
@@ -425,7 +427,7 @@ Vertical completion UI for minibuffer.
     :custom
     (vertico-posframe-truncate-lines t)
     :config
-    (add-to-list 'default-frame-alist '(resize-pixelwise . t))
+
     (setq frame-resize-pixelwise t))
 #+end_src
 
@@ -652,9 +654,8 @@ Flycheck for on-the-fly syntax checking.
   (use-package terraform-mode
     :defer t
     :mode ("\\.tf\\'" "\\.tfvars\\'")
-    :init
-    ;; Set custom vars before package loads
-    (setq terraform-format-on-save t)
+    :custom
+    (terraform-format-on-save t)
     :hook (terraform-mode . outline-minor-mode))
 #+end_src
 
