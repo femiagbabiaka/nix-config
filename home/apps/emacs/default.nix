@@ -119,7 +119,7 @@ in
     package = emacsWithPkgs;
   };
 
-  # This writes the early-init.el to ~/.config/emacs/early-init.el
+  # This writes the early-init.el to ~/.emacs.d/early-init.el
   home.file.".emacs.d/early-init.el".text = ''
     ;; -*- lexical-binding: t -*-
     ;; Increase GC threshold to infinity during startup
