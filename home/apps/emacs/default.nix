@@ -120,9 +120,28 @@ in
   };
 
   # This writes the early-init.el to ~/.config/emacs/early-init.el
-  xdg.configFile."emacs/early-init.el".text = ''
+  home.file.".emacs.d/early-init.el".text = ''
+    ;; -*- lexical-binding: t -*-
     ;; Increase GC threshold to infinity during startup
     (setq gc-cons-threshold most-positive-fixnum)
+
+    ;; Disable UI elements before they're rendered (faster than init.el)
+    (push '(tool-bar-lines . 0) default-frame-alist)
+    (push '(menu-bar-lines . 0) default-frame-alist)
+    (push '(vertical-scroll-bars) default-frame-alist)
+
+    ;; Prevent package.el from loading packages at startup
+    (setq package-enable-at-startup nil)
+
+    ;; Prevent visual flash of default theme
+    (push '(ns-transparent-titlebar . t) default-frame-alist)
+    (push '(ns-appearance . dark) default-frame-alist)
+
+    ;; Disable file-name-handler-alist during startup (restores automatically)
+    (defvar my/file-name-handler-alist file-name-handler-alist)
+    (setq file-name-handler-alist nil)
+    (add-hook 'emacs-startup-hook
+              (lambda () (setq file-name-handler-alist my/file-name-handler-alist)))
   '';
 
 }

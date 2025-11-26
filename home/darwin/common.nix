@@ -54,6 +54,7 @@ let
       golangci-lint
       golangci-lint-langserver
       gopls
+      gotools
       graphviz
       haskell.compiler.ghc910
       haskell-language-server

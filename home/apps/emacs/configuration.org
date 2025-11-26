@@ -56,10 +56,11 @@ Use GCMH to run GC during idle time instead of during editing.
 
 ** Startup Profiling
 Benchmark startup time and identify slow packages.
+Only loads when EMACS_BENCHMARK env var is set.
 #+begin_src emacs-lisp
   (use-package benchmark-init
+    :if (getenv "EMACS_BENCHMARK")
     :config
-    ;; Disable collection after init to avoid performance impact
     (add-hook 'after-init-hook 'benchmark-init/deactivate))
 #+end_src
 
@@ -166,8 +167,8 @@ Configure modifier keys for macOS.
   (setq select-enable-clipboard t)
   (setq mouse-yank-at-point t)
 
-  ;; Enable automatic delimiter pairing
-  (electric-pair-mode 1)
+  ;; Enable automatic delimiter pairing (deferred)
+  (add-hook 'after-init-hook #'electric-pair-mode)
 #+end_src
 
 ** Delete Trailing Whitespace
@@ -184,49 +185,51 @@ Remove trailing whitespace on save (except in markdown).
 
 ** File History
 Remember recently edited files and cursor positions.
+Deferred to avoid loading tramp at startup.
 #+begin_src emacs-lisp
   (use-package recentf
     :ensure nil
-    :init (recentf-mode 1)
+    :hook (after-init-hook . recentf-mode)
     :custom
     (recentf-auto-cleanup 'never)
-    :config
-    (add-to-list 'recentf-exclude "\\`/\\w+:")
-    (add-to-list 'recentf-exclude "/ssh:")
-    (add-to-list 'recentf-exclude "/sudo:")
-    (add-to-list 'recentf-exclude "/docker:"))
+    ;; Set excludes before mode activates to avoid tramp autoload
+    (recentf-exclude '("\\`/\\w+:" "/ssh:" "/sudo:" "/docker:")))
 
   (use-package saveplace
     :ensure nil
-    :init (save-place-mode 1)
+    :hook (after-init-hook . save-place-mode)
     :custom
     (save-place-ignore-files-regexp
      "\\`/\\(?:ssh\\|scp\\|ftp\\|sudo\\|docker\\):"))
 #+end_src
 
 ** Dired Configuration
-Enhanced directory editing with dired-x.
+Enhanced directory editing with dired-x. Deferred until dired is actually used.
 #+begin_src emacs-lisp
+  (use-package dired
+    :ensure nil
+    :defer t
+    :custom
+    (dired-dwim-target t)
+    (dired-listing-switches "-lah"))
+
   (use-package dired-x
     :ensure nil
-    :custom
-    (dired-dwim-target t)  ; Guess target directory in dual-pane setup
-    (dired-listing-switches "-lah"))
+    :after dired
+    :hook (dired-mode . dired-extra-startup))
 #+end_src
 
 * UI & Appearance
 ** Theme
-*** Theme Package
-#+begin_src emacs-lisp
-  (use-package doric-themes
-    :defer t)
-#+end_src
-
 *** Automatic Theme Switching
 Switch between light and dark themes based on macOS system appearance.
 #+begin_src emacs-lisp
+  (use-package doric-themes
+    :ensure t)
+
   (use-package auto-dark
     :if (display-graphic-p)
+    :after doric-themes
     :hook (after-init-hook . auto-dark-mode)
     :custom
     (auto-dark-themes '((doric-valley) (doric-marble))))
@@ -243,10 +246,11 @@ is faster than set-face-attribute at startup.
 #+end_src
 
 ** Frame Parameters
-macOS-specific frame appearance settings.
-#+begin_src emacs-lisp
-  (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
-  (add-to-list 'default-frame-alist '(ns-appearance . dark))
+macOS-specific frame appearance settings are in early-init.el.
+#+begin_src emacs-lisp :tangle no
+  ;; Moved to early-init.el for faster startup
+  ;; (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
+  ;; (add-to-list 'default-frame-alist '(ns-appearance . dark))
 #+end_src
 
 ** Visual Bell
@@ -277,16 +281,14 @@ Minimalist nano-modeline for a cleaner appearance.
 #+end_src
 
 ** Basic UI Elements
-Disable unnecessary UI elements for a cleaner interface.
-These should ideally be in early-init.el for fastest startup.
+UI elements are disabled in early-init.el for fastest startup.
 #+begin_src emacs-lisp
-  (push '(tool-bar-lines . 0) default-frame-alist)
-  (push '(menu-bar-lines . 0) default-frame-alist)
-  (push '(vertical-scroll-bars) default-frame-alist)
   (setq inhibit-startup-screen t)
   (setq inhibit-startup-message t)
   (setq inhibit-startup-echo-area-message user-login-name)
-  (global-hl-line-mode 1)
+
+  ;; Defer hl-line-mode to after init
+  (add-hook 'after-init-hook #'global-hl-line-mode)
 #+end_src
 
 ** Line Numbers
@@ -299,8 +301,8 @@ Enable line numbers in programming modes only.
 ** Word Wrapping
 Enable visual line mode globally for better text wrapping.
 #+begin_src emacs-lisp
-  (setq word-wrap 1)
-  (global-visual-line-mode 1)
+  (setq word-wrap t)
+  (add-hook 'after-init-hook #'global-visual-line-mode)
 #+end_src
 
 ** Olivetti Mode
@@ -367,9 +369,9 @@ Structural editing for Lisp code.
      (scheme-mode     . paredit-mode)
      (racket-mode     . paredit-mode)))
 
-  ;; Built-in paren matching (no package load needed)
+  ;; Built-in paren matching (deferred)
   (setq show-paren-delay 0)
-  (show-paren-mode 1)
+  (add-hook 'after-init-hook #'show-paren-mode)
 #+end_src
 
 ** Which Key
@@ -398,9 +400,13 @@ Quick window switching with visual indicators.
 Fallback jump-to-definition using ripgrep.
 #+begin_src emacs-lisp
   (use-package dumb-jump
+    :defer t
     :commands dumb-jump-xref-activate
     :init
-    (add-hook 'xref-backend-functions #'dumb-jump-xref-activate)
+    ;; Defer xref setup to first prog-mode buffer
+    (add-hook 'prog-mode-hook
+              (lambda ()
+                (add-hook 'xref-backend-functions #'dumb-jump-xref-activate nil t)))
     :custom
     (xref-show-definitions-function #'xref-show-definitions-completing-read)
     (xref-search-program 'ripgrep))
@@ -425,9 +431,10 @@ Vertical completion UI for minibuffer.
 
 ** Orderless
 Flexible completion style with space-separated components.
+Loads after vertico (which loads after-init).
 #+begin_src emacs-lisp
   (use-package orderless
-    :demand t  ; Needed immediately for completion
+    :after vertico
     :custom
     (completion-styles '(orderless basic))
     (completion-category-overrides '((file (styles basic partial-completion))))
@@ -448,9 +455,7 @@ In-buffer completion popup.
     :if (not (display-graphic-p)))
 
   (use-package corfu
-    :hook
-    ((after-init-hook . global-corfu-mode)
-     (after-init-hook . corfu-popupinfo-mode))
+    :hook (after-init-hook . global-corfu-mode)
     :init
     (unless (display-graphic-p)
       (with-eval-after-load 'corfu
@@ -463,18 +468,23 @@ In-buffer completion popup.
     (corfu-min-width 20)
     (corfu-max-width 80)
     (corfu-bar-width 0)
-    (corfu-border-width 1))
+    (corfu-border-width 1)
+    :config
+    (require 'corfu-popupinfo)
+    (corfu-popupinfo-mode 1))
 #+end_src
 
 ** Cape
-Completion extensions for Corfu.
+Completion extensions for Corfu. Deferred setup to after-init.
 #+begin_src emacs-lisp
   (use-package cape
+    :defer t
     :bind ("C-c p" . cape-prefix-map)
     :init
-    (add-hook 'completion-at-point-functions #'cape-dabbrev)
-    (add-hook 'completion-at-point-functions #'cape-file)
-    (add-hook 'completion-at-point-functions #'cape-elisp-block))
+    (with-eval-after-load 'corfu
+      (add-hook 'completion-at-point-functions #'cape-dabbrev)
+      (add-hook 'completion-at-point-functions #'cape-file)
+      (add-hook 'completion-at-point-functions #'cape-elisp-block)))
 #+end_src
 
 ** Minuet (AI Completion)
@@ -640,9 +650,12 @@ Flycheck for on-the-fly syntax checking.
 *** Terraform
 #+begin_src emacs-lisp
   (use-package terraform-mode
-    :custom (terraform-format-on-save t)
-    :hook (terraform-mode . (lambda ()
-                              (outline-minor-mode 1))))
+    :defer t
+    :mode ("\\.tf\\'" "\\.tfvars\\'")
+    :init
+    ;; Set custom vars before package loads
+    (setq terraform-format-on-save t)
+    :hook (terraform-mode . outline-minor-mode))
 #+end_src
 
 *** Dockerfile
@@ -709,7 +722,8 @@ Lightweight file tree sidebar.
 Powerful Git porcelain for Emacs.
 #+begin_src emacs-lisp
   (use-package magit
-    :commands (magit-status magit-file-dispatch)
+    :bind ("C-x g" . magit-status)
+    :commands magit-file-dispatch
     :custom
     (magit-refresh-status-buffer nil)
     (magit-blame-styles
@@ -730,52 +744,53 @@ GitHub/GitLab integration for Magit.
 #+end_src
 
 *** GitHub CLI Auth Source
-Use gh CLI for authentication with Forge.
+Use gh CLI for authentication with Forge. Deferred until forge loads.
 #+begin_src emacs-lisp
-  (cl-defun auth-source-ghcli-search (&rest spec
-                                            &key backend require
-                                            type max host user port
-                                            &allow-other-keys)
-    "Given a property list SPEC, return search matches from the `:backend'.
-  See `auth-source-search' for details on SPEC."
-    (cl-assert (or (null type) (eq type (oref backend type)))
-               t "Invalid GH CLI search: %s %s")
+  (with-eval-after-load 'forge
+    (cl-defun auth-source-ghcli-search (&rest spec
+                                              &key backend require
+                                              type max host user port
+                                              &allow-other-keys)
+      "Given a property list SPEC, return search matches from the `:backend'.
+    See `auth-source-search' for details on SPEC."
+      (cl-assert (or (null type) (eq type (oref backend type)))
+                 t "Invalid GH CLI search: %s %s")
 
-    (when-let* ((hostname (string-remove-prefix "api." host))
-                (ghub_ident (split-string user "\\^"))
-                (username (car ghub_ident))
-                (package (cadr ghub_ident))
-                (cmd (format "gh auth token --hostname '%s'" hostname))
-                (token (when (string= package "forge")
-                         (string-trim-right (shell-command-to-string cmd))))
-                (retval (list
-                         :host hostname
-                         :user username
-                         :secret token)))
-      (auth-source-do-debug
-       "auth-source-ghcli: return %s as final result (plus hidden password)"
-       (seq-subseq retval 0 -2))
-      (list retval)))
+      (when-let* ((hostname (string-remove-prefix "api." host))
+                  (ghub_ident (split-string user "\\^"))
+                  (username (car ghub_ident))
+                  (package (cadr ghub_ident))
+                  (cmd (format "gh auth token --hostname '%s'" hostname))
+                  (token (when (string= package "forge")
+                           (string-trim-right (shell-command-to-string cmd))))
+                  (retval (list
+                           :host hostname
+                           :user username
+                           :secret token)))
+        (auth-source-do-debug
+         "auth-source-ghcli: return %s as final result (plus hidden password)"
+         (seq-subseq retval 0 -2))
+        (list retval)))
 
-  (defvar auth-source-ghcli-backend
-    (auth-source-backend
-     :source "."
-     :type 'gh-cli
-     :search-function #'auth-source-ghcli-search)
-    "Auth-source backend for GH CLI.")
+    (defvar auth-source-ghcli-backend
+      (auth-source-backend
+       :source "."
+       :type 'gh-cli
+       :search-function #'auth-source-ghcli-search)
+      "Auth-source backend for GH CLI.")
 
-  (defun auth-source-ghcli-backend-parse (entry)
-    "Create a GH CLI auth-source backend from ENTRY."
-    (when (eq entry 'gh-cli)
-      (auth-source-backend-parse-parameters entry auth-source-ghcli-backend)))
+    (defun auth-source-ghcli-backend-parse (entry)
+      "Create a GH CLI auth-source backend from ENTRY."
+      (when (eq entry 'gh-cli)
+        (auth-source-backend-parse-parameters entry auth-source-ghcli-backend)))
 
-  (if (boundp 'auth-source-backend-parser-functions)
-      (add-hook 'auth-source-backend-parser-functions
-                #'auth-source-ghcli-backend-parse)
-    (advice-add 'auth-source-backend-parse :before-until
-                #'auth-source-ghcli-backend-parse))
+    (if (boundp 'auth-source-backend-parser-functions)
+        (add-hook 'auth-source-backend-parser-functions
+                  #'auth-source-ghcli-backend-parse)
+      (advice-add 'auth-source-backend-parse :before-until
+                  #'auth-source-ghcli-backend-parse))
 
-  (setq auth-sources '(gh-cli))
+    (setq auth-sources '(gh-cli)))
 #+end_src
 
 *** Jujutsu VCS
@@ -795,11 +810,17 @@ Support for jj version control system.
 Visual indication of git changes in the fringe. Faster than git-gutter.
 #+begin_src emacs-lisp
   (use-package diff-hl
-    :hook
-    ((prog-mode . diff-hl-mode)
-     (dired-mode . diff-hl-dired-mode)
-     (magit-pre-refresh . diff-hl-magit-pre-refresh)
-     (magit-post-refresh . diff-hl-magit-post-refresh)))
+    :hook (prog-mode . diff-hl-mode)
+    :config
+    ;; Dired integration
+    (with-eval-after-load 'dired
+      (require 'diff-hl-dired nil t)
+      (when (fboundp 'diff-hl-dired-mode)
+        (add-hook 'dired-mode-hook #'diff-hl-dired-mode)))
+    ;; Magit integration - functions defined in main file, just add hooks
+    (with-eval-after-load 'magit
+      (add-hook 'magit-pre-refresh-hook #'diff-hl-magit-pre-refresh)
+      (add-hook 'magit-post-refresh-hook #'diff-hl-magit-post-refresh)))
 #+end_src
 
 * Applications & Utilities
