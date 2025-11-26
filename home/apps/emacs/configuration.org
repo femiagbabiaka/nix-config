@@ -225,15 +225,15 @@ Enhanced directory editing with dired-x. Deferred until dired is actually used.
 *** Automatic Theme Switching
 Switch between light and dark themes based on macOS system appearance.
 #+begin_src emacs-lisp
-  (use-package doric-themes
+  (use-package ef-themes
     :ensure t)
 
   (use-package auto-dark
     :if (display-graphic-p)
-    :after doric-themes
+    :after ef-themes
     :hook (after-init-hook . auto-dark-mode)
     :custom
-    (auto-dark-themes '((doric-valley) (doric-marble))))
+    (auto-dark-themes '((ef-melissa-dark) (ef-melissa-light))))
 #+end_src
 
 ** Font Configuration
@@ -477,16 +477,15 @@ In-buffer completion popup.
 #+end_src
 
 ** Cape
-Completion extensions for Corfu. Deferred setup to after-init.
+Completion extensions for Corfu.
 #+begin_src emacs-lisp
   (use-package cape
-    :defer t
+    :after corfu
     :bind ("C-c p" . cape-prefix-map)
-    :init
-    (with-eval-after-load 'corfu
-      (add-hook 'completion-at-point-functions #'cape-dabbrev)
-      (add-hook 'completion-at-point-functions #'cape-file)
-      (add-hook 'completion-at-point-functions #'cape-elisp-block)))
+    :config
+    (add-hook 'completion-at-point-functions #'cape-dabbrev)
+    (add-hook 'completion-at-point-functions #'cape-file)
+    (add-hook 'completion-at-point-functions #'cape-elisp-block))
 #+end_src
 
 ** Minuet (AI Completion)
@@ -630,7 +629,11 @@ Flycheck for on-the-fly syntax checking.
 *** Haskell
 #+begin_src emacs-lisp
   (use-package haskell-mode
-    :mode "\\.hs\\'")
+    :mode ("\\.hs\\'" "\\.hsc\\'" "\\.lhs\\'")
+    :config
+    ;; Ensure all haskell-mode components are loaded
+    (require 'haskell nil t)
+    (require 'haskell-completions nil t))
 #+end_src
 
 *** Racket
