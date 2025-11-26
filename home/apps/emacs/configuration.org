@@ -1,54 +1,70 @@
 ;;; -*- lexical-binding: t -*-
 #+PROPERTY: header-args:emacs-lisp :tangle yes :lexical t
-* Emacs Configuration.. semi-literate
-** Packages
-*** Custom file location
-custom and the way it stores items in init.el is one of the dumber things
-emacs does. well whatever, we move it
+#+TITLE: Emacs Configuration
+#+AUTHOR: Femi Agbabiaka
+#+STARTUP: overview
+
+* Introduction
+This is a literate Emacs configuration optimized for fast startup and efficient lazy loading.
+The configuration is organized into logical sections with performance as a primary concern.
+
+** Design Principles
+- Lazy load everything possible using =:defer=, =:hook=, =:commands=, and =:mode=
+- Use =:custom= instead of =:config= for simple variable settings
+- Defer UI elements that don't affect initial display
+- Minimize work during startup, defer to idle time or first use
+- Use native compilation and tree-sitter where available
+
+* Bootstrap & Performance
+** Custom File Location
+Emacs custom.el is notoriously messy. Keep it separate from init.el.
 #+begin_src emacs-lisp
   (setq custom-file (concat user-emacs-directory "custom.el"))
   (load custom-file 'noerror)
 #+end_src
 
-** Performance
-*** Measuring startup speed
-Function copied from sqrtminusone's config, measures emacs startup time.
+** Garbage Collection Strategy
+Maximize GC threshold during startup, then use GCMH for intelligent GC during idle.
+Also set process output max for better LSP performance.
 #+begin_src emacs-lisp
-  (defvar my/emacs-started nil
-    "Flag to track whether Emacs has completed startup.")
-
+  ;; Maximize GC threshold during startup (restored by gcmh)
   (setq gc-cons-threshold most-positive-fixnum)
 
+  ;; Log startup time
   (add-hook 'emacs-startup-hook
             (lambda ()
               (message "*** Emacs loaded in %s with %d garbage collections."
-  	                   (format "%.2f seconds"
-  		                         (float-time
-  			                        (time-subtract after-init-time before-init-time)))
-  	                   gcs-done)
-              (setq gc-cons-threshold 100000000)
-              (setq my/emacs-started t)))
-  (use-package benchmark-init
-    :config
-    ;; To disable collection of benchmark data after init is done.
-    (add-hook 'after-init-hook 'benchmark-init/deactivate))
-    #+end_src
+                       (format "%.2f seconds"
+                               (float-time
+                                (time-subtract after-init-time before-init-time)))
+                       gcs-done)))
 
-*** Garbage collection
-#+begin_src emacs-lisp
-  (setq read-process-output-max (* 1024 1024))
+  ;; Increase process output for LSP performance
+  (setq read-process-output-max (* 1024 1024))  ; 1MB
 #+end_src
 
-*** dired-x
+** Intelligent Garbage Collection
+Use GCMH to run GC during idle time instead of during editing.
 #+begin_src emacs-lisp
-  (use-package dired-x
-    :ensure nil
+  (use-package gcmh
+    :hook (after-init-hook . gcmh-mode)
+    :custom
+    (gcmh-idle-delay 'auto)
+    (gcmh-auto-idle-delay-factor 10)
+    (gcmh-high-cons-threshold (* 16 1024 1024)))  ; 16MB
+#+end_src
+
+** Startup Profiling
+Benchmark startup time and identify slow packages.
+#+begin_src emacs-lisp
+  (use-package benchmark-init
     :config
-    (setq dired-dwim-target t)
-    (setq dired-listing-switches "-lah"))
-          #+end_src
-** Config Files
-Turns out, there's a feature called file locking that's used for multi-user scenarios. That sucks.
+    ;; Disable collection after init to avoid performance impact
+    (add-hook 'after-init-hook 'benchmark-init/deactivate))
+#+end_src
+
+** File Management
+Configure backup, auto-save, and lock file locations to avoid clutter.
 #+begin_src emacs-lisp
   (setq lock-file-name-transforms
         '(("\\`/.*/\\([^/]+\\)\\'" "~/.emacs.d/.cache/\\1" t)))
@@ -56,364 +72,431 @@ Turns out, there's a feature called file locking that's used for multi-user scen
         '(("\\`/.*/\\([^/]+\\)\\'" "~/.emacs.d/.cache/\\1" t)))
   (setq backup-directory-alist
         '((".*" . "~/.emacs.d/.cache/")))
+  (setq backup-inhibited t)
+  (setq auto-save-default nil)
 #+end_src
 
-*** Make it harder to kill emacs
-This will prompt us when we're going to kill Emacs.
+** Exit Confirmation
+Make it harder to accidentally kill Emacs (except in daemon mode).
 #+begin_src emacs-lisp
   (unless (daemonp)
     (setq confirm-kill-emacs 'y-or-n-p))
 #+end_src
 
-** General settings
-*** Emacs
+* Core Emacs Settings
+** Built-in Emacs Configuration
+Configure core Emacs behavior and enable tree-sitter modes.
 #+begin_src emacs-lisp
   (use-package emacs
-    :config
-    (setq major-mode-remap-alist
-          '(
-            ;; Languages explicitly in your config
-            (nix-mode . nix-ts-mode)              ;;
-            (rust-mode . rust-ts-mode)            ;;
-            (go-mode . go-ts-mode)                ;;
-            (yaml-mode . yaml-ts-mode)            ;;
-            (ruby-mode . ruby-ts-mode)            ;;
-            (dockerfile-mode . dockerfile-ts-mode);;
-            (typescript-mode . typescript-ts-mode);;
-            (zig-mode . zig-ts-mode)              ;;
-
-            ;; Standard formats you likely encounter given your stack
-            (js-mode . js-ts-mode)
-            (json-mode . json-ts-mode)
-            (css-mode . css-ts-mode)
-            (sh-mode . bash-ts-mode)              ;; Covers .sh files
-            (conf-toml-mode . toml-ts-mode)       ;; Useful for Cargo.toml etc.
-
-            ;; C/C++ (Note: Your simpc-mode config takes precedence for .c/.h files
-            ;; due to explicit :mode regex, but this handles fallbacks)
-            (c-mode . c-ts-mode)
-            (c++-mode . c++-ts-mode)
-            (c-or-c++-mode . c-or-c++-ts-mode)
-            ))
     :custom
-    ;; Enable context menu. `vertico-multiform-mode' adds a menu in the minibuffer
-    ;; to switch display modes.
+    ;; Enable context menu for mouse right-click
     (context-menu-mode t)
-    ;; Support opening new minibuffers from inside existing minibuffers.
+    ;; Allow recursive minibuffer editing
     (enable-recursive-minibuffers t)
-    ;; Hide commands in M-x which do not work in the current mode.  Vertico
-    ;; commands are hidden in normal buffers. This setting is useful beyond
-    ;; Vertico.
+    ;; Hide commands that don't work in current mode
     (read-extended-command-predicate #'command-completion-default-include-p)
-    ;; Do not allow the cursor in the minibuffer prompt
+    ;; Prevent cursor from entering minibuffer prompt
     (minibuffer-prompt-properties
      '(read-only t cursor-intangible t face minibuffer-prompt))
-    ;; Enable indentation+completion using the TAB key.
-    ;; `completion-at-point' is often bound to M-TAB.
+    ;; Tab key behavior: indent then complete
     (tab-always-indent 'complete)
-
-    ;; Emacs 30 and newer: Disable Ispell completion function.
-    ;; Try `cape-dict' as an alternative.
-    (text-mode-ispell-word-completion nil))
+    ;; Disable Ispell completion in text-mode (use cape-dict instead)
+    (text-mode-ispell-word-completion nil)
+    ;; Use tree-sitter modes by default
+    (major-mode-remap-alist
+     '(;; Languages with explicit tree-sitter support
+       (nix-mode . nix-ts-mode)
+       (rust-mode . rust-ts-mode)
+       (go-mode . go-ts-mode)
+       (yaml-mode . yaml-ts-mode)
+       (ruby-mode . ruby-ts-mode)
+       (dockerfile-mode . dockerfile-ts-mode)
+       (typescript-mode . typescript-ts-mode)
+       (zig-mode . zig-ts-mode)
+       ;; Standard formats
+       (js-mode . js-ts-mode)
+       (json-mode . json-ts-mode)
+       (css-mode . css-ts-mode)
+       (sh-mode . bash-ts-mode)
+       (conf-toml-mode . toml-ts-mode)
+       ;; C/C++
+       (c-mode . c-ts-mode)
+       (c++-mode . c++-ts-mode)
+       (c-or-c++-mode . c-or-c++-ts-mode))))
 #+end_src
 
-**** exec-path-from-shell
-here we use bash instead of fish shell because I don't have anything installed ther and it's faster
+** Environment Variables
+Load PATH and other environment variables from shell (macOS/GUI only).
+Deferred to window setup to avoid blocking startup.
 #+begin_src emacs-lisp
   (use-package exec-path-from-shell
     :if (memq window-system '(mac ns x))
-    :defer t
-    :hook
-    (window-setup-hook . exec-path-from-shell-initialize)
-    :config
-    (setq exec-path-from-shell-variables
-          '("PATH" "MANPATH" "NIX_PATH" "NIX_SSL_CERT_FILE"))
-    (setq exec-path-from-shell-shell-name "/bin/bash"))
+    :hook (window-setup-hook . exec-path-from-shell-initialize)
+    :custom
+    ;; Use bash for speed (faster than fish for this purpose)
+    (exec-path-from-shell-shell-name "/bin/bash")
+    (exec-path-from-shell-variables
+     '("PATH" "MANPATH" "NIX_PATH" "NIX_SSL_CERT_FILE")))
 #+end_src
 
-*** Keybindings
-**** multiple-cursors
-#+begin_src emacs-lisp
-  (use-package multiple-cursors
-    :bind
-    (("C-S-c C-S-c" . mc/edit-lines)
-     ("C->" . mc/mark-next-like-this)
-     ("C-<" . mc/mark-previous-like-this)
-     ("C-c C-<" . mc/mark-all-like-this)
-     ("C-\"" . mc/skip-to-next-like-this)
-     ("C-:" . mc/skip-to-previous-like-this)))
-#+end_src
-
-**** zap mode
-very useful replacement for dt<char> from vim
-#+begin_src emacs-lisp
-  (global-set-key [remap zap-to-char]
-                  'zap-up-to-char)
-#+end_src
-
-**** which-key
-A package that displays the available keybindings in a popup.
-The package is pretty useful, as Emacs seems to have more keybindings than
-I can remember at any given point.
-#+begin_src emacs-lisp
-  (use-package which-key
-    :config
-    (setq which-key-idle-delay 0.3)
-    (setq which-key-popup-type 'frame)
-    (which-key-mode)
-    (which-key-setup-side-window-bottom)
-    (set-face-attribute 'which-key-local-map-description-face nil
-                        :weight 'bold)
-    )
-#+end_src
-**** dumb-jump / xref
-#+begin_src emacs-lisp
-  (use-package dumb-jump
-    :defer t
-    :config
-    (add-hook 'xref-backend-functions #'dumb-jump-xref-activate)
-    (setq xref-show-definitions-function #'xref-show-definitions-completing-read))
-  (setq xref-search-program 'ripgrep)
-#+end_src
-
-***** expand-region
-#+begin_src emacs-lisp
-  (use-package expand-region
-    :bind
-    ("C-=" . er/expand-region))
-#+end_src
-***** keep alt key as meta
+** macOS-Specific Settings
+Configure modifier keys for macOS.
 #+begin_src emacs-lisp
   (when (eq system-type 'darwin)
-    (setq mac-option-modifier 'meta)    ;; Use Option/Alt as Meta
-    (setq mac-command-modifier 'super))  ;; Use Command as Super (optional)
+    (setq mac-option-modifier 'meta)    ; Option = Meta
+    (setq mac-command-modifier 'super)) ; Command = Super
 #+end_src
 
-**** ace-window (better jump)
+** Text Editing Defaults
 #+begin_src emacs-lisp
-  (use-package ace-window
-    :bind
-    ("M-o" . ace-window))
+  ;; Indentation and tabs
+  (setq-default tab-width 2)
+  (setq-default default-tab-width 2)
+  (setq-default indent-tabs-mode nil)
+
+  ;; Scrolling behavior
+  (setq scroll-conservatively scroll-margin)
+  (setq scroll-step 1)
+  (setq scroll-preserve-screen-position t)
+  (setq scroll-error-top-bottom t)
+  (setq mouse-wheel-progressive-speed nil)
+  (setq mouse-wheel-inhibit-click-time nil)
+
+  ;; Clipboard integration
+  (setq select-enable-clipboard t)
+  (setq mouse-yank-at-point t)
+
+  ;; Enable automatic delimiter pairing
+  (electric-pair-mode 1)
 #+end_src
-*** Theme
-**** doric
-#+BEGIN_SRC emacs-lisp
-  (use-package doric-themes)
-#+END_SRC
-**** theme switcher
+
+** Delete Trailing Whitespace
+Remove trailing whitespace on save (except in markdown).
+#+begin_src emacs-lisp
+  (defvar my/trailing-whitespace-modes '(markdown-mode)
+    "List of modes where trailing whitespace should NOT be deleted.")
+
+  (add-hook 'before-save-hook
+            (lambda ()
+              (unless (seq-some #'derived-mode-p my/trailing-whitespace-modes)
+                (delete-trailing-whitespace))))
+#+end_src
+
+** File History
+Remember recently edited files and cursor positions.
+#+begin_src emacs-lisp
+  (use-package recentf
+    :ensure nil
+    :init (recentf-mode 1)
+    :custom
+    (recentf-auto-cleanup 'never)
+    :config
+    (add-to-list 'recentf-exclude "\\`/\\w+:")
+    (add-to-list 'recentf-exclude "/ssh:")
+    (add-to-list 'recentf-exclude "/sudo:")
+    (add-to-list 'recentf-exclude "/docker:"))
+
+  (use-package saveplace
+    :ensure nil
+    :init (save-place-mode 1)
+    :custom
+    (save-place-ignore-files-regexp
+     "\\`/\\(?:ssh\\|scp\\|ftp\\|sudo\\|docker\\):"))
+#+end_src
+
+** Dired Configuration
+Enhanced directory editing with dired-x.
+#+begin_src emacs-lisp
+  (use-package dired-x
+    :ensure nil
+    :custom
+    (dired-dwim-target t)  ; Guess target directory in dual-pane setup
+    (dired-listing-switches "-lah"))
+#+end_src
+
+* UI & Appearance
+** Theme
+*** Theme Package
+#+begin_src emacs-lisp
+  (use-package doric-themes
+    :defer t)
+#+end_src
+
+*** Automatic Theme Switching
+Switch between light and dark themes based on macOS system appearance.
 #+begin_src emacs-lisp
   (use-package auto-dark
-    :init
-    (when (display-graphic-p)
-      (auto-dark-mode))
+    :if (display-graphic-p)
+    :hook (after-init-hook . auto-dark-mode)
     :custom
     (auto-dark-themes '((doric-valley) (doric-marble))))
 #+end_src
-**** Font
+
+** Font Configuration
+Set Berkeley Mono as the primary font family. Using default-frame-alist
+is faster than set-face-attribute at startup.
 #+begin_src emacs-lisp
-  (add-to-list 'default-frame-alist '(font . "Berkeley Mono 16"))
-  (set-face-attribute 'default        nil :family "Berkeley Mono" :height 160 :weight 'medium)
-  (set-face-attribute 'fixed-pitch    nil :family "Berkeley Mono" :height 1.0 :weight 'medium)
-  (set-face-attribute 'variable-pitch nil :family "Berkeley Mono" :height 1.0 :weight 'normal)
+  (add-to-list 'default-frame-alist '(font . "Berkeley Mono-16"))
+  (set-face-attribute 'default nil :font "Berkeley Mono-16")
+  (set-face-attribute 'fixed-pitch nil :inherit 'default)
+  (set-face-attribute 'variable-pitch nil :inherit 'default)
 #+end_src
 
-#+RESULTS:
-
-
-**** Default Frame Parameters
+** Frame Parameters
+macOS-specific frame appearance settings.
 #+begin_src emacs-lisp
   (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
   (add-to-list 'default-frame-alist '(ns-appearance . dark))
 #+end_src
 
-**** visual bell only
+** Visual Bell
+Use visual bell only, no audible bell.
 #+begin_src emacs-lisp
   (setq ring-bell-function 'ignore)
   (setq visible-bell t)
 #+end_src
 
-#+RESULTS:
-: visual-bell
-
-**** Dashboard
-# #+begin_src emacs-lisp
-#   (use-package dashboard
-#     :config
-#     (dashboard-setup-startup-hook)
-#     (setq dashboard-set-file-icons nil)    ; Disable icons (avoids all-the-icons loading)
-#     (setq dashboard-set-heading-icons nil)
-#     (setq dashboard-projects-backend 'none) ; Don't look for projects
-#     (setq dashboard-items '((recents  . 5))))
-# #+end_src
-
-*** Programming Modes
-**** C/C++
+** Modeline
+Minimalist nano-modeline for a cleaner appearance.
 #+begin_src emacs-lisp
-  (use-package simpc-mode
-    :ensure nil
-    :mode "\\.[hc]\\(pp\\)?\\'")
-#+end_src
-
-**** nix
-#+begin_src emacs-lisp
-  (use-package nix-mode
-    :defer t)
-  (use-package nix-ts-mode
-    :mode "\\.nix\'")
-#+end_src
-
-**** Rust
-***** rust-mode
-#+begin_src emacs-lisp
-  (use-package rust-mode
-    :defer t
-    :config
-    (setq rust-mode-treesitter-derive t)
-    (setq rust-format-on-save t)
-    (add-hook 'rust-mode-hook (lambda () (setq indent-tabs-mode nil)))
-    (add-hook 'rust-mode-hook (lambda () (prettify-symbols-mode))))
-#+end_src
-
-**** Fish Shell
-#+begin_src emacs-lisp
-  (use-package fish-mode
-    :defer t
-    :mode "\\.fish\\'")
-#+end_src
-
-**** Haskell
-#+begin_src emacs-lisp
-  (use-package haskell-mode
-    :defer t
-    :mode "\\.hs\\'")
-#+end_src
-
-**** Terraform
-#+begin_src emacs-lisp
-  (use-package terraform-mode
-    :defer t
-    :custom (terraform-format-on-save t)
-    :config
-    (defun my-terraform-mode-init ()
-      ;; if you want to use outline-minor-mode
-      (outline-minor-mode 1))
-    (add-hook 'terraform-mode-hook 'my-terraform-mode-init))
-#+end_src
-
-**** Dockerfile
-#+begin_src emacs-lisp
-  (use-package dockerfile-mode
-    :defer t)
-#+end_src
-
-**** Helm
-#+begin_src emacs-lisp
-  (use-package poly-helm-mode
-    :defer t
-    :ensure nil)
-#+end_src
-**** Groovy
-#+begin_src emacs-lisp
-  (use-package groovy-mode
-    :defer t)
-#+end_src
-
-**** LSP
-#+begin_src emacs-lisp
-  (use-package eglot
-    :config
-    ;; Ensure `nil` is in your PATH.
-    (add-to-list 'eglot-server-programs '(nix-mode . ("nil")))
-    (add-to-list 'eglot-server-programs '(nix-ts-mode . ("nil")))
+  (use-package nano-modeline
     :hook
-    (nix-ts-mode . eglot-ensure)
-    (terraform-mode . eglot-ensure)
-    (haskell-mode . eglot-ensure)
-    (rust-ts-mode . eglot-ensure)
-    (fish-mode . eglot-ensure)
-    (typescript-mode . eglot-ensure)
-    (go-ts-mode . eglot-ensure)
-    (yaml-mode . eglot-ensure)
-    (ruby-mode. eglot-ensure)
-    (dockerfile-mode . eglot-ensure)
-    (groovy-mode . eglot-ensure)
-    (zig-ts-mode . eglot-ensure))
+    ((prog-mode            . nano-modeline-prog-mode)
+     (text-mode            . nano-modeline-text-mode)
+     (org-mode             . nano-modeline-org-mode)
+     (pdf-view-mode        . nano-modeline-pdf-mode)
+     (mu4e-headers-mode    . nano-modeline-mu4e-headers-mode)
+     (mu4e-view-mode       . nano-modeline-mu4e-message-mode)
+     (elfeed-show-mode     . nano-modeline-elfeed-entry-mode)
+     (elfeed-search-mode   . nano-modeline-elfeed-search-mode)
+     (term-mode            . nano-modeline-term-mode)
+     (xwidget-webkit-mode  . nano-modeline-xwidget-mode)
+     (messages-buffer-mode . nano-modeline-message-mode)
+     (org-capture-mode     . nano-modeline-org-capture-mode)
+     (org-agenda-mode      . nano-modeline-org-agenda-mode)))
 #+end_src
 
-**** Flycheck
+** Basic UI Elements
+Disable unnecessary UI elements for a cleaner interface.
+These should ideally be in early-init.el for fastest startup.
 #+begin_src emacs-lisp
-  (use-package flycheck
-    :init (global-flycheck-mode))
-  (use-package flycheck-eglot
-    :after (flycheck eglot)
-    :config (global-flycheck-eglot-mode 1))
+  (push '(tool-bar-lines . 0) default-frame-alist)
+  (push '(menu-bar-lines . 0) default-frame-alist)
+  (push '(vertical-scroll-bars) default-frame-alist)
+  (setq inhibit-startup-screen t)
+  (setq inhibit-startup-message t)
+  (setq inhibit-startup-echo-area-message user-login-name)
+  (global-hl-line-mode 1)
 #+end_src
 
-**** Corfu
+** Line Numbers
+Enable line numbers in programming modes only.
 #+begin_src emacs-lisp
-  (use-package corfu-terminal)
-  (use-package corfu
-    :init
-    (global-corfu-mode)
-    (corfu-popupinfo-mode)
-    (unless (display-graphic-p)
-      (corfu-terminal-mode +1))
+  (add-hook 'prog-mode-hook #'display-line-numbers-mode)
+  (setq display-line-numbers-type t)
+#+end_src
+
+** Word Wrapping
+Enable visual line mode globally for better text wrapping.
+#+begin_src emacs-lisp
+  (setq word-wrap 1)
+  (global-visual-line-mode 1)
+#+end_src
+
+** Olivetti Mode
+Center text for better readability (GUI only).
+#+begin_src emacs-lisp
+  (use-package olivetti
+    :if (display-graphic-p)
+    :commands olivetti-mode
+    :custom
+    (olivetti-body-width 86))
+#+end_src
+
+** ANSI Colors
+Enable ANSI color support in compilation buffers.
+#+begin_src emacs-lisp
+  (use-package ansi-color
+    :ensure nil
+    :hook (compilation-filter . ansi-color-compilation-filter))
+#+end_src
+
+* Editing & Navigation
+** Multiple Cursors
+Edit multiple regions simultaneously.
+#+begin_src emacs-lisp
+  (use-package multiple-cursors
+    :bind
+    (("C-S-c C-S-c" . mc/edit-lines)
+     ("C->"         . mc/mark-next-like-this)
+     ("C-<"         . mc/mark-previous-like-this)
+     ("C-c C-<"     . mc/mark-all-like-this)
+     ("C-\""        . mc/skip-to-next-like-this)
+     ("C-:"         . mc/skip-to-previous-like-this)))
+#+end_src
+
+** Expand Region
+Intelligently expand selection by semantic units.
+#+begin_src emacs-lisp
+  (use-package expand-region
+    :bind ("C-=" . er/expand-region))
+#+end_src
+
+** Move Text
+Move lines or regions up and down.
+#+begin_src emacs-lisp
+  (use-package move-text
+    :bind
+    (("M-n" . move-text-down)
+     ("M-p" . move-text-up)))
+#+end_src
+
+** Zap to Char
+Improved zap-to-char that doesn't delete the target character.
+#+begin_src emacs-lisp
+  (global-set-key [remap zap-to-char] 'zap-up-to-char)
+#+end_src
+
+** Paredit
+Structural editing for Lisp code.
+#+begin_src emacs-lisp
+  (use-package paredit
+    :hook
+    ((emacs-lisp-mode . paredit-mode)
+     (lisp-mode       . paredit-mode)
+     (scheme-mode     . paredit-mode)
+     (racket-mode     . paredit-mode)))
+
+  ;; Built-in paren matching (no package load needed)
+  (setq show-paren-delay 0)
+  (show-paren-mode 1)
+#+end_src
+
+** Which Key
+Display available keybindings in popup. Deferred to idle time for faster startup.
+#+begin_src emacs-lisp
+  (use-package which-key
+    :defer 1
+    :custom
+    (which-key-idle-delay 0.3)
+    (which-key-popup-type 'side-window)
+    (which-key-side-window-location 'bottom)
     :config
-    (setq corfu-auto t
-          corfu-quit-no-match 'separator
-          corfu-auto-delay 0.2
-          corfu-min-width 20
-          corfu-max-width 80
-          corfu-bar-width 0
-          corfu-border-width 1))
-  (use-package cape
-    ;; Bind prefix keymap providing all Cape commands under a mnemonic key.
-    ;; Press C-c p ? to for help.
-    :bind ("C-c p" . cape-prefix-map) ;; Alternative key: M-<tab>, M-p, M-+
-    ;; Alternatively bind Cape commands individually.
-    ;; :bind (("C-c p d" . cape-dabbrev)
-    ;;        ("C-c p h" . cape-history)
-    ;;        ("C-c p f" . cape-file)
-    ;;        ...)
+    (which-key-mode))
+#+end_src
+
+** Window Navigation
+*** Ace Window
+Quick window switching with visual indicators.
+#+begin_src emacs-lisp
+  (use-package ace-window
+    :bind ("M-o" . ace-window))
+#+end_src
+
+** Jump to Definition
+*** Dumb Jump with xref
+Fallback jump-to-definition using ripgrep.
+#+begin_src emacs-lisp
+  (use-package dumb-jump
+    :commands dumb-jump-xref-activate
     :init
-    ;; Add to the global default value of `completion-at-point-functions' which is
-    ;; used by `completion-at-point'.  The order of the functions matters, the
-    ;; first function returning a result wins.  Note that the list of buffer-local
-    ;; completion functions takes precedence over the global list.
+    (add-hook 'xref-backend-functions #'dumb-jump-xref-activate)
+    :custom
+    (xref-show-definitions-function #'xref-show-definitions-completing-read)
+    (xref-search-program 'ripgrep))
+#+end_src
+
+* Completion & Search
+** Vertico
+Vertical completion UI for minibuffer.
+#+begin_src emacs-lisp
+  (use-package vertico
+    :hook (after-init-hook . vertico-mode))
+
+  (use-package vertico-posframe
+    :after vertico
+    :hook (vertico-mode . vertico-posframe-mode)
+    :custom
+    (vertico-posframe-truncate-lines t)
+    :config
+    (add-to-list 'default-frame-alist '(resize-pixelwise . t))
+    (setq frame-resize-pixelwise t))
+#+end_src
+
+** Orderless
+Flexible completion style with space-separated components.
+#+begin_src emacs-lisp
+  (use-package orderless
+    :demand t  ; Needed immediately for completion
+    :custom
+    (completion-styles '(orderless basic))
+    (completion-category-overrides '((file (styles basic partial-completion))))
+    (completion-category-defaults nil))
+#+end_src
+
+** Marginalia
+Rich annotations for minibuffer completions.
+#+begin_src emacs-lisp
+  (use-package marginalia
+    :hook (after-init-hook . marginalia-mode))
+#+end_src
+
+** Corfu
+In-buffer completion popup.
+#+begin_src emacs-lisp
+  (use-package corfu-terminal
+    :if (not (display-graphic-p)))
+
+  (use-package corfu
+    :hook
+    ((after-init-hook . global-corfu-mode)
+     (after-init-hook . corfu-popupinfo-mode))
+    :init
+    (unless (display-graphic-p)
+      (with-eval-after-load 'corfu
+        (require 'corfu-terminal)
+        (corfu-terminal-mode +1)))
+    :custom
+    (corfu-auto t)
+    (corfu-quit-no-match 'separator)
+    (corfu-auto-delay 0.2)
+    (corfu-min-width 20)
+    (corfu-max-width 80)
+    (corfu-bar-width 0)
+    (corfu-border-width 1))
+#+end_src
+
+** Cape
+Completion extensions for Corfu.
+#+begin_src emacs-lisp
+  (use-package cape
+    :bind ("C-c p" . cape-prefix-map)
+    :init
     (add-hook 'completion-at-point-functions #'cape-dabbrev)
     (add-hook 'completion-at-point-functions #'cape-file)
-    (add-hook 'completion-at-point-functions #'cape-elisp-block)
-    ;; (add-hook 'completion-at-point-functions #'cape-history)
-    ;; ...
-    )
+    (add-hook 'completion-at-point-functions #'cape-elisp-block))
 #+end_src
 
-**** minuet (ai autocomplete)
+** Minuet (AI Completion)
+AI-powered code completion using local LLM.
 #+begin_src emacs-lisp
   (use-package minuet
+    :defer t
+    :custom
+    (minuet-provider 'openai-fim-compatible)
+    (minuet-n-completions 1)
+    (minuet-context-window 8192)
     :config
-    (setq minuet-provider 'openai-fim-compatible)
-    (setq minuet-n-completions 1) ; recommended for Local LLM for resource saving
-    ;; I recommend beginning with a small context window size and incrementally
-    ;; expanding it, depending on your local computing power. A context window
-    ;; of 512, serves as an good starting point to estimate your computing
-    ;; power. Once you have a reliable estimate of your local computing power,
-    ;; you should adjust the context window to a larger value.
-    (setq minuet-context-window 8192)
-    (plist-put minuet-openai-fim-compatible-options :end-point "http://cerebro:8080/v1/completions")
-    ;; an arbitrary non-null environment variable as placeholder
-    ;; For Windows users, TERM may not be present in environment variables.
-    ;; Consider using APPDATA instead.
-    (plist-put minuet-openai-fim-compatible-options :name "Llama.cpp")
-    (plist-put minuet-openai-fim-compatible-options :api-key "TERM")
-    ;; The model is set by the llama-cpp server and cannot be altered
-    ;; post-launch.
-    (plist-put minuet-openai-fim-compatible-options :model "PLACEHOLDER")
-
-    ;; Llama.cpp does not support the `suffix` option in FIM completion.
-    ;; Therefore, we must disable it and manually populate the special
-    ;; tokens required for FIM completion.
-    (minuet-set-nested-plist minuet-openai-fim-compatible-options nil :template :suffix)
+    (plist-put minuet-openai-fim-compatible-options
+               :end-point "http://cerebro:8080/v1/completions")
+    (plist-put minuet-openai-fim-compatible-options
+               :name "Llama.cpp")
+    (plist-put minuet-openai-fim-compatible-options
+               :api-key "TERM")
+    (plist-put minuet-openai-fim-compatible-options
+               :model "PLACEHOLDER")
+    (minuet-set-nested-plist minuet-openai-fim-compatible-options
+                             nil :template :suffix)
     (minuet-set-optional-options
      minuet-openai-fim-compatible-options
      :prompt
@@ -423,288 +506,260 @@ I can remember at any given point.
                (plist-get ctx :before-cursor)
                (plist-get ctx :after-cursor)))
      :template)
-
-    (minuet-set-optional-options minuet-openai-fim-compatible-options :max_tokens 56))
+    (minuet-set-optional-options minuet-openai-fim-compatible-options
+                                 :max_tokens 56))
 #+end_src
 
-**** Typescript
+* Programming
+** Language Server Protocol (LSP)
+Use Eglot as LSP client for various programming languages.
 #+begin_src emacs-lisp
-  (use-package typescript-mode
-    :mode "\\.ts\\'"
+  (use-package eglot
+    :hook
+    ((nix-ts-mode      . eglot-ensure)
+     (terraform-mode   . eglot-ensure)
+     (haskell-mode     . eglot-ensure)
+     (rust-ts-mode     . eglot-ensure)
+     (fish-mode        . eglot-ensure)
+     (typescript-mode  . eglot-ensure)
+     (go-ts-mode       . eglot-ensure)
+     (yaml-mode        . eglot-ensure)
+     (ruby-mode        . eglot-ensure)
+     (dockerfile-mode  . eglot-ensure)
+     (groovy-mode      . eglot-ensure)
+     (zig-ts-mode      . eglot-ensure))
     :config
-    (add-hook 'typescript-mode-hook #'hs-minor-mode))
+    (add-to-list 'eglot-server-programs '(nix-mode . ("nil")))
+    (add-to-list 'eglot-server-programs '(nix-ts-mode . ("nil"))))
 #+end_src
 
-**** go-mode
+** Syntax Checking
+Flycheck for on-the-fly syntax checking.
+#+begin_src emacs-lisp
+  (use-package flycheck
+    :hook (after-init-hook . global-flycheck-mode))
+
+  (use-package flycheck-eglot
+    :after (flycheck eglot)
+    :hook (eglot-managed-mode . flycheck-eglot-mode)
+    :config
+    (global-flycheck-eglot-mode 1))
+#+end_src
+
+** Language Modes
+*** C/C++
+#+begin_src emacs-lisp
+  (use-package simpc-mode
+    :ensure nil
+    :mode "\\.[hc]\\(pp\\)?\\'")
+#+end_src
+
+*** Nix
+#+begin_src emacs-lisp
+  (use-package nix-mode
+    :defer t)
+
+  (use-package nix-ts-mode
+    :mode "\\.nix\\'")
+#+end_src
+
+*** Rust
+#+begin_src emacs-lisp
+  (use-package rust-mode
+    :mode "\\.rs\\'"
+    :custom
+    (rust-mode-treesitter-derive t)
+    (rust-format-on-save t)
+    :hook
+    ((rust-mode . (lambda () (setq indent-tabs-mode nil)))
+     (rust-mode . prettify-symbols-mode)))
+#+end_src
+
+*** Go
 #+begin_src emacs-lisp
   (use-package go-mode
     :mode "\\.go\\'"
     :hook (before-save . gofmt-before-save)
-    :custom (gofmt-command "goimports"))
+    :custom
+    (gofmt-command "goimports"))
 #+end_src
 
-**** ruby-mode
+*** TypeScript
+#+begin_src emacs-lisp
+  (use-package typescript-mode
+    :mode "\\.ts\\'"
+    :hook (typescript-mode . hs-minor-mode))
+#+end_src
+
+*** Ruby
 #+begin_src emacs-lisp
   (use-package ruby-mode
     :ensure nil
-    :mode "\\.\\(?:cap\\|gemspec\\|irbrc\\|gemrc\\|rake\\|rb\\|ru\\|thor\\)\\'"
-    :mode "\\(?:Brewfile\\|Capfile\\|Gemfile\\(?:\\.[a-zA-Z0-9._-]+\\)?\\|[rR]akefile\\)\\'")
+    :mode
+    ("\\.\\(?:cap\\|gemspec\\|irbrc\\|gemrc\\|rake\\|rb\\|ru\\|thor\\)\\'"
+     "\\(?:Brewfile\\|Capfile\\|Gemfile\\(?:\\.[a-zA-Z0-9._-]+\\)?\\|[rR]akefile\\)\\'"))
 #+end_src
-**** zig-mode
+
+*** Zig
 #+begin_src emacs-lisp
   (use-package zig-mode
-    :mode "\\.\\(zig\\|zon\\)\\'")
+    :defer t)
+
   (use-package zig-ts-mode
     :mode "\\.\\(zig\\|zon\\)\\'")
 #+end_src
-**** racket-mode
+
+*** Fish Shell
+#+begin_src emacs-lisp
+  (use-package fish-mode
+    :mode "\\.fish\\'")
+#+end_src
+
+*** Haskell
+#+begin_src emacs-lisp
+  (use-package haskell-mode
+    :mode "\\.hs\\'")
+#+end_src
+
+*** Racket
 #+begin_src emacs-lisp
   (use-package racket-mode
-    :mode "\\.rkt\\'"
-    :defer t)
+    :mode "\\.rkt\\'")
+
   (use-package scribble-mode
     :defer t)
 #+end_src
-**** gptel
-#+begin_src emacs-lisp
-  (use-package gptel
-    :defer t
-    :config
-    (setq gptel-model 'zai-glm-4.6
-          gptel-backend
-          (gptel-make-openai "Cerebras"
-                             :host "api.cerebras.ai"
-                             :endpoint "/v1/chat/completions"
-                             :stream nil
-                             :key #'gptel-api-key
-                             :models '(qwen-3-235b-a22b-instruct-2507
-                                       zai-glm-4.6
-                                       gpt-oss-120b))))
-#+END_SRC
-**** elisp
-#+BEGIN_SRC emacs-lisp
-  (use-package paredit
-    :config
-    (show-paren-mode 1)
-    :hook
-    (emacs-lisp-mode-hook . paredit-mode)
-    (racket-mode . paredit-mode))
-#+END_SRC
 
-**** treesitter
-# #+begin_src emacs-lisp
-#   (use-package treesit-auto
-#     :custom
-#     (treesit-auto-install 'prompt)
-#     :config
-#     (treesit-auto-add-to-auto-mode-alist
-#      '(nix rust fish haskell terraform dockerfile groovy
-#            typescript go yaml ruby zig c cpp json toml markdown))
-#     (global-treesit-auto-mode))
-# #+end_src
-**** delimiters
-#+begin_src emacs-lisp
-  (electric-pair-mode 1)
-#+end_src
-**** lean
+*** Lean
 #+begin_src emacs-lisp
   (use-package lean4-mode
-    :defer t
-    :mode "\\.lean\\'"
-    :ensure nil)
+    :ensure nil
+    :mode "\\.lean\\'")
 #+end_src
-*** nano modeline
-#+BEGIN_SRC emacs-lisp
-  (use-package nano-modeline
+
+*** Terraform
+#+begin_src emacs-lisp
+  (use-package terraform-mode
+    :custom (terraform-format-on-save t)
+    :hook (terraform-mode . (lambda ()
+                              (outline-minor-mode 1))))
+#+end_src
+
+*** Dockerfile
+#+begin_src emacs-lisp
+  (use-package dockerfile-mode
+    :defer t)
+#+end_src
+
+*** Helm Charts
+#+begin_src emacs-lisp
+  (use-package poly-helm-mode
+    :ensure nil
+    :defer t)
+#+end_src
+
+*** Groovy
+#+begin_src emacs-lisp
+  (use-package groovy-mode
+    :defer t)
+#+end_src
+
+** AI Assistant
+GPTel for LLM integration in Emacs.
+#+begin_src emacs-lisp
+  (use-package gptel
+    :commands gptel
+    :custom
+    (gptel-model 'zai-glm-4.6)
     :config
-    (add-hook 'prog-mode-hook            #'nano-modeline-prog-mode)
-    (add-hook 'text-mode-hook            #'nano-modeline-text-mode)
-    (add-hook 'org-mode-hook             #'nano-modeline-org-mode)
-    (add-hook 'pdf-view-mode-hook        #'nano-modeline-pdf-mode)
-    (add-hook 'mu4e-headers-mode-hook    #'nano-modeline-mu4e-headers-mode)
-    (add-hook 'mu4e-view-mode-hook       #'nano-modeline-mu4e-message-mode)
-    (add-hook 'elfeed-show-mode-hook     #'nano-modeline-elfeed-entry-mode)
-    (add-hook 'elfeed-search-mode-hook   #'nano-modeline-elfeed-search-mode)
-    (add-hook 'term-mode-hook            #'nano-modeline-term-mode)
-    (add-hook 'xwidget-webkit-mode-hook  #'nano-modeline-xwidget-mode)
-    (add-hook 'messages-buffer-mode-hook #'nano-modeline-message-mode)
-    (add-hook 'org-capture-mode-hook     #'nano-modeline-org-capture-mode)
-    (add-hook 'org-agenda-mode-hook      #'nano-modeline-org-agenda-mode))
-#+END_SRC
-
-
-*** Text Editing
-**** indentation and whitespace
-***** aggressive indent
-This package reindents the file being edited after every change. Pretty useful.
-<2023-04-24 Mon> Removing this, it's hella annoying. I think if I had a projectile configuration per project it would be better.
-#+begin_src emacs-lisp
-  (use-package aggressive-indent
-    :disabled t
-    :config
-    (global-aggressive-indent-mode 1))
+    (setq gptel-backend
+          (gptel-make-openai "Cerebras"
+            :host "api.cerebras.ai"
+            :endpoint "/v1/chat/completions"
+            :stream nil
+            :key #'gptel-api-key
+            :models '(qwen-3-235b-a22b-instruct-2507
+                      zai-glm-4.6
+                      gpt-oss-120b))))
 #+end_src
 
-***** Delete trailing whitespace
-This deletes trailing whitespace when the buffer is saved.
-#+begin_src emacs-lisp
-  (defvar my/trailing-whitespace-modes '(markdown-mode)
-    "List of modes where trailing whitespace should NOT be deleted.")
-
-  (require 'cl-extra)
-
-  (add-hook 'before-save-hook
-            (lambda ()
-              (unless (cl-some #'derived-mode-p my/trailing-whitespace-modes)
-  	            (delete-trailing-whitespace))))
-#+end_src
-
-***** set tabs
-Default tab settings, namely, no tabs, and also, a tab equaling four spaces.
-#+begin_src emacs-lisp
-  (setq tab-always-indent nil)
-  (setq-default default-tab-width 2)
-  (setq-default tab-width 2)
-  (setq-default indent-tabs-mode nil)
-#+end_src
-**** Settings
-***** Scrolling
-#+begin_src emacs-lisp
-  (setq scroll-conservatively scroll-margin)
-  (setq scroll-step 1)
-  (setq scroll-preserve-screen-position t)
-  (setq scroll-error-top-bottom t)
-  (setq mouse-wheel-progressive-speed nil)
-  (setq mouse-wheel-inhibit-click-time nil)
-#+end_src
-***** Clipboard
-#+begin_src emacs-lisp
-  (setq select-enable-clipboard t)
-  (setq mouse-yank-at-point t)
-#+end_src
-
-***** Backups
-#+begin_src emacs-lisp
-  (setq backup-inhibited t)
-  (setq auto-save-default nil)
-#+end_src
-
-**** Move Text
-allows for movement of text line under point, nifty
-#+BEGIN_SRC emacs-lisp
-  (use-package move-text
-    :bind (
-           ("M-n" . move-text-down)
-           ("M-p" . move-text-up)))
-#+END_SRC
-*** Project Management
-Packages related to managing projects and files.
-
-**** dired-sidebar
-
-Never heard of this until digging into sqrtminusone's config,
-but seems like a nice lightweight replacement for Treemacs.
+* Project & Version Control
+** Dired Sidebar
+Lightweight file tree sidebar.
 #+begin_src emacs-lisp
   (use-package dired-sidebar
-    :bind (("C-x t t" . dired-sidebar-toggle-sidebar))
-
-    :commands (dired-sidebar-toggle-sidebar)
-    :init
-    (add-hook 'dired-sidebar-mode-hook
-              (lambda ()
-                (unless (file-remote-p default-directory)
-                  (auto-revert-mode))))
+    :bind ("C-x t t" . dired-sidebar-toggle-sidebar)
+    :commands dired-sidebar-toggle-sidebar
+    :hook
+    (dired-sidebar-mode . (lambda ()
+                            (unless (file-remote-p default-directory)
+                              (auto-revert-mode))))
+    :custom
+    (dired-sidebar-subtree-line-prefix "__")
+    (dired-sidebar-theme 'nerd)
+    (dired-sidebar-use-term-integration t)
+    (dired-sidebar-use-custom-font t)
     :config
     (push 'toggle-window-split dired-sidebar-toggle-hidden-commands)
-    (push 'rotate-windows dired-sidebar-toggle-hidden-commands)
-    (setq dired-sidebar-subtree-line-prefix "__")
-    (setq dired-sidebar-theme 'nerd)
-    (setq dired-sidebar-use-term-integration t)
-    (setq dired-sidebar-use-custom-font t))
+    (push 'rotate-windows dired-sidebar-toggle-hidden-commands))
 #+end_src
 
-**** Projectile
-So necessary. Manages projects, git aware. IDK how you would use
-Emacs efficiently without this.
-
-11/19/2023: Turns out, project.el exists, and is quite good. In case
-I come back to this and don't remember, the default prefix for project.el
-keybinds in C-x p.
-#+begin_src emacs-lisp
-  (use-package projectile
-    :disabled t
-    :bind (:map projectile-mode-map
-                ("C-c p" . projectile-command-map))
-    :config
-    (setq projectile-project-search-path '(("~/src/" . 2)))
-    :init
-    (projectile-mode +1))
-
-  (use-package counsel-projectile
-    :after (counsel projectile)
-    )
-#+end_src
-
-**** Magit
-Probably the most iconic Emacs program? Anyways, super good either way.
+** Git Integration
+*** Magit
+Powerful Git porcelain for Emacs.
 #+begin_src emacs-lisp
   (use-package magit
-    :defer t
     :commands (magit-status magit-file-dispatch)
-    :config
-    (setq magit-refresh-status-buffer nil)
-    (setq magit-blame-styles
-          '((headings
-             (heading-format . "%-20a %C %s\n"))
-            (highlight
-             (highlight-face . magit-blame-highlight))
-            (lines
-             (show-lines . t)
-             (show-message . t)))))
+    :custom
+    (magit-refresh-status-buffer nil)
+    (magit-blame-styles
+     '((headings
+        (heading-format . "%-20a %C %s\n"))
+       (highlight
+        (highlight-face . magit-blame-highlight))
+       (lines
+        (show-lines . t)
+        (show-message . t)))))
 #+end_src
 
-**** Forge
-Integrates with magit, used for integrations with github and the like.
+*** Forge
+GitHub/GitLab integration for Magit.
 #+begin_src emacs-lisp
   (use-package forge
     :after magit)
 #+end_src
 
-Copied from: https://github.com/magit/forge/discussions/544.
-This adds a new auth-source that forge can use that taps into the gh-cli, which I always have installed.
+*** GitHub CLI Auth Source
+Use gh CLI for authentication with Forge.
 #+begin_src emacs-lisp
-  ;; =============================================================================
-  ;; use gh-cli as auth-source for forge to workaround forbidden PAT access to organization
-  ;; -----------------------------------------------------------------------------
-
   (cl-defun auth-source-ghcli-search (&rest spec
                                             &key backend require
                                             type max host user port
                                             &allow-other-keys)
     "Given a property list SPEC, return search matches from the `:backend'.
   See `auth-source-search' for details on SPEC."
-    ;; just in case, check that the type is correct (null or same as the backend)
     (cl-assert (or (null type) (eq type (oref backend type)))
                t "Invalid GH CLI search: %s %s")
 
     (when-let* ((hostname (string-remove-prefix "api." host))
-                ;; split ghub--ident again
                 (ghub_ident (split-string user "\\^"))
                 (username (car ghub_ident))
                 (package (cadr ghub_ident))
                 (cmd (format "gh auth token --hostname '%s'" hostname))
-                (token (when (string= package "forge") (string-trim-right (shell-command-to-string cmd))))
+                (token (when (string= package "forge")
+                         (string-trim-right (shell-command-to-string cmd))))
                 (retval (list
                          :host hostname
                          :user username
                          :secret token)))
-      (auth-source-do-debug  "auth-source-ghcli: return %s as final result (plus hidden password)"
-                             (seq-subseq retval 0 -2)) ;; remove password
+      (auth-source-do-debug
+       "auth-source-ghcli: return %s as final result (plus hidden password)"
+       (seq-subseq retval 0 -2))
       (list retval)))
 
   (defvar auth-source-ghcli-backend
     (auth-source-backend
-     :source "." ;; not used
+     :source "."
      :type 'gh-cli
      :search-function #'auth-source-ghcli-search)
     "Auth-source backend for GH CLI.")
@@ -715,252 +770,175 @@ This adds a new auth-source that forge can use that taps into the gh-cli, which 
       (auth-source-backend-parse-parameters entry auth-source-ghcli-backend)))
 
   (if (boundp 'auth-source-backend-parser-functions)
-      (add-hook 'auth-source-backend-parser-functions #'auth-source-ghcli-backend-parse)
-    (advice-add 'auth-source-backend-parse :before-until #'auth-source-ghcli-backend-parse))
+      (add-hook 'auth-source-backend-parser-functions
+                #'auth-source-ghcli-backend-parse)
+    (advice-add 'auth-source-backend-parse :before-until
+                #'auth-source-ghcli-backend-parse))
+
   (setq auth-sources '(gh-cli))
 #+end_src
 
-***** jj-vcs
-allows the built in project.el and vc.el modes
+*** Jujutsu VCS
+Support for jj version control system.
 #+begin_src emacs-lisp
   (use-package vc-jj
     :defer t)
+
   (use-package jj-mode
-    :defer t
     :ensure nil
+    :defer t
     :config
-    ;; Prevent it from adding itself to vc-handled-backends at startup
-    ;; if that's what's triggering the load
     (setq vc-handled-backends (delq 'JJ vc-handled-backends)))
 #+end_src
 
-**** Git gutter
-Make things pretty.
-#+BEGIN_SRC emacs-lisp
-  (use-package git-gutter
-    :hook (prog-mode . git-gutter-mode)
-    :config
-    (setq git-gutter:update-interval 0.02))
-#+END_SRC
-**** Editing files
-Remember recently edited files.
+*** Diff HL
+Visual indication of git changes in the fringe. Faster than git-gutter.
 #+begin_src emacs-lisp
-  (use-package recentf
-   :ensure nil
-   :init
-   (recentf-mode 1)
-   :custom
-   (recentf-auto-cleanup 'never)
-   :config
-   (add-to-list 'recentf-exclude "\\`/\\w+:")
-   (add-to-list 'recentf-exclude "/ssh:")
-   (add-to-list 'recentf-exclude "/sudo:")
-   (add-to-list 'recentf-exclude "/docker:"))
+  (use-package diff-hl
+    :hook
+    ((prog-mode . diff-hl-mode)
+     (dired-mode . diff-hl-dired-mode)
+     (magit-pre-refresh . diff-hl-magit-pre-refresh)
+     (magit-post-refresh . diff-hl-magit-post-refresh)))
 #+end_src
 
-Save the most recently edited place in a file.
+* Applications & Utilities
+** Org Mode
+*** Core Org Configuration
 #+begin_src emacs-lisp
-  (use-package saveplace
-    :ensure nil
-    :init
-    (save-place-mode 1)
-    :custom
-    ;; Ignore any path that starts with /method: (like /ssh:, /sudo:, /docker:)
-    (save-place-ignore-files-regexp "\\`/\\(?:ssh\\|scp\\|ftp\\|sudo\\|docker\\):"))
-#+end_src
-**** org-mode and org-agenda
-#+begin_src emacs-lisp
-  ;; org-roam deps
-  (use-package dash)
-  (use-package f)
-  (use-package s)
-  (use-package emacsql)
-  (use-package magit-section)
   (use-package org
     :bind ("C-c a" . org-agenda)
-    :config
-    (setq org-agenda-files (list "~/src/femiagbabiaka/org/agenda")))
+    :custom
+    (org-agenda-files (list "~/src/femiagbabiaka/org/agenda"))
+    ;; Edit settings
+    (org-auto-align-tags nil)
+    (org-tags-column 0)
+    (org-catch-invisible-edits 'show-and-error)
+    (org-special-ctrl-a/e t)
+    (org-insert-heading-respect-content t)
+    ;; Styling
+    (org-hide-emphasis-markers t)
+    (org-pretty-entities t)
+    (org-agenda-tags-column 0)
+    (org-ellipsis "…"))
+#+end_src
+
+*** Org Modern
+Modern styling for org-mode.
+#+begin_src emacs-lisp
+  (use-package org-modern
+    :hook (org-mode . org-modern-mode))
+#+end_src
+
+*** Org Roam
+Zettelkasten note-taking system.
+#+begin_src emacs-lisp
   (use-package org-roam
-    :defer t
+    :commands
+    (org-roam-buffer-toggle
+     org-roam-node-find
+     org-roam-graph
+     org-roam-node-insert
+     org-roam-capture
+     org-roam-dailies-capture-today)
+    :bind
+    (("C-c r l" . org-roam-buffer-toggle)
+     ("C-c r f" . org-roam-node-find)
+     ("C-c r g" . org-roam-graph)
+     ("C-c r i" . org-roam-node-insert)
+     ("C-c r c" . org-roam-capture)
+     ("C-c r j" . org-roam-dailies-capture-today))
     :custom
     (org-roam-directory (file-truename "~/src/femiagbabiaka/org/notes"))
-    :bind (("C-c r l" . org-roam-buffer-toggle)
-           ("C-c r f" . org-roam-node-find)
-           ("C-c r g" . org-roam-graph)
-           ("C-c r i" . org-roam-node-insert)
-           ("C-c r c" . org-roam-capture)
-           ;; Dailies
-           ("C-c r j" . org-roam-dailies-capture-today))
+    (org-roam-node-display-template
+     (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
     :config
-    ;; If you're using a vertical completion framework, you might want a more informative completion interface
-    (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
     (org-roam-db-autosync-mode)
-    ;; If using org-roam-protocol
     (require 'org-roam-protocol))
-  (use-package org-modern
-    :hook (org-mode . org-modern-mode)
-    :config
-    (setq
-     ;; Edit settings
-     org-auto-align-tags nil
-     org-tags-column 0
-     org-catch-invisible-edits 'show-and-error
-     org-special-ctrl-a/e t
-     org-insert-heading-respect-content t
-
-     ;; Org styling, hide markup etc.
-     org-hide-emphasis-markers t
-     org-pretty-entities t
-     org-agenda-tags-column 0
-     org-ellipsis "…"))
 #+end_src
 
-*** Completion
-This entire section is pretty much cargo culted. We'll see what works long term.
-**** Vertico
-Vertico is a completion framework that seeks to extend native Emacs     functionality.
-#+begin_src emacs-lisp
-  (use-package vertico
-    :init (vertico-mode))
-  (use-package vertico-posframe
-    :requires vertico
-    :init
-    (vertico-posframe-mode 1)
-    :config
-    (add-to-list 'default-frame-alist '(resize-pixelwise . t))
-    (setq frame-resize-pixelwise t)
-    (setq vertico-posframe-truncate-lines t))
-#+end_src
-
-#+RESULTS:
-: t
-
-**** orderless
-#+begin_src emacs-lisp
-  (use-package orderless
-    :custom
-    (completion-styles '(orderless basic))
-    (completion-category-overrides '((file (styles basic partial-completion))))
-    (completion-category-defaults nil)
-    (completion-pcm-leading-wildcard t))
-#+end_src
-
-**** marginalia
-#+begin_src emacs-lisp
-  (use-package marginalia
-    :config
-    (marginalia-mode))
-#+end_src
-
-*** Feed reader
+** RSS Feed Reader
+*** Elfeed
 #+begin_src emacs-lisp
   (use-package elfeed
     :bind ("C-x w" . elfeed)
-    :config
-    (setq elfeed-feeds
-          '(("https://www.computerenhance.com/feed" programming)
-            ("https://jyn.dev/atom.xml" programming)
-            ("https://ansuz.sooke.bc.ca/rss" programming)
-            ("https://andreyor.st/feed.xml" programming))))
-#+END_SRC
+    :custom
+    (elfeed-feeds
+     '(("https://www.computerenhance.com/feed" programming)
+       ("https://jyn.dev/atom.xml" programming)
+       ("https://ansuz.sooke.bc.ca/rss" programming)
+       ("https://andreyor.st/feed.xml" programming))))
+#+end_src
 
-*** youtube feed reader
-#+BEGIN_SRC emacs-lisp
+*** Elfeed Tube
+YouTube feed support for Elfeed.
+#+begin_src emacs-lisp
   (use-package elfeed-tube
     :after elfeed
+    :bind
+    (:map elfeed-show-mode-map
+          ("F" . elfeed-tube-fetch)
+          ([remap save-buffer] . elfeed-tube-save)
+          :map elfeed-search-mode-map
+          ("F" . elfeed-tube-fetch)
+          ([remap save-buffer] . elfeed-tube-save))
     :config
-    ;; (setq elfeed-tube-auto-save-p nil) ; default value
-    ;; (setq elfeed-tube-auto-fetch-p t)  ; default value
     (elfeed-tube-setup)
-    (elfeed-tube-add-feeds '("veritasium"
-                             "netdevconf"
-                             "XahLee"
-                             "BillyEllis"
-                             "protesilaos"
-                             "TsodingDaily"
-                             "ALifeEngineered"))
+    (elfeed-tube-add-feeds
+     '("veritasium"
+       "netdevconf"
+       "XahLee"
+       "BillyEllis"
+       "protesilaos"
+       "TsodingDaily"
+       "ALifeEngineered")))
+#+end_src
 
-    :bind (:map elfeed-show-mode-map
-                ("F" . elfeed-tube-fetch)
-                ([remap save-buffer] . elfeed-tube-save)
-                :map elfeed-search-mode-map
-                ("F" . elfeed-tube-fetch)
-                ([remap save-buffer] . elfeed-tube-save)))
-#+END_SRC
-
-*** Terminal
-#+BEGIN_SRC emacs-lisp
+** Terminal Emulator
+#+begin_src emacs-lisp
   (use-package vterm
-    :defer t)
-#+END_SRC
-** UI Settings
-*** Miscellaneous
-Setup ansi-color mode.
-#+BEGIN_SRC emacs-lisp
-  (use-package ansi-color
-    :ensure nil
-    :hook (compilation-filter . ansi-color-compilation-filter))
-#+END_SRC
-
-Disable the annoying stuff.
-#+begin_src emacs-lisp
-  (tool-bar-mode -1)
-  (menu-bar-mode -1)
-  (scroll-bar-mode -1)
+    :commands vterm)
 #+end_src
 
-#+RESULTS:
-
-Highlight the current line.
-#+begin_src emacs-lisp
-  (global-hl-line-mode 1)
-#+end_src
-
-Disable the start screen.
-#+begin_src emacs-lisp
-  (setq inhibit-startup-screen t)
-#+end_src
-
-Highlight the current line.
-#+begin_src emacs-lisp
-  (global-hl-line-mode 1)
-#+end_src
-
-*** Line numbers
-Turn on line numbers mode.
-Make line numbers absolute.
-#+begin_src emacs-lisp
-  (add-hook 'prog-mode-hook #'display-line-numbers-mode)
-  (setq display-line-numbers-type t)
-#+end_src
-
-#+RESULTS:
-: t
-
-*** Word wrapping
-#+begin_src emacs-lisp
-  (setq word-wrap 1)
-  (global-visual-line-mode 1)
-#+end_src
-
-*** Olivetti
-This package limits the text body width, super useful in visual mode.
-#+begin_src emacs-lisp
-  (use-package olivetti
-    :if (display-graphic-p)
-    :config
-    (setq-default olivetti-body-width 86))
-#+end_src
-
-*** epub reader
+** EPUB Reader
 #+begin_src emacs-lisp
   (use-package nov
     :mode ("\\.epub\\'" . nov-mode)
-    :hook (nov-mode . (lambda ()
-                        (face-remap-add-relative 'shr-h1 :height 1.8 :weight 'bold)
-                        (face-remap-add-relative 'shr-h2 :height 1.6 :weight 'bold)
-                        (face-remap-add-relative 'shr-h3 :height 1.4 :weight 'bold)
-                        (face-remap-add-relative 'shr-text :height 1.3)
-                        (face-remap-add-relative 'shr-code :height 1.2)
-                        (display-line-numbers-mode -1))))
+    :hook
+    (nov-mode . (lambda ()
+                  (face-remap-add-relative 'shr-h1 :height 1.8 :weight 'bold)
+                  (face-remap-add-relative 'shr-h2 :height 1.6 :weight 'bold)
+                  (face-remap-add-relative 'shr-h3 :height 1.4 :weight 'bold)
+                  (face-remap-add-relative 'shr-text :height 1.3)
+                  (face-remap-add-relative 'shr-code :height 1.2)
+                  (display-line-numbers-mode -1))))
 #+end_src
+
+* Notes & Tips
+** Startup Optimization Checklist
+- Use =:defer t= or =:defer N= (seconds) for packages not needed at startup
+- Use =:hook=, =:mode=, =:commands=, or =:bind= to auto-defer packages
+- Prefer =:custom= over =:config= for simple variable settings
+- Use =after-init-hook= for non-critical initialization
+- Keep GC threshold high during startup (handled by gcmh)
+- Minimize work in top-level expressions
+- Use =push= on =default-frame-alist= instead of mode toggles for UI
+
+** Performance Monitoring
+- =M-x benchmark-init/show-durations-tree= - Package load times
+- =M-x emacs-init-time= - Total init time
+- =(emacs-uptime)= - Check uptime
+
+** Key Optimizations Applied
+1. *GCMH* - Garbage collection during idle, not during editing
+2. *diff-hl* - Faster than git-gutter for VCS indicators
+3. *Frame parameters via push* - Faster than mode function calls
+4. *seq-some* - Built-in, no cl-lib require needed
+5. *:defer 1* for which-key - Loads after 1 second idle
+6. *Simplified font config* - Using :inherit reduces face computation
+
+** Common Issues
+- If a package isn't loading, check if it's deferred and add =:commands= or =:hook=
+- If completion is slow, check =corfu-auto-delay= setting
+- If LSP is slow, check =read-process-output-max= value
+- If GC pauses occur, check =gcmh-high-cons-threshold=

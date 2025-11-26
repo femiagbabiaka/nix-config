@@ -98,28 +98,6 @@ let
         epkgs.treesit-grammars.with-all-grammars
         jj-mode
         lean4-mode
-        pkgs.claude-code
-        pkgs.delve
-        pkgs.go
-        pkgs.gotools
-        pkgs.golangci-lint
-        pkgs.golangci-lint-langserver
-        pkgs.gopls
-        pkgs.helm-ls
-        pkgs.jj
-        pkgs.kubernetes-helm
-        pkgs.nil
-        pkgs.nix
-        pkgs.nixfmt-rfc-style
-        pkgs.racket-minimal
-        pkgs.ripgrep
-        pkgs.rust-analyzer
-        pkgs.terraform-ls
-        pkgs.tflint
-        pkgs.vscode-langservers-extracted
-        pkgs.yaml-language-server
-        pkgs.zig
-        pkgs.zls
         poly-helm-mode
         simpc-mode
       ];

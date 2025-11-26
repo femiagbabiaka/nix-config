@@ -55,6 +55,8 @@ let
       golangci-lint-langserver
       gopls
       graphviz
+      haskell.compiler.ghc910
+      haskell-language-server
       helix
       helm-ls
       htop
