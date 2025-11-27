@@ -226,7 +226,10 @@ Enhanced directory editing with dired-x. Deferred until dired is actually used.
 Switch between light and dark themes based on macOS system appearance.
 #+begin_src emacs-lisp
   (use-package ef-themes
-    :ensure t)
+    :ensure t
+    :config
+    (unless (display-graphic-p)
+      (add-hook 'after-init-hook (lambda () (load-theme #'ef-melissa-light)))))
 
   (use-package auto-dark
     :if (display-graphic-p)
