@@ -8,13 +8,6 @@
 This is a literate Emacs configuration optimized for fast startup and efficient lazy loading.
 The configuration is organized into logical sections with performance as a primary concern.
 
-** Design Principles
-- Lazy load everything possible using =:defer=, =:hook=, =:commands=, and =:mode=
-- Use =:custom= instead of =:config= for simple variable settings
-- Defer UI elements that don't affect initial display
-- Minimize work during startup, defer to idle time or first use
-- Use native compilation and tree-sitter where available
-
 * Bootstrap & Performance
 ** Custom File Location
 Emacs custom.el is notoriously messy. Keep it separate from init.el.
@@ -244,8 +237,8 @@ Set Berkeley Mono as the primary font family. Using default-frame-alist
 is faster than set-face-attribute at startup.
 #+begin_src emacs-lisp
   (add-to-list 'default-frame-alist '(font . "Berkeley Mono-16"))
-  (set-face-attribute 'default nil :font "Berkeley Mono-16")
   (set-face-attribute 'fixed-pitch nil :inherit 'default)
+  (set-face-attribute 'default nil :font "Berkeley Mono-16")
   (set-face-attribute 'variable-pitch nil :inherit 'default)
 #+end_src
 
@@ -453,113 +446,7 @@ Rich annotations for minibuffer completions.
     :hook (after-init-hook . marginalia-mode))
 #+end_src
 
-** Corfu
-In-buffer completion popup.
-#+begin_src emacs-lisp
-  (use-package corfu-terminal
-    :if (not (display-graphic-p)))
-
-  (use-package corfu
-    :hook (after-init-hook . global-corfu-mode)
-    :init
-    (unless (display-graphic-p)
-      (with-eval-after-load 'corfu
-        (require 'corfu-terminal)
-        (corfu-terminal-mode +1)))
-    :custom
-    (corfu-auto t)
-    (corfu-quit-no-match 'separator)
-    (corfu-auto-delay 0.2)
-    (corfu-min-width 20)
-    (corfu-max-width 80)
-    (corfu-bar-width 0)
-    (corfu-border-width 1)
-    :config
-    (require 'corfu-popupinfo)
-    (corfu-popupinfo-mode 1))
-#+end_src
-
-** Cape
-Completion extensions for Corfu.
-#+begin_src emacs-lisp
-  (use-package cape
-    :after corfu
-    :bind ("C-c p" . cape-prefix-map)
-    :config
-    (add-hook 'completion-at-point-functions #'cape-dabbrev)
-    (add-hook 'completion-at-point-functions #'cape-file)
-    (add-hook 'completion-at-point-functions #'cape-elisp-block))
-#+end_src
-
-** Minuet (AI Completion)
-AI-powered code completion using local LLM.
-#+begin_src emacs-lisp
-  (use-package minuet
-    :defer t
-    :custom
-    (minuet-provider 'openai-fim-compatible)
-    (minuet-n-completions 1)
-    (minuet-context-window 8192)
-    :config
-    (plist-put minuet-openai-fim-compatible-options
-               :end-point "http://cerebro:8080/v1/completions")
-    (plist-put minuet-openai-fim-compatible-options
-               :name "Llama.cpp")
-    (plist-put minuet-openai-fim-compatible-options
-               :api-key "TERM")
-    (plist-put minuet-openai-fim-compatible-options
-               :model "PLACEHOLDER")
-    (minuet-set-nested-plist minuet-openai-fim-compatible-options
-                             nil :template :suffix)
-    (minuet-set-optional-options
-     minuet-openai-fim-compatible-options
-     :prompt
-     (defun minuet-llama-cpp-fim-qwen-prompt-function (ctx)
-       (format "<|fim_prefix|>%s\n%s<|fim_suffix|>%s<|fim_middle|>"
-               (plist-get ctx :language-and-tab)
-               (plist-get ctx :before-cursor)
-               (plist-get ctx :after-cursor)))
-     :template)
-    (minuet-set-optional-options minuet-openai-fim-compatible-options
-                                 :max_tokens 56))
-#+end_src
-
 * Programming
-** Language Server Protocol (LSP)
-Use Eglot as LSP client for various programming languages.
-#+begin_src emacs-lisp
-  (use-package eglot
-    :hook
-    ((nix-ts-mode      . eglot-ensure)
-     (terraform-mode   . eglot-ensure)
-     (haskell-mode     . eglot-ensure)
-     (rust-ts-mode     . eglot-ensure)
-     (fish-mode        . eglot-ensure)
-     (typescript-mode  . eglot-ensure)
-     (go-ts-mode       . eglot-ensure)
-     (yaml-mode        . eglot-ensure)
-     (ruby-mode        . eglot-ensure)
-     (dockerfile-mode  . eglot-ensure)
-     (groovy-mode      . eglot-ensure)
-     (zig-ts-mode      . eglot-ensure))
-    :config
-    (add-to-list 'eglot-server-programs '(nix-mode . ("nil")))
-    (add-to-list 'eglot-server-programs '(nix-ts-mode . ("nil"))))
-#+end_src
-
-** Syntax Checking
-Flycheck for on-the-fly syntax checking.
-#+begin_src emacs-lisp
-  (use-package flycheck
-    :hook (after-init-hook . global-flycheck-mode))
-
-  (use-package flycheck-eglot
-    :after (flycheck eglot)
-    :hook (eglot-managed-mode . flycheck-eglot-mode)
-    :config
-    (global-flycheck-eglot-mode 1))
-#+end_src
-
 ** Language Modes
 *** C/C++
 #+begin_src emacs-lisp
@@ -684,46 +571,7 @@ Flycheck for on-the-fly syntax checking.
     :defer t)
 #+end_src
 
-** AI Assistant
-GPTel for LLM integration in Emacs.
-#+begin_src emacs-lisp
-  (use-package gptel
-    :commands gptel
-    :custom
-    (gptel-model 'zai-glm-4.6)
-    :config
-    (setq gptel-backend
-          (gptel-make-openai "Cerebras"
-            :host "api.cerebras.ai"
-            :endpoint "/v1/chat/completions"
-            :stream nil
-            :key #'gptel-api-key
-            :models '(qwen-3-235b-a22b-instruct-2507
-                      zai-glm-4.6
-                      gpt-oss-120b))))
-#+end_src
-
 * Project & Version Control
-** Dired Sidebar
-Lightweight file tree sidebar.
-#+begin_src emacs-lisp
-  (use-package dired-sidebar
-    :bind ("C-x t t" . dired-sidebar-toggle-sidebar)
-    :commands dired-sidebar-toggle-sidebar
-    :hook
-    (dired-sidebar-mode . (lambda ()
-                            (unless (file-remote-p default-directory)
-                              (auto-revert-mode))))
-    :custom
-    (dired-sidebar-subtree-line-prefix "__")
-    (dired-sidebar-theme 'nerd)
-    (dired-sidebar-use-term-integration t)
-    (dired-sidebar-use-custom-font t)
-    :config
-    (push 'toggle-window-split dired-sidebar-toggle-hidden-commands)
-    (push 'rotate-windows dired-sidebar-toggle-hidden-commands))
-#+end_src
-
 ** Git Integration
 *** Magit
 Powerful Git porcelain for Emacs.
@@ -941,32 +789,3 @@ YouTube feed support for Elfeed.
                   (face-remap-add-relative 'shr-code :height 1.2)
                   (display-line-numbers-mode -1))))
 #+end_src
-
-* Notes & Tips
-** Startup Optimization Checklist
-- Use =:defer t= or =:defer N= (seconds) for packages not needed at startup
-- Use =:hook=, =:mode=, =:commands=, or =:bind= to auto-defer packages
-- Prefer =:custom= over =:config= for simple variable settings
-- Use =after-init-hook= for non-critical initialization
-- Keep GC threshold high during startup (handled by gcmh)
-- Minimize work in top-level expressions
-- Use =push= on =default-frame-alist= instead of mode toggles for UI
-
-** Performance Monitoring
-- =M-x benchmark-init/show-durations-tree= - Package load times
-- =M-x emacs-init-time= - Total init time
-- =(emacs-uptime)= - Check uptime
-
-** Key Optimizations Applied
-1. *GCMH* - Garbage collection during idle, not during editing
-2. *diff-hl* - Faster than git-gutter for VCS indicators
-3. *Frame parameters via push* - Faster than mode function calls
-4. *seq-some* - Built-in, no cl-lib require needed
-5. *:defer 1* for which-key - Loads after 1 second idle
-6. *Simplified font config* - Using :inherit reduces face computation
-
-** Common Issues
-- If a package isn't loading, check if it's deferred and add =:commands= or =:hook=
-- If completion is slow, check =corfu-auto-delay= setting
-- If LSP is slow, check =read-process-output-max= value
-- If GC pauses occur, check =gcmh-high-cons-threshold=

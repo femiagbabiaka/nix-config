@@ -11,7 +11,6 @@ let
     fishPlugins.fzf
     glibtool
     kubectx
-    roswell
   ];
 in
 common {

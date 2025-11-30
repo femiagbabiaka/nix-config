@@ -68,9 +68,8 @@
     platinum-searcher
     pulseaudio
     rbenv
-    ripgrep
-    roswell
     rustup
+    ripgrep
     shellcheck
     spotify
     stern
