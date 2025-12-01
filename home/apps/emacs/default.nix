@@ -45,24 +45,17 @@ let
             hash = "sha256-l+6/XDhdvX6JWK61hKcOvPll4xZrNM3l87fWzBKO7BU=";
           };
         };
-        lean4-mode = epkgs.trivialBuild rec {
-          pname = "lean4-mode";
-          version = "1388f9d";
-          # Add this block to copy the data directory
-          postInstall = ''
-            cp -r data $out/share/emacs/site-lisp/
-          '';
-          src = pkgs.fetchFromGitHub {
-            owner = "leanprover-community";
-            repo = "lean4-mode";
+        nael = epkgs.trivialBuild rec {
+          pname = "nael";
+          version = "6f83a50dce";
+          src = pkgs.fetchFromGitea {
+            domain = "codeberg.org";
+            owner = "mekeor";
+            repo = "nael";
             rev = version;
-            hash = "sha256-6XFcyqSTx1CwNWqQvIc25cuQMwh3YXnbgr5cDiOCxBk=";
+            hash = "sha256-8K7MXP60ppbZV6VvMnBp0/EOfw/YqIo9iM4oBrrGMis=";
           };
-          packageRequires = with epkgs; [
-            dash
-            lsp-mode
-            magit-section
-         ];
+          sourceRoot = "${src.name}/nael";
         };
         jj-mode = epkgs.trivialBuild rec {
           pname = "jj-mode";
@@ -97,12 +90,12 @@ let
         epkgs.esup
         epkgs.treesit-grammars.with-all-grammars
         jj-mode
-        lean4-mode
+        nael
         poly-helm-mode
         simpc-mode
       ];
 
-    override = final: prev: { # this is literally _just_ for forge, which needs git at runtime
+    override = (final: prev: { # this is literally _just_ for forge, which needs git at runtime
       trivialBuild = args:
         if args.pname == "default" then
           prev.trivialBuild (args // {
@@ -110,7 +103,15 @@ let
           })
         else
           prev.trivialBuild args;
-    };
+
+      org = prev.org.overrideAttrs(old: {
+        version = "9.7.39";
+        src = pkgs.fetchurl {
+          url = "https://elpa.gnu.org/packages/org-9.7.39.tar";
+          sha256 = "sha256-vC/pU4haCCU1m4ay3XDDDIy88/Z8ds+u46JhTRAE5fk=";
+        };
+      });
+    });
   };
 in
 {

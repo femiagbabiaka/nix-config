@@ -3,7 +3,7 @@
 
   inputs = {
     determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/*";
-    nixpkgs.url = "github:femiagbabiaka/nixpkgs-unfree";
+    nixpkgs.url = "git+https://codeberg.org/femi/nixpkgs-unfree";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
     home-manager = {
       url = "github:nix-community/home-manager/master";
@@ -243,4 +243,3 @@
       };
     };
 }
-

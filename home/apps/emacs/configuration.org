@@ -213,6 +213,16 @@ Enhanced directory editing with dired-x. Deferred until dired is actually used.
     :hook (dired-mode . dired-extra-startup))
 #+end_src
 
+** Terminal Only Settings
+We can take advantage of kitty's terminal protocol extensions to get better key-chord interpretation when running in the terminal.
+#+begin_src emacs-lisp
+  (use-package kkp
+    :ensure t
+    :if (not (display-graphic-p))
+    :config
+    (global-kkp-mode +1))
+#+end_src
+
 * UI & Appearance
 ** Theme
 *** Automatic Theme Switching
@@ -409,6 +419,7 @@ Fallback jump-to-definition using ripgrep.
     (xref-show-definitions-function #'xref-show-definitions-completing-read)
     (xref-search-program 'ripgrep))
 #+end_src
+**
 
 * Completion & Search
 ** Vertico
@@ -537,8 +548,10 @@ Rich annotations for minibuffer completions.
 
 *** Lean
 #+begin_src emacs-lisp
-  (use-package lean4-mode
+  (use-package nael
     :ensure nil
+    :config
+    (require 'nael)
     :mode "\\.lean\\'")
 #+end_src
 
@@ -683,6 +696,7 @@ Visual indication of git changes in the fringe. Faster than git-gutter.
 *** Core Org Configuration
 #+begin_src emacs-lisp
   (use-package org
+    :ensure nil
     :bind ("C-c a" . org-agenda)
     :custom
     (org-agenda-files (list "~/src/femiagbabiaka/org/agenda"))

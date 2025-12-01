@@ -77,7 +77,6 @@ let
       platinum-searcher
       radicle-node
       radicle-tui
-      racket-minimal
       rbenv
       ripgrep
       rustup
