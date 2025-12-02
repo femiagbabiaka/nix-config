@@ -49,6 +49,9 @@ with lib;
 
   homebrew = {
     enable = true;
+    onActivation = {
+      cleanup = "zap";
+    };
     casks = [
       "1password"
       "yubico-authenticator"
@@ -56,6 +59,7 @@ with lib;
       "plexamp"
       "zed"
       "keymapp"
+      "signal"
     ];
     masApps = {
       "Wireguard" = 1451685025;
