@@ -12,6 +12,7 @@ let
   inherit (lib) unique;
 
   sharedImports = [
+    ../apps/kanata
     ../apps/bash
     ../apps/fish
     ../apps/gitconfig
@@ -24,6 +25,7 @@ let
   basePackages =
     with pkgs;
     [
+      kanata
       ansible
       automake
       awscli2

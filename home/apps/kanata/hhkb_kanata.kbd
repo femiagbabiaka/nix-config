@@ -1,0 +1,60 @@
+;; Kanata Configuration for HHKB Professional Type-S
+;; Adds Home Row Mods (HRM)
+;;
+;; MAPPING:
+;; Left Hand:
+;; A = Control (Hold) / A (Tap)
+;; S = Alt/Option (Hold) / S (Tap)
+;; D = Shift (Hold) / D (Tap)     <-- Added for completeness
+;; F = Command/Super (Hold) / F (Tap)
+;;
+;; Right Hand:
+;; J = Command/Super (Hold) / J (Tap)
+;; K = Shift (Hold) / K (Tap)     <-- Added for completeness
+;; L = Alt/Option (Hold) / L (Tap)
+;; ; = Control (Hold) / ; (Tap)
+
+(defcfg
+  ;; If you are on Linux, you might need to select the correct input device.
+  ;; On Windows/MacOS, this often works automatically.
+  process-unmapped-keys yes
+)
+
+(defsrc
+  ;; We define the keys we want to intercept on the base layer.
+  ;; HHKB standard layout implies standard ANSI scancodes for these keys.
+  a    s    d    f    j    k    l    ;
+)
+
+(defvar
+  ;; TAPPING TERM
+  ;; How long you need to hold a key for it to become a modifier (in ms).
+  ;; 200ms is a good starting point. Lower it (e.g., 150) if you type fast and
+  ;; it misses modifiers. Raise it if you get accidental modifiers while typing.
+  tap-time 200
+
+  ;; HOLD TIME
+  ;; How long the key must be held to trigger the hold action.
+  hold-time 200
+)
+
+(defalias
+  ;; LEFT HAND MODIFIERS
+  ;; Using tap-hold-release implies that if you press 'a', then press another key,
+  ;; and release 'a' before the other key, it acts as a modifier.
+  ;; If this feels laggy, switch to simple 'tap-hold'.
+
+  a_ctl (tap-hold $tap-time $hold-time a lctl)
+  s_alt (tap-hold $tap-time $hold-time s lalt)
+  f_cmd (tap-hold $tap-time $hold-time f lmet) ;; Command/Super (Meta) on index
+
+  ;; RIGHT HAND MODIFIERS
+  j_cmd (tap-hold $tap-time $hold-time j rmet) ;; Command/Super (Meta) on index
+  l_alt (tap-hold $tap-time $hold-time l ralt)
+  ;_ctl (tap-hold $tap-time $hold-time ; rctl)
+)
+
+(deflayer base
+  ;; The base layer with our home row mod aliases mapped
+  @a_ctl  @s_alt  d  @f_cmd  @j_cmd  k  @l_alt  @;_ctl
+)

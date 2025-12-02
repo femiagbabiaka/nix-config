@@ -39,7 +39,6 @@ let
       kind
       kubeswitch
       presenterm
-      spotify
       uv
       vault
       zellij
