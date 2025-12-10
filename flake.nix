@@ -155,6 +155,40 @@
             }
           ];
         };
+        giljotin = nixpkgs.lib.nixosSystem rec {
+          system = "x86_64-linux";
+          specialArgs = { inherit inputs; };
+          modules = [
+            ./systems/giljotin
+            ./systems/giljotin/configuration.nix
+            nixos-hardware.nixosModules.common-cpu-amd
+            nixos-hardware.nixosModules.common-gpu-amd
+            nixos-hardware.nixosModules.common-cpu-amd-pstate
+            nixos-hardware.nixosModules.common-pc-laptop-ssd
+            nixos-hardware.nixosModules.common-pc-laptop
+            home-manager.nixosModules.home-manager
+            {
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = true;
+              home-manager.users.femi = import ./home/home-linux.nix;
+              home-manager.extraSpecialArgs =
+                let
+                  username = "femi";
+                  homeDirectory = "/home/${username}";
+                in
+                {
+                  inherit
+                    username
+                    homeDirectory
+                    self
+                    home-manager
+		    neovim-nightly-overlay
+                    ;
+                  pkgs = inputs.nixpkgs.legacyPackages.${system};
+                };
+            }
+          ];
+        };
         tachibana = nixpkgs.lib.nixosSystem rec {
           system = "x86_64-linux";
           specialArgs = { inherit inputs; };

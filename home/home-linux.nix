@@ -11,6 +11,10 @@
     ./apps/gitconfig
     ./apps/ssh
     ./apps/emacs
+    ./apps/bash
+    ./apps/kitty
+    ./apps/neovim
+    ./apps/kakoune
   ];
 
   home = {
@@ -91,10 +95,18 @@
     zoxide
     zathura
     zellij
-    nerd-fonts.fira-code
     fzf
     delta
     bat
+    signal-desktop
+    elan
+    racket
+    discord
+    plexamp
+    xivlauncher
+    exercism
+    fwupd
+    gcc
   ];
 
   fonts.fontconfig.enable = true;

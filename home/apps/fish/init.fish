@@ -3,7 +3,7 @@ zoxide init fish --cmd cd | source
 
 set -x LSP_USE_LISTS true
 set -x EDITOR nvim
-set -l NON_WORK_HOSTS laincomp nixos cassiopeia jormungand tachibana cerebro
+set -l NON_WORK_HOSTS laincomp nixos cassiopeia jormungand tachibana cerebro giljotin
 
 if not contains (hostname) $NON_WORK_HOSTS
     eval (cinc shell-init fish)

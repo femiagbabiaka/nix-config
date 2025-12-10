@@ -4,7 +4,7 @@ let
     if pkgs.stdenv.isDarwin then
       pkgs.emacs-macport
     else
-      pkgs.emacs-git;
+      pkgs.emacs-unstable-pgtk;
 
   myEmacsAttrs = baseEmacs.overrideAttrs (previousAttrs: {
     nativeBuildInputs = (previousAttrs.nativeBuildInputs or [ ]) ++ [
