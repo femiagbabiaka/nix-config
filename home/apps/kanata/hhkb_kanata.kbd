@@ -18,6 +18,9 @@
   ;; If you are on Linux, you might need to select the correct input device.
   ;; On Windows/MacOS, this often works automatically.
   process-unmapped-keys yes
+  macos-dev-names-include (
+   "HHKB-Hybrid"
+  )
 )
 
 (defsrc
