@@ -13,7 +13,6 @@ let
   inherit (lib) unique;
 
   sharedImports = [
-    ../apps/kanata
     ../apps/bash
     ../apps/fish
     ../apps/gitconfig
@@ -119,6 +118,7 @@ let
     golangci-lint-langserver
     gopls
     gotools
+    ghc
     haskell-language-server
     helix
     jq

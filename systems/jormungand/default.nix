@@ -69,7 +69,6 @@
       "zed"
       "discord"
       "keymapp"
-      "spotify"
     ];
   };
 

@@ -44,6 +44,7 @@
         jormungand = nix-darwin.lib.darwinSystem rec {
           system = "aarch64-darwin";
           modules = [
+            determinate.darwinModules.default
             mac-app-util.darwinModules.default
             ./systems/jormungand
             home-manager.darwinModules.home-manager
