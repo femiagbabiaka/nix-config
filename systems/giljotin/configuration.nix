@@ -2,17 +2,12 @@
 # your system. Help is available in the configuration.nix(5) man page, on
 # https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
 
-{ config, lib, pkgs, ... }:
-let
-  checkLid = pkgs.writeShellScriptBin "check-lid" ''
-    LID_STATE=$(grep -o "open" /proc/acpi/button/lid/LID/state || true)
-    if [ "$LID_STATE" = "open" ]; then
-      exit 0
-    else
-      exit 1
-    fi
-  '';
-in
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 {
   nix.settings.experimental-features = [
     "nix-command"
@@ -28,13 +23,13 @@ in
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  powerManagement.enable = true;
   nixpkgs.config.allowUnfree = true;
 
   networking.hostName = "giljotin"; # Define your hostname.
 
   # Configure network connections interactively with nmcli or nmtui.
   networking.networkmanager.enable = true;
+  networking.networkmanager.wifi.powersave = false;
 
   # Set your time zone.
   time.timeZone = "America/Chicago";
@@ -50,10 +45,12 @@ in
     useXkbConfig = true; # use xkb.options in tty.
   };
 
-  services.displayManager.cosmic-greeter.enable = true;
-  services.greetd.enable = true;
-  services.desktopManager.cosmic.enable = true;
-  services.system76-scheduler.enable = true;
+  services.displayManager.gdm.enable = true;
+  services.desktopManager.gnome.enable = true;
+  services.gnome.core-apps.enable = false;
+  services.gnome.core-developer-tools.enable = false;
+  services.gnome.games.enable = false;
+  environment.gnome.excludePackages = with pkgs; [ gnome-tour gnome-user-docs ];
 
 
   # Configure keymap in X11
@@ -70,26 +67,23 @@ in
   };
 
   # Enable touchpad support (enabled default in most desktopManager).
-  services.libinput.enable = true;
+  services.libinput = {
+    enable = true;
+    touchpad = {
+      tapping = true;
+      clickMethod = "clickfinger";
+      naturalScrolling = true;
+    };
+  };
   programs.fish.enable = true;
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.femi = {
     isNormalUser = true;
     shell = pkgs.fish;
-    extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
+    extraGroups = [ "wheel" "input" ]; # Enable ‘sudo’ for the user.
     packages = with pkgs; [
       tree
     ];
-  };
-
-  fileSystems."/mnt/share" = {
-    device = "//brain-2/plex";
-    fsType = "cifs";
-    options = let
-      # this line prevents hanging on network split
-      automount_opts = "x-systemd.automount,noauto,x-systemd.idle-timeout=60,x-systemd.device-timeout=5s,x-systemd.mount-timeout=5s";
-
-    in ["${automount_opts},credentials=/etc/nixos/smb-secrets"];
   };
 
   # programs.firefox.enable = true;
@@ -99,29 +93,10 @@ in
   environment.systemPackages = with pkgs; [
     vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
     git
+    gnome-tweaks
+    gnomeExtensions.blur-my-shell
+    gnomeExtensions.paperwm
   ];
-
-  services.fprintd = {
-    enable = true;
-    tod.enable = true;
-    tod.driver = pkgs.libfprint-2-tod1-goodix;
-  };
-
-  security.pam.services = {
-    # Apply to sudo
-    sudo.text = pkgs.lib.mkDefault (
-      pkgs.lib.mkBefore ''
-        auth [success=ignore default=1] pam_exec.so quiet ${checkLid}/bin/check-lid
-      ''
-    );
-
-    # Optional: Apply to login/GDM if you want the same behavior there
-    login.text = pkgs.lib.mkDefault (
-      pkgs.lib.mkBefore ''
-        auth [success=ignore default=1] pam_exec.so quiet ${checkLid}/bin/check-lid
-      ''
-    );
-  };
 
   programs.steam = {
     enable = true;
@@ -138,9 +113,6 @@ in
     enable = true;
     enableSSHSupport = true;
   };
-  services.fwupd.enable = true;
-
-
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.

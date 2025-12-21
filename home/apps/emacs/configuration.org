@@ -37,17 +37,6 @@ Also set process output max for better LSP performance.
   (setq read-process-output-max (* 1024 1024))  ; 1MB
 #+end_src
 
-** Intelligent Garbage Collection
-Use GCMH to run GC during idle time instead of during editing.
-#+begin_src emacs-lisp
-  (use-package gcmh
-    :hook (after-init-hook . gcmh-mode)
-    :custom
-    (gcmh-idle-delay 'auto)
-    (gcmh-auto-idle-delay-factor 10)
-    (gcmh-high-cons-threshold (* 16 1024 1024)))  ; 16MB
-#+end_src
-
 ** Startup Profiling
 Benchmark startup time and identify slow packages.
 Only loads when EMACS_BENCHMARK env var is set.
@@ -233,25 +222,17 @@ Switch between light and dark themes based on macOS system appearance.
     :config
     (unless (display-graphic-p)
       (add-hook 'after-init-hook (lambda () (load-theme #'ef-melissa-light)))))
-
-  (use-package auto-dark
-    :if (display-graphic-p)
-    :after ef-themes
-    :hook (after-init-hook . auto-dark-mode)
-    :custom
-    (auto-dark-themes '((ef-melissa-dark) (ef-melissa-light))))
 #+end_src
 
 ** Font Configuration
 Set Berkeley Mono as the primary font family. Using default-frame-alist
 is faster than set-face-attribute at startup.
 #+begin_src emacs-lisp
-  (add-to-list 'default-frame-alist '(font . "Berkeley Mono-14"))
+  (add-to-list 'default-frame-alist '(font . "Berkeley Mono-16"))
   (set-face-attribute 'fixed-pitch nil :inherit 'default)
-  (set-face-attribute 'default nil :font "Berkeley Mono-14")
+  (set-face-attribute 'default nil :font "Berkeley Mono-16")
   (set-face-attribute 'variable-pitch nil :inherit 'default)
 #+end_src
-
 ** Frame Parameters
 macOS-specific frame appearance settings are in early-init.el.
 #+begin_src emacs-lisp :tangle no
@@ -383,7 +364,6 @@ Quick window switching with visual indicators.
   (use-package ace-window
     :bind ("M-o" . ace-window))
 #+end_src
-
 ** Jump to Definition
 *** Dumb Jump with xref
 Fallback jump-to-definition using ripgrep.
@@ -401,7 +381,12 @@ Fallback jump-to-definition using ripgrep.
     (xref-search-program 'ripgrep))
 #+end_src
 **
-
+** Devil Mode
+#+begin_src emacs-lisp
+  (use-package devil
+    :bind ("C-," . global-devil-mode)
+    :config (global-devil-mode))
+#+end_src
 * Completion & Search
 ** Vertico
 Vertical completion UI for minibuffer.

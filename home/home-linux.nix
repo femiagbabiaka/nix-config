@@ -15,6 +15,7 @@
     ./apps/kitty
     ./apps/neovim
     ./apps/kakoune
+    ./apps/kanata
   ];
 
   home = {
@@ -26,6 +27,7 @@
   programs.home-manager.enable = true;
   programs.fish.enable = true;
   nixpkgs.config.allowUnfree = true;
+  nixpkgs.config.allowBroken = true;
 
   programs.firefox = {
     enable = true;
@@ -36,6 +38,7 @@
     ansible
     automake
     awscli2
+    brave
     bat
     cmake
     colima

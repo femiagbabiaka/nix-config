@@ -1,10 +1,6 @@
 { pkgs, ... }:
 let
-  baseEmacs =
-    if pkgs.stdenv.isDarwin then
-      pkgs.emacs-macport
-    else
-      pkgs.emacs-unstable-pgtk;
+  baseEmacs = if pkgs.stdenv.isDarwin then pkgs.emacs-macport else pkgs.emacs-igc;
 
   myEmacsAttrs = baseEmacs.overrideAttrs (previousAttrs: {
     nativeBuildInputs = (previousAttrs.nativeBuildInputs or [ ]) ++ [
@@ -19,7 +15,8 @@ let
     alwaysTangle = true;
     alwaysEnsure = true;
 
-    extraEmacsPackages = epkgs:
+    extraEmacsPackages =
+      epkgs:
       let
         claude-code-ide = epkgs.trivialBuild rec {
           pname = "claude-code-ide";
@@ -88,30 +85,39 @@ let
       [
         claude-code-ide
         epkgs.esup
-        epkgs.treesit-grammars.with-all-grammars
+        (epkgs.treesit-grammars.with-grammars (
+          grammars: builtins.attrValues (builtins.removeAttrs grammars [ "tree-sitter-razor" ])
+        ))
         jj-mode
         nael
         poly-helm-mode
         simpc-mode
       ];
 
-    override = (final: prev: { # this is literally _just_ for forge, which needs git at runtime
-      trivialBuild = args:
-        if args.pname == "default" then
-          prev.trivialBuild (args // {
-            nativeBuildInputs = (args.nativeBuildInputs or [ ]) ++ [ pkgs.git ];
-          })
-        else
-          prev.trivialBuild args;
+    override = (
+      final: prev: {
+        # this is literally _just_ for forge, which needs git at runtime
+        trivialBuild =
+          args:
+          if args.pname == "default" then
+            prev.trivialBuild (
+              args
+              // {
+                nativeBuildInputs = (args.nativeBuildInputs or [ ]) ++ [ pkgs.git ];
+              }
+            )
+          else
+            prev.trivialBuild args;
 
-      org = prev.org.overrideAttrs(old: {
-        version = "9.7.39";
-        src = pkgs.fetchurl {
-          url = "https://elpa.gnu.org/packages/org-9.7.39.tar";
-          sha256 = "sha256-vC/pU4haCCU1m4ay3XDDDIy88/Z8ds+u46JhTRAE5fk=";
-        };
-      });
-    });
+        org = prev.org.overrideAttrs (old: {
+          version = "9.7.39";
+          src = pkgs.fetchurl {
+            url = "https://elpa.gnu.org/packages/org-9.7.39.tar";
+            sha256 = "sha256-vC/pU4haCCU1m4ay3XDDDIy88/Z8ds+u46JhTRAE5fk=";
+          };
+        });
+      }
+    );
   };
 in
 {
@@ -119,6 +125,8 @@ in
     enable = true;
     package = emacsWithPkgs;
   };
+
+  services.emacs.enable = true;
 
   # This writes the early-init.el to ~/.emacs.d/early-init.el
   home.file.".emacs.d/early-init.el".text = ''

@@ -21,6 +21,11 @@
   macos-dev-names-include (
    "HHKB-Hybrid"
   )
+  linux-dev-names-include (
+    "PFU Limited HHKB-Hybrid Keyboard"
+    "PFU Limited HHKB-Hybrid Consumer Control"
+    "PFU Limited HHKB-Hybrid"
+  )
 )
 
 (defsrc
