@@ -65,6 +65,7 @@ let
     jujutsu
     k9s
     kakoune-lsp
+    kak-tree-sitter-unwrapped
     kubernetes-helm
     lldb
     mosh

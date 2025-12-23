@@ -67,6 +67,7 @@
     k9s
     kubectx
     kakoune-lsp
+    kak-tree-sitter
     mitschemeX11
     mosh
     nil

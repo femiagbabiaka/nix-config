@@ -9,7 +9,7 @@
     };
     themeFile = "GitHub_Light_High_Contrast";
     settings = {
-      enabled_layouts = "splits:split_axis=horizontal,stack";
+      enabled_layouts = "tall:bias=50;full_size=1;mirrored=false";
       allow_remote_control = "yes";
       scrollback_lines = 10000;
       enable_audio_bell = false;
