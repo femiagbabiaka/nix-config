@@ -22,7 +22,19 @@ let
 in
 {
   programs.kakoune = {
+    defaultEditor = true;
     enable = true;
+    colorSchemePackage = kakoune-colors;
+    config = {
+			colorScheme = "ef-melissa-dark";
+			indentWidth = 2;
+			numberLines = {
+				enable = true;
+				highlightCursor = true;
+			};
+			showMatching = true;
+			tabStop = 2;
+    };
     extraConfig = builtins.readFile ./extraconfig.kak;
     plugins = [
       pkgs.kakounePlugins.fzf-kak
