@@ -40,6 +40,27 @@
       ...
     }:
     {
+      homeConfigurations = {
+        femi = home-manager.lib.homeManagerConfiguration {
+          pkgs = inputs.nixpkgs.legacyPackages."x86_64-linux";
+          extraSpecialArgs =
+            let
+              username = "femi";
+            in
+            {
+              inherit
+                username
+                self
+                home-manager
+                neovim-nightly-overlay
+                ;
+              homeDirectory = "/home/${username}";
+            };
+          modules = [
+            (import ./home/home-linux.nix)
+          ];
+        };
+      };
       darwinConfigurations = {
         jormungand = nix-darwin.lib.darwinSystem rec {
           system = "aarch64-darwin";
@@ -169,7 +190,7 @@
             nixos-hardware.nixosModules.common-pc-laptop-ssd
             nixos-hardware.nixosModules.common-pc-laptop
             {
-                nixpkgs.config.allowBroken = true;
+              nixpkgs.config.allowBroken = true;
             }
             home-manager.nixosModules.home-manager
             {

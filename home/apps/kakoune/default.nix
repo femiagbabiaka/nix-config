@@ -1,7 +1,7 @@
 { pkgs, ... }:
 let
   kakoune-colors = pkgs.stdenv.mkDerivation rec {
-    pname = "kakoune-ts-themes";
+    pname = "kakoune-themes";
     version = "205ec3f2";
     src = pkgs.fetchFromGitHub {
       owner = "anhsirk0";
@@ -26,14 +26,14 @@ in
     enable = true;
     colorSchemePackage = kakoune-colors;
     config = {
-			colorScheme = "ef-melissa-dark";
-			indentWidth = 2;
-			numberLines = {
-				enable = true;
-				highlightCursor = true;
-			};
-			showMatching = true;
-			tabStop = 2;
+      colorScheme = "ef-melissa-dark";
+      indentWidth = 2;
+      numberLines = {
+        enable = true;
+        highlightCursor = true;
+      };
+      showMatching = true;
+      tabStop = 2;
     };
     extraConfig = builtins.readFile ./extraconfig.kak;
     plugins = [

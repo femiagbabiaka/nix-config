@@ -23,4 +23,4 @@ map global object D '<a-semicolon>lsp-diagnostic-object error<ret>' -docstring '
 map global user f ':fzf-mode<ret>'
 
 # auto-pairs
-auto-pairs-enable
+enable-auto-pairs
