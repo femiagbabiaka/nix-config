@@ -27,7 +27,7 @@ vim.pack.add({
     { src = "https://github.com/stevearc/oil.nvim" },
     { src = 'https://github.com/nyoom-engineering/oxocarbon.nvim.git' },
     { src = 'https://github.com/neovim/nvim-lspconfig' },
-    { src = 'https://github.com/echasnovski/mini.pick' },
+    { src = 'https://github.com/dmtrKovalenko/fff.nvim' },
     { src = 'https://github.com/echasnovski/mini.pairs' },
     { src = 'https://github.com/nvim-treesitter/nvim-treesitter.git' },
     {
@@ -41,11 +41,23 @@ vim.opt.background = "dark"
 -- make statusline transparent
 vim.cmd(":hi statusline guibg=NONE")
 
--- mini.pick
-require "mini.pick".setup()
-vim.keymap.set('n', '<leader>f', ":Pick files<CR>")
-vim.keymap.set('n', '<leader>b', ":Pick buffers<CR>")
-vim.keymap.set('n', '<leader>h', ":Pick help<CR>")
+-- fff.nvim
+vim.api.nvim_create_autocmd('PackChanged', {
+  callback = function(event)
+    if event.data.updated then
+      require('fff.download').download_or_build_binary()
+    end
+  end,
+})
+
+vim.g.fff = {
+  lazy_sync = true, -- start syncing only when the picker is open
+  debug = {
+    enabled = true,
+    show_scores = true,
+  },
+}
+vim.keymap.set('n', '<leader>f', function() require('fff').find_files() end)
 
 -- mini.pairs
 require "mini.pairs".setup()
@@ -55,7 +67,7 @@ require "oil".setup()
 vim.keymap.set('n', '<leader>e', ":Oil<CR>")
 
 -- nvim-treesitter
-require "nvim-treesitter.configs".setup({
+require "nvim-treesitter".setup({
     sync_install = true,
     ensure_installed = "all",
     highlight = { enable = true },
@@ -71,6 +83,7 @@ require "blink.cmp".setup({
 -- servers
 vim.lsp.enable(
     {
+        "clangd",
         "gopls",
         "helm_ls",
         "lua_ls",
@@ -78,7 +91,8 @@ vim.lsp.enable(
         "rubocop",
         "ruby_lsp",
         "rust_analyzer",
-        "terraformls"
+        "terraformls",
+        "zls"
     }
 )
 vim.lsp.config("lua_ls", {

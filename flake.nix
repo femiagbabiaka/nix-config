@@ -22,6 +22,13 @@
     nix-darwin.url = "github:nix-darwin/nix-darwin/master";
     nix-darwin.inputs.nixpkgs.follows = "nixpkgs/nixpkgs";
     neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay";
+    zen-browser = {
+      url = "github:0xc000022070/zen-browser-flake";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        home-manager.follows = "home-manager";
+      };
+    };
   };
 
   outputs =
@@ -37,8 +44,12 @@
       nix-darwin,
       determinate,
       neovim-nightly-overlay,
+      zen-browser,
       ...
     }:
+    let
+      mkSystem = import ./lib/helpers.nix { inherit inputs; };
+    in
     {
       homeConfigurations = {
         femi = home-manager.lib.homeManagerConfiguration {
@@ -53,6 +64,7 @@
                 self
                 home-manager
                 neovim-nightly-overlay
+                zen-browser
                 ;
               homeDirectory = "/home/${username}";
             };
@@ -61,235 +73,46 @@
           ];
         };
       };
+
       darwinConfigurations = {
-        jormungand = nix-darwin.lib.darwinSystem rec {
-          system = "aarch64-darwin";
-          modules = [
-            determinate.darwinModules.default
-            mac-app-util.darwinModules.default
-            ./systems/jormungand
-            home-manager.darwinModules.home-manager
-            {
-              home-manager.useUserPackages = true;
-              home-manager.users.femi = import ./home/home-darwin-personal.nix;
-              home-manager.sharedModules = [ mac-app-util.homeManagerModules.default ];
-              home-manager.extraSpecialArgs =
-                let
-                  username = "femi";
-                in
-                {
-                  inherit
-                    username
-                    self
-                    home-manager
-                    neovim-nightly-overlay
-                    ;
-                  pkgs = inputs.nixpkgs.legacyPackages.${system};
-                };
-            }
-          ];
+        jormungand = mkSystem.mkDarwinSystem {
+          hostname = "jormungand";
+          extraModules = [ determinate.darwinModules.default ];
         };
-        proletariat = nix-darwin.lib.darwinSystem rec {
-          system = "aarch64-darwin";
-          specialArgs = { inherit inputs; };
-          modules = [
-            mac-app-util.darwinModules.default
-            ./systems/proletariat
-            home-manager.darwinModules.home-manager
-            {
-              home-manager.useUserPackages = true;
-              home-manager.users.fagbabiaka = import ./home/home-darwin.nix;
-              home-manager.sharedModules = [ mac-app-util.homeManagerModules.default ];
-              home-manager.extraSpecialArgs =
-                let
-                  username = "fagbabiaka";
-                in
-                {
-                  inherit
-                    username
-                    self
-                    home-manager
-                    dagger
-                    system
-                    neovim-nightly-overlay
-                    ;
-                  pkgs = inputs.nixpkgs.legacyPackages.${system};
-                };
-            }
-          ];
+        proletariat = mkSystem.mkDarwinSystem {
+          hostname = "proletariat";
+          user = "fagbabiaka";
         };
       };
+
       nixosConfigurations = {
-        cassiopeia = nixpkgs.lib.nixosSystem rec {
-          system = "x86_64-linux";
-          specialArgs = { inherit inputs; };
-          modules = [
-            ./systems/cassiopeia
-            ./systems/cassiopeia/configuration.nix
-            home-manager.nixosModules.home-manager
-            {
-              home-manager.useGlobalPkgs = true;
-              home-manager.useUserPackages = true;
-              home-manager.users.femi = import ./home/home-linux.nix;
-              home-manager.extraSpecialArgs =
-                let
-                  username = "femi";
-                  homeDirectory = "/home/${username}";
-                in
-                {
-                  inherit
-                    username
-                    homeDirectory
-                    self
-                    home-manager
-                    ;
-                  pkgs = inputs.nixpkgs.legacyPackages.${system};
-                };
-            }
-          ];
+        cassiopeia = mkSystem.mkNixosSystem {
+          hostname = "cassiopeia";
         };
-        cerebro = nixpkgs.lib.nixosSystem rec {
-          system = "x86_64-linux";
-          specialArgs = { inherit inputs; };
-          modules = [
-            ./systems/cerebro
-            ./systems/cerebro/configuration.nix
-            nixos-hardware.nixosModules.framework-desktop-amd-ai-max-300-series
-            home-manager.nixosModules.home-manager
-            {
-              home-manager.useGlobalPkgs = true;
-              home-manager.useUserPackages = true;
-              home-manager.users.femi = import ./home/home-linux.nix;
-              home-manager.extraSpecialArgs =
-                let
-                  username = "femi";
-                  homeDirectory = "/home/${username}";
-                in
-                {
-                  inherit
-                    username
-                    homeDirectory
-                    self
-                    home-manager
-                    ;
-                  pkgs = inputs.nixpkgs.legacyPackages.${system};
-                };
-            }
-          ];
+
+        cerebro = mkSystem.mkNixosSystem {
+          hostname = "cerebro";
+          hardwareModules = [ nixos-hardware.nixosModules.framework-desktop-amd-ai-max-300-series ];
         };
-        giljotin = nixpkgs.lib.nixosSystem rec {
-          system = "x86_64-linux";
-          specialArgs = { inherit inputs; };
-          modules = [
-            ./systems/giljotin
-            ./systems/giljotin/configuration.nix
-            determinate.nixosModules.default
-            home-manager.nixosModules.home-manager
-            {
-              home-manager.useGlobalPkgs = true;
-              home-manager.useUserPackages = true;
-              home-manager.users.femi = import ./home/home-linux.nix;
-              home-manager.extraSpecialArgs =
-                let
-                  username = "femi";
-                  homeDirectory = "/home/${username}";
-                in
-                {
-                  inherit
-                    username
-                    homeDirectory
-                    self
-                    home-manager
-                    neovim-nightly-overlay
-                    ;
-                  pkgs = inputs.nixpkgs.legacyPackages.${system};
-                };
-            }
-          ];
+
+        giljotin = mkSystem.mkNixosSystem {
+          hostname = "giljotin";
+          extraModules = [ determinate.nixosModules.default ];
         };
-        tachibana = nixpkgs.lib.nixosSystem rec {
-          system = "x86_64-linux";
-          specialArgs = { inherit inputs; };
-          modules = [
-            ./systems/tachibana
-            ./systems/tachibana/configuration.nix
-            home-manager.nixosModules.home-manager
-            {
-              home-manager.useGlobalPkgs = true;
-              home-manager.useUserPackages = true;
-              home-manager.users.femi = import ./home/home-linux.nix;
-              home-manager.extraSpecialArgs =
-                let
-                  username = "femi";
-                  homeDirectory = "/home/${username}";
-                in
-                {
-                  inherit
-                    username
-                    homeDirectory
-                    self
-                    home-manager
-                    ;
-                };
-            }
-          ];
+
+        tachibana = mkSystem.mkNixosSystem {
+          hostname = "tachibana";
         };
-        laincomp = nixpkgs.lib.nixosSystem rec {
-          system = "x86_64-linux";
-          specialArgs = { inherit inputs; };
-          modules = [
-            ./systems/laincomp
-            ./systems/laincomp/configuration.nix
-            nixos-hardware.nixosModules.dell-xps-13-9380
-            home-manager.nixosModules.home-manager
-            {
-              home-manager.useGlobalPkgs = true;
-              home-manager.useUserPackages = true;
-              home-manager.users.femi = import ./home/home-linux.nix;
-              home-manager.extraSpecialArgs =
-                let
-                  username = "femi";
-                  homeDirectory = "/home/${username}";
-                in
-                {
-                  inherit
-                    username
-                    homeDirectory
-                    self
-                    home-manager
-                    ;
-                  pkgs = inputs.nixpkgs.legacyPackages.${system};
-                };
-            }
-          ];
+
+        laincomp = mkSystem.mkNixosSystem {
+          hostname = "laincomp";
+          hardwareModules = [ nixos-hardware.nixosModules.dell-xps-13-9380 ];
         };
-        brain = nixpkgs.lib.nixosSystem rec {
-          system = "x86_64-linux";
-          specialArgs = { inherit inputs; };
-          modules = [
-            ./systems/brain/configuration.nix
-            nixos-wsl.nixosModules.wsl
-            home-manager.nixosModules.home-manager
-            {
-              home-manager.useGlobalPkgs = true;
-              home-manager.useUserPackages = true;
-              home-manager.users.nixos = import ./home/home-linux.nix;
-              home-manager.extraSpecialArgs =
-                let
-                  username = "nixos";
-                  homeDirectory = "/home/${username}";
-                in
-                {
-                  inherit
-                    username
-                    homeDirectory
-                    self
-                    home-manager
-                    ;
-                  pkgs = nixpkgs.legacyPackages.${system};
-                };
-            }
-          ];
+
+        brain = mkSystem.mkNixosSystem {
+          hostname = "brain";
+          user = "nixos";
+          wsl = true;
         };
       };
     };

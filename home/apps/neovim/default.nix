@@ -19,6 +19,7 @@ let
                --add-flags "-u ${nvimConfig}" \
       	 --prefix PATH : "${
           lib.makeBinPath [
+            pkgs.clang-tools
             pkgs.checkmake
             pkgs.clippy
             pkgs.codespell

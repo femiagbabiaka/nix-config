@@ -3,6 +3,7 @@
   lib,
   username,
   homeDirectory,
+  zen-browser,
   ...
 }:
 {
@@ -111,6 +112,7 @@
     exercism
     fwupd
     gcc
+    zen-browser.packages."${system}".default
   ];
 
   fonts.fontconfig.enable = true;

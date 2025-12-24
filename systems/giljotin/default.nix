@@ -12,22 +12,38 @@
   boot.initrd.kernelModules = [ ];
   boot.kernelModules = [ "kvm-amd" ];
   boot.extraModulePackages = [ ];
-  boot.kernelPackages = pkgs.linuxPackages;
 
   fileSystems."/" =
-    { device = "/dev/disk/by-uuid/43ae3978-2c79-4d7b-8ad5-3c2278c41221";
-      fsType = "ext4";
+    { device = "/dev/disk/by-uuid/78296245-c79a-4f7d-ac27-deba8ab44d63";
+      fsType = "btrfs";
+      options = [ "subvol=@" ];
     };
 
   fileSystems."/boot" =
-    { device = "/dev/disk/by-uuid/5100-69D4";
+    { device = "/dev/disk/by-uuid/34F7-6F5A";
       fsType = "vfat";
-      options = [ "fmask=0077" "dmask=0077" ];
+      options = [ "fmask=0022" "dmask=0022" ];
     };
 
-  swapDevices =
-    [ { device = "/dev/disk/by-uuid/c440d99f-8436-4086-a72f-b73833e41ed8"; }
-    ];
+  fileSystems."/home" =
+    { device = "/dev/disk/by-uuid/78296245-c79a-4f7d-ac27-deba8ab44d63";
+      fsType = "btrfs";
+      options = [ "subvol=@home" ];
+    };
+
+  fileSystems."/nix" =
+    { device = "/dev/disk/by-uuid/78296245-c79a-4f7d-ac27-deba8ab44d63";
+      fsType = "btrfs";
+      options = [ "subvol=@nix" ];
+    };
+
+  fileSystems."/var/log" =
+    { device = "/dev/disk/by-uuid/78296245-c79a-4f7d-ac27-deba8ab44d63";
+      fsType = "btrfs";
+      options = [ "subvol=@log" ];
+    };
+
+  swapDevices = [ ];
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
