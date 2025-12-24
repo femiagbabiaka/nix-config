@@ -53,6 +53,11 @@
 	  displayManager.sddm.wayland.enable = true;
   };
 
+  
+  services.fprintd.enable = true;
+  services.fprintd.tod.enable = true;
+  services.fprintd.tod.driver = pkgs.libfprint-2-tod1-goodix; # Goodix driver module
+
   # Configure keymap in X11
   services.xserver.xkb.layout = "us";
   services.xserver.xkb.options = "ctrl:nocaps";
