@@ -12,7 +12,7 @@
   boot.initrd.kernelModules = [ ];
   boot.kernelModules = [ "kvm-amd" ];
   boot.extraModulePackages = [ ];
-  boot.kernelPackages = pkgs.linuxPackages_latest;
+  boot.kernelPackages = pkgs.linuxPackages;
 
   fileSystems."/" =
     { device = "/dev/disk/by-uuid/43ae3978-2c79-4d7b-8ad5-3c2278c41221";

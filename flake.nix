@@ -184,14 +184,6 @@
             ./systems/giljotin
             ./systems/giljotin/configuration.nix
             determinate.nixosModules.default
-            nixos-hardware.nixosModules.common-cpu-amd
-            nixos-hardware.nixosModules.common-gpu-amd
-            nixos-hardware.nixosModules.common-cpu-amd-pstate
-            nixos-hardware.nixosModules.common-pc-laptop-ssd
-            nixos-hardware.nixosModules.common-pc-laptop
-            {
-              nixpkgs.config.allowBroken = true;
-            }
             home-manager.nixosModules.home-manager
             {
               home-manager.useGlobalPkgs = true;
