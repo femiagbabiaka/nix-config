@@ -13,46 +13,43 @@
   boot.kernelModules = [ "kvm-amd" ];
   boot.extraModulePackages = [ ];
   boot.kernelPackages = pkgs.linuxPackages_latest;
-  boot.kernelParams = ["resume_offset=50191960"];
-  boot.resumeDevice = "/dev/disk/by-uuid/78296245-c79a-4f7d-ac27-deba8ab44d63";
+  boot.kernelParams = ["resume_offset=0"];
+  boot.resumeDevice = "/dev/disk/by-label/swap";
   powerManagement.enable = true;
 
   fileSystems."/" =
-    { device = "/dev/disk/by-uuid/78296245-c79a-4f7d-ac27-deba8ab44d63";
+    { device = "/dev/disk/by-uuid/a7750155-0997-4178-ba8c-072ed7a62922";
       fsType = "btrfs";
       options = [ "subvol=@" ];
     };
 
   fileSystems."/boot" =
-    { device = "/dev/disk/by-uuid/34F7-6F5A";
+    { device = "/dev/disk/by-uuid/FB87-31C8";
       fsType = "vfat";
       options = [ "fmask=0022" "dmask=0022" ];
     };
 
   fileSystems."/home" =
-    { device = "/dev/disk/by-uuid/78296245-c79a-4f7d-ac27-deba8ab44d63";
+    { device = "/dev/disk/by-uuid/a7750155-0997-4178-ba8c-072ed7a62922";
       fsType = "btrfs";
       options = [ "subvol=@home" ];
     };
 
   fileSystems."/nix" =
-    { device = "/dev/disk/by-uuid/78296245-c79a-4f7d-ac27-deba8ab44d63";
+    { device = "/dev/disk/by-uuid/a7750155-0997-4178-ba8c-072ed7a62922";
       fsType = "btrfs";
       options = [ "subvol=@nix" ];
     };
 
   fileSystems."/var/log" =
-    { device = "/dev/disk/by-uuid/78296245-c79a-4f7d-ac27-deba8ab44d63";
+    { device = "/dev/disk/by-uuid/a7750155-0997-4178-ba8c-072ed7a62922";
       fsType = "btrfs";
       options = [ "subvol=@log" ];
     };
 
-  swapDevices = [
-    {
-      device = "/var/lib/swapfile";
-      size = 200 * 1024; # 32GB in MB
-    }
-  ];
+  swapDevices =
+    [ { device = "/dev/disk/by-label/swap"; }
+    ];
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
