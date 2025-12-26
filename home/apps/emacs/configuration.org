@@ -533,6 +533,41 @@ Rich annotations for minibuffer completions.
     ;; (keymap-set consult-narrow-map (concat consult-narrow-key " ?") #'consult-narrow-help)
     )
 #+end_src
+** corfu
+#+begin_src emacs-lisp
+  (use-package corfu
+    ;; TAB-and Go customizations
+    :custom
+    (corfu-cycle t)           ;; Enable cycling for `corfu-next/previous'
+    (corfu-preselect 'prompt) ;; Always preselect the prompt
+    (corfu-popupinfo-delay '(0.4 . 0.2))
+    ;; Enable auto completion, configure delay, trigger and quitting
+    (setq corfu-auto t
+          corfu-auto-delay 0.2
+          corfu-quit-no-match 'separator) ;; or t
+
+    ;; Use TAB for cycling, default is `corfu-complete'.
+    :bind
+    ("C-<tab>" . completion-at-point)
+    :bind
+    (:map corfu-map
+          ("TAB" . corfu-next)
+          ([tab] . corfu-next)
+          ("S-TAB" . corfu-previous)
+          ([backtab] . corfu-previous))
+    :hook
+    ((after-init . global-corfu-mode)
+     (prog-mode . corfu-mode)
+     (shell-mode . corfu-mode)
+     (eshell-mode . corfu-mode)))
+
+  (use-package corfu-popupinfo
+    :hook ((global-corfu-mode . corfu-popupinfo-mode)
+           (corfu-mode . corfu-popupinfo-mode)))
+#+end_src
+
+#+RESULTS:
+: corfu-previous
 
 * Programming
 ** Language Modes
