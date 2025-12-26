@@ -12,6 +12,10 @@
   boot.initrd.kernelModules = [ ];
   boot.kernelModules = [ "kvm-amd" ];
   boot.extraModulePackages = [ ];
+  boot.kernelPackages = pkgs.linuxPackages_latest;
+  boot.kernelParams = ["resume_offset=50191960"];
+  boot.resumeDevice = "/dev/disk/by-uuid/78296245-c79a-4f7d-ac27-deba8ab44d63";
+  powerManagement.enable = true;
 
   fileSystems."/" =
     { device = "/dev/disk/by-uuid/78296245-c79a-4f7d-ac27-deba8ab44d63";
@@ -43,7 +47,12 @@
       options = [ "subvol=@log" ];
     };
 
-  swapDevices = [ ];
+  swapDevices = [
+    {
+      device = "/var/lib/swapfile";
+      size = 200 * 1024; # 32GB in MB
+    }
+  ];
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;

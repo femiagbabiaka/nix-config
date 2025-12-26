@@ -82,7 +82,6 @@
     shellcheck
     spotify
     stern
-    tailscale
     toolbox
     _1password-gui
     yubioath-flutter

@@ -3,11 +3,19 @@
 # https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
 
 {
-  config,
-  lib,
   pkgs,
   ...
 }:
+let
+  checkLid = pkgs.writeShellScriptBin "check-lid" ''
+    LID_STATE=$(grep -o "open" /proc/acpi/button/lid/LID/state || true)
+    if [ "$LID_STATE" = "open" ]; then
+      exit 0
+    else
+      exit 1
+    fi
+  '';
+in
 {
   nix.settings.experimental-features = [
     "nix-command"
@@ -30,6 +38,8 @@
   # Configure network connections interactively with nmcli or nmtui.
   networking.networkmanager.enable = true;
   networking.networkmanager.wifi.powersave = false;
+  networking.wireless.iwd.enable = true;
+  networking.networkmanager.wifi.backend = "iwd";
 
   # Set your time zone.
   time.timeZone = "America/Chicago";
@@ -57,6 +67,21 @@
   services.fprintd.enable = true;
   services.fprintd.tod.enable = true;
   services.fprintd.tod.driver = pkgs.libfprint-2-tod1-goodix; # Goodix driver module
+  security.pam.services = {
+    # Apply to sudo
+    sudo.text = pkgs.lib.mkDefault (
+      pkgs.lib.mkBefore ''
+        auth [success=ignore default=1] pam_exec.so quiet ${checkLid}/bin/check-lid
+      ''
+    );
+    
+    # Optional: Apply to login/GDM if you want the same behavior there
+    login.text = pkgs.lib.mkDefault (
+      pkgs.lib.mkBefore ''
+        auth [success=ignore default=1] pam_exec.so quiet ${checkLid}/bin/check-lid
+      ''
+    );
+  };
 
   # Configure keymap in X11
   services.xserver.xkb.layout = "us";
@@ -125,7 +150,6 @@
     localNetworkGameTransfers.openFirewall = true; # Open ports in the firewall for Steam Local Network Game Transfers
   };
 
-  services.tailscale.enable = true;
   services.udev.packages = [ pkgs.yubikey-personalization ];
   programs.gnupg.agent = {
     enable = false;
