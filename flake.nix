@@ -81,7 +81,7 @@
         };
         proletariat = mkSystem.mkDarwinSystem {
           hostname = "proletariat";
-          user = "fagbabiaka";
+          username = "fagbabiaka";
         };
       };
 
@@ -111,7 +111,7 @@
 
         brain = mkSystem.mkNixosSystem {
           hostname = "brain";
-          user = "nixos";
+          username = "nixos";
           wsl = true;
         };
       };

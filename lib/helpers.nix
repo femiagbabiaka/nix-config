@@ -49,7 +49,7 @@ in
   mkDarwinSystem = {
     hostname,
     system ? "aarch64-darwin",
-    user ? defaultUser,
+    username ? defaultUser,
     homeConfig ? null,
     extraModules ? [],
   }:
@@ -62,14 +62,14 @@ in
       inputs.home-manager.darwinModules.home-manager
       {
         home-manager.useUserPackages = true;
-        home-manager.users.${user} = 
+        home-manager.users.${username} =
           if homeConfig != null then import homeConfig
-          else if user == "femi" then import personalDarwinHome 
+          else if username == "femi" then import personalDarwinHome
           else import defaultDarwinHome;
         
         home-manager.sharedModules = [ inputs.mac-app-util.homeManagerModules.default ];
         home-manager.extraSpecialArgs = {
-          inherit inputs user;
+          inherit inputs username;
           self = inputs.self;
           home-manager = inputs.home-manager;
           dagger = inputs.dagger;
