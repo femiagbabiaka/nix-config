@@ -63,7 +63,7 @@ in
 	  displayManager.sddm.wayland.enable = true;
   };
 
-  
+
   services.fprintd.enable = true;
   services.fprintd.tod.enable = true;
   services.fprintd.tod.driver = pkgs.libfprint-2-tod1-goodix; # Goodix driver module
@@ -74,7 +74,7 @@ in
         auth [success=ignore default=1] pam_exec.so quiet ${checkLid}/bin/check-lid
       ''
     );
-    
+
     # Optional: Apply to login/GDM if you want the same behavior there
     login.text = pkgs.lib.mkDefault (
       pkgs.lib.mkBefore ''
@@ -116,6 +116,14 @@ in
     ];
   };
 
+  services.fwupd = {
+    enable = true;
+    extraTrustedKeys = [];
+    daemonSettings = {
+      DisabledPlugins = [ "drm_dp_aux" ];
+    };
+  };
+
   # programs.firefox.enable = true;
 
   # List packages installed in system profile.
@@ -150,6 +158,8 @@ in
     localNetworkGameTransfers.openFirewall = true; # Open ports in the firewall for Steam Local Network Game Transfers
   };
 
+  services.pcscd.enable = true;
+  services.tailscale.enable = true;
   services.udev.packages = [ pkgs.yubikey-personalization ];
   programs.gnupg.agent = {
     enable = false;

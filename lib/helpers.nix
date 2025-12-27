@@ -1,7 +1,7 @@
 { inputs }:
 let
   inherit (inputs.nixpkgs) lib;
-  
+
   defaultUser = "femi";
   defaultLinuxHome = ../home/home-linux.nix;
   defaultDarwinHome = ../home/home-darwin.nix;
@@ -24,7 +24,7 @@ in
       ../systems/${hostname}/configuration.nix
       # Include default.nix (often hardware config) if it exists
       (if builtins.pathExists ../systems/${hostname}/default.nix then ../systems/${hostname}/default.nix else {})
-      
+
       inputs.home-manager.nixosModules.home-manager
       {
         home-manager.useGlobalPkgs = true;
@@ -37,10 +37,11 @@ in
           home-manager = inputs.home-manager;
           neovim-nightly-overlay = inputs.neovim-nightly-overlay;
           zen-browser = inputs.zen-browser;
+          llm-agents = inputs.llm-agents;
           pkgs = inputs.nixpkgs.legacyPackages.${system};
         };
       }
-    ] 
+    ]
     ++ (if wsl then [ inputs.nixos-wsl.nixosModules.wsl ] else [])
     ++ hardwareModules
     ++ extraModules;
@@ -66,7 +67,7 @@ in
           if homeConfig != null then import homeConfig
           else if username == "femi" then import personalDarwinHome
           else import defaultDarwinHome;
-        
+
         home-manager.sharedModules = [ inputs.mac-app-util.homeManagerModules.default ];
         home-manager.extraSpecialArgs = {
           inherit inputs username;

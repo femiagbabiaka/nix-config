@@ -20,7 +20,7 @@ map global object d '<a-semicolon>lsp-diagnostic-object error warning<ret>' -doc
 map global object D '<a-semicolon>lsp-diagnostic-object error<ret>' -docstring 'LSP errors'
 
 # fzf.kak
-map global user f ':fzf-mode<ret>'
+map global user f ':fzf-mode<ret>' -docstring 'FZF'
 
 # auto-pairs
 enable-auto-pairs

@@ -12,8 +12,13 @@
   boot.initrd.kernelModules = [ ];
   boot.kernelModules = [ "kvm-amd" ];
   boot.extraModulePackages = [ ];
-  boot.kernelPackages = pkgs.linuxPackages_latest;
-  boot.kernelParams = ["resume_offset=0"];
+  boot.kernelPackages = pkgs.linuxPackages;
+  boot.kernelParams = [
+    "resume_offset=0"
+    "amdgpu.ppfeaturemask=0xfffd3fff"
+    "amdgpu.runpm=0"
+    "amdgpu.dpm=1"
+  ];
   boot.resumeDevice = "/dev/disk/by-label/swap";
   powerManagement.enable = true;
 

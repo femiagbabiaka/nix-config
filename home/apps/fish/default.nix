@@ -3,12 +3,29 @@
   ...
 }:
 {
+  programs.fzf = {
+    enable = true;
+    enableFishIntegration = true;
+    defaultCommand = "fd --type f --hidden --follow --exclude .git";
+    defaultOptions = [
+      "--height 40%"
+      "--layout=reverse"
+      "--border"
+    ];
+    fileWidgetCommand = "fd --type f --hidden --follow --exclude .git";
+    fileWidgetOptions = [ "--preview 'bat --style=numbers --color=always --line-range :500 {}'" ];
+    changeDirWidgetCommand = "fd --type d --hidden --follow --exclude .git";
+    changeDirWidgetOptions = [ "--preview 'tree -C {} | head -200'" ];
+    historyWidgetOptions = [ "--sort" "--exact" ];
+  };
+
   programs.fish = {
     enable = true;
     interactiveShellInit = builtins.readFile ./init.fish;
     shellAliases = {
       e = "emacs -nw";
-      vim = "nvim";
+      k = "kak";
+      vim = "kak";
       gc = "git commit";
       gp = "git push";
       cat = "bat";
@@ -17,6 +34,15 @@
       kubectx = "${pkgs.kubeswitch}/bin/switcher";
     };
     plugins = [
+      {
+        name = "fzf.fish";
+        src = pkgs.fetchFromGitHub {
+          owner = "PatrickF1";
+          repo = "fzf.fish";
+          rev = "v10.3";
+          sha256 = "sha256-T8KYLA/r/gOKvAivKRoeqIwE2pINlxFQtZJHpOy9GMM=";
+        };
+      }
       {
         name = "fishbang";
         src = pkgs.fetchFromGitHub {

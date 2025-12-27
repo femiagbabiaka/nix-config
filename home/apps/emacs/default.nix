@@ -81,6 +81,22 @@ let
             yaml-mode
           ];
         };
+        hel = epkgs.trivialBuild rec {
+          pname = "hel";
+          version = "3f0aaf7";
+          src = pkgs.fetchFromGitHub {
+            owner = "anuvyklack";
+            repo = "hel";
+            rev = version;
+            hash = "sha256-yEvb79V5868hSdnN9lyihUkfyO10VNHvmePd/VVcc6A=";
+          };
+          packageRequires = with epkgs; [
+            s
+            dash
+            avy
+            pcre2el
+          ];
+        };
       in
       [
         claude-code-ide
@@ -92,6 +108,7 @@ let
         nael
         poly-helm-mode
         simpc-mode
+        hel
       ];
 
     override = (

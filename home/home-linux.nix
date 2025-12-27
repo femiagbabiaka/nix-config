@@ -4,6 +4,7 @@
   username,
   homeDirectory,
   zen-browser,
+  llm-agents,
   ...
 }:
 {
@@ -58,9 +59,14 @@
     gopls
     ghc
     ghostty
+    tailscale
+    llm-agents.packages.${pkgs.system}.opencode
+    chromium
     haskell-language-server
     helix
     mpv
+    nodejs_25
+    tailscale
     stack
     kubernetes-helm
     jujutsu
@@ -93,6 +99,7 @@
     tmux-xpanes
     vscode-langservers-extracted
     yaml-language-server
+    python315
     zig
     zls
     zstd
