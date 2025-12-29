@@ -487,7 +487,6 @@ Fallback jump-to-definition using ripgrep.
               (lambda ()
                 (add-hook 'xref-backend-functions #'dumb-jump-xref-activate nil t)))
     :custom
-    (xref-show-definitions-function #'xref-show-definitions-completing-read)
     (xref-search-program 'ripgrep))
 #+end_src
 
@@ -529,7 +528,7 @@ Rich annotations for minibuffer completions.
 ** Consult
 #+begin_src emacs-lisp
   (use-package consult
-    ;; Replace bindings. Lazily loaded by `use-package'.
+    :demand t
     :bind (;; C-c bindings in `mode-specific-map'
            ("C-c M-x" . consult-mode-command)
            ("C-c h" . consult-history)
@@ -622,20 +621,25 @@ Rich annotations for minibuffer completions.
     ;; Both < and C-+ work reasonably well.
     (setq consult-narrow-key "<") ;; "C-+"
 
-    (require 'keymap) ;; keymap-substitute requires emacs version 29.1?
-    (require 'cl-seq)
+    (with-eval-after-load 'project
+      (require 'keymap) ;; keymap-substitute requires emacs version 29.1?
+      (require 'cl-seq)
 
-    (keymap-substitute project-prefix-map #'project-find-regexp #'consult-ripgrep)
-    (cl-nsubstitute-if
-     '(consult-ripgrep "Find regexp")
-     (pcase-lambda (`(,cmd _)) (eq cmd #'project-find-regexp))
-     project-switch-commands)
+      (keymap-substitute project-prefix-map #'project-find-regexp #'consult-ripgrep)
+      (cl-nsubstitute-if
+       '(consult-ripgrep "Find regexp")
+       (pcase-lambda (`(,cmd _)) (eq cmd #'project-find-regexp))
+       project-switch-commands))
 
 
     ;; Optionally make narrowing help available in the minibuffer.
     ;; You may want to use `embark-prefix-help-command' or which-key instead.
     ;; (keymap-set consult-narrow-map (concat consult-narrow-key " ?") #'consult-narrow-help)
-    )
+
+    ;; Use consult for xref with live preview
+    (require 'consult-xref)
+    (setq xref-show-xrefs-function #'consult-xref)
+    (setq xref-show-definitions-function #'consult-xref))
 #+end_src
 ** corfu
 #+begin_src emacs-lisp
@@ -892,7 +896,9 @@ Display hover documentation in a styled child frame. Zed-like appearance.
             (menu-bar-lines . 0)
             (tool-bar-lines . 0)
             (line-spacing . 0.1)
-            (no-special-glyphs . t))))
+            (no-special-glyphs . t)
+            (no-accept-focus . t)
+            (no-focus-on-map . t))))
 #+end_src
 
 * Project & Version Control
