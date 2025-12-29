@@ -24,3 +24,6 @@ map global user f ':fzf-mode<ret>' -docstring 'FZF'
 
 # auto-pairs
 enable-auto-pairs
+
+# compile.kak
+map global user g ':recompile<ret>' -docstring 'recompile'

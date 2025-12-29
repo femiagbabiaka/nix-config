@@ -25,6 +25,9 @@ in
     "flakes"
   ];
 
+  nixpkgs.config.allowUnfree = true;
+  nixpkgs.config.allowBroken = true;
+
 
   # Configure network proxy if necessary
   # networking.proxy.default = "http://user:password@proxy:port/";

@@ -32,6 +32,7 @@ in
   boot.loader.efi.canTouchEfiVariables = true;
 
   nixpkgs.config.allowUnfree = true;
+  nixpkgs.config.allowBroken = true;
 
   networking.hostName = "giljotin"; # Define your hostname.
 
@@ -57,9 +58,7 @@ in
 
   services = {
 	  desktopManager.plasma6.enable = true;
-
 	  displayManager.sddm.enable = true;
-
 	  displayManager.sddm.wayland.enable = true;
   };
 
@@ -124,14 +123,9 @@ in
     };
   };
 
-  # programs.firefox.enable = true;
-
-  # List packages installed in system profile.
-  # You can use https://search.nixos.org/ to find more packages (and options).
   environment.systemPackages = with pkgs; [
     vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
     git
-        # KDE
     kdePackages.discover # Optional: Install if you use Flatpak or fwupd firmware update sevice
     kdePackages.kcalc # Calculator
     kdePackages.kcharselect # Tool to select and copy special characters from all installed fonts
@@ -143,7 +137,6 @@ in
     kdiff3 # Compares and merges 2 or 3 files or directories
     kdePackages.isoimagewriter # Optional: Program to write hybrid ISO files onto USB disks
     kdePackages.partitionmanager # Optional: Manage the disk devices, partitions and file systems on your computer
-    # Non-KDE graphical packages
     hardinfo2 # System information and benchmarks for Linux systems
     vlc # Cross-platform media player and streaming server
     wayland-utils # Wayland utilities

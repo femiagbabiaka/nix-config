@@ -2,6 +2,25 @@
 let
   baseEmacs = if pkgs.stdenv.isDarwin then pkgs.emacs-macport else pkgs.emacs-igc;
 
+  # Build zig grammar from the actively maintained tree-sitter-grammars repo
+  # nixpkgs uses the archived maxxnino/tree-sitter-zig which has incompatible node names
+  tree-sitter-zig-grammar = pkgs.tree-sitter.buildGrammar {
+    language = "zig";
+    version = "1.1.2";
+    src = pkgs.fetchFromGitHub {
+      owner = "tree-sitter-grammars";
+      repo = "tree-sitter-zig";
+      rev = "v1.1.2";
+      hash = "sha256-lDMmnmeGr2ti9W692ZqySWObzSUa9vY7f+oHZiE8N+U=";
+    };
+  };
+
+  # Create an emacs-compatible grammar package (symlinks parser as libtree-sitter-zig.so)
+  emacs-tree-sitter-zig = pkgs.runCommand "emacs-treesit-grammar-zig" { } ''
+    mkdir -p $out/lib
+    ln -s ${tree-sitter-zig-grammar}/parser $out/lib/libtree-sitter-zig.so
+  '';
+
   myEmacsAttrs = baseEmacs.overrideAttrs (previousAttrs: {
     nativeBuildInputs = (previousAttrs.nativeBuildInputs or [ ]) ++ [
       pkgs.git
@@ -81,34 +100,27 @@ let
             yaml-mode
           ];
         };
-        hel = epkgs.trivialBuild rec {
-          pname = "hel";
-          version = "3f0aaf7";
-          src = pkgs.fetchFromGitHub {
-            owner = "anuvyklack";
-            repo = "hel";
-            rev = version;
-            hash = "sha256-yEvb79V5868hSdnN9lyihUkfyO10VNHvmePd/VVcc6A=";
-          };
-          packageRequires = with epkgs; [
-            s
-            dash
-            avy
-            pcre2el
-          ];
-        };
+
       in
       [
         claude-code-ide
         epkgs.esup
+        # Use all grammars except razor and zig (zig uses our custom build above)
         (epkgs.treesit-grammars.with-grammars (
-          grammars: builtins.attrValues (builtins.removeAttrs grammars [ "tree-sitter-razor" ])
+          grammars:
+          builtins.attrValues (
+            builtins.removeAttrs grammars [
+              "tree-sitter-razor"
+              "tree-sitter-zig"
+            ]
+          )
         ))
+        # Add our custom zig grammar from tree-sitter-grammars (actively maintained)
+        emacs-tree-sitter-zig
         jj-mode
         nael
         poly-helm-mode
         simpc-mode
-        hel
       ];
 
     override = (
@@ -144,6 +156,9 @@ in
   };
 
   services.emacs.enable = true;
+
+  # Copy gptel-emacs-tools.el to ~/.emacs.d/lisp/
+  home.file.".emacs.d/lisp/gptel-emacs-tools.el".source = ./gptel-emacs-tools.el;
 
   # This writes the early-init.el to ~/.emacs.d/early-init.el
   home.file.".emacs.d/early-init.el".text = ''

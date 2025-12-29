@@ -17,7 +17,6 @@
     ./apps/kitty
     ./apps/neovim
     ./apps/kakoune
-    ./apps/kanata
   ];
 
   home = {
@@ -28,8 +27,7 @@
 
   programs.home-manager.enable = true;
   programs.fish.enable = true;
-  nixpkgs.config.allowUnfree = true;
-  nixpkgs.config.allowBroken = true;
+  # Note: nixpkgs.config is set at the system level when using useGlobalPkgs
 
   programs.firefox = {
     enable = true;
@@ -60,6 +58,9 @@
     ghc
     ghostty
     tailscale
+    ocaml
+    zed-editor-fhs
+    ocamlPackages.merlin
     llm-agents.packages.${pkgs.system}.opencode
     chromium
     haskell-language-server
@@ -78,6 +79,7 @@
     mitschemeX11
     mosh
     nil
+    nixd
     nixfmt-rfc-style
     nushell
     platinum-searcher
@@ -86,6 +88,7 @@
     rustup
     ripgrep
     shellcheck
+    gnumake
     spotify
     stern
     toolbox

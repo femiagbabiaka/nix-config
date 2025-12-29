@@ -64,6 +64,7 @@ let
     jq
     jujutsu
     k9s
+    nixd
     kakoune-lsp
     kak-tree-sitter-unwrapped
     kubernetes-helm

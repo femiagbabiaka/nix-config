@@ -217,11 +217,12 @@ We can take advantage of kitty's terminal protocol extensions to get better key-
 *** Automatic Theme Switching
 Switch between light and dark themes based on macOS system appearance.
 #+begin_src emacs-lisp
-  (use-package ef-themes
+  (use-package modus-themes
     :ensure t
     :config
-    (unless (display-graphic-p)
-      (add-hook 'after-init-hook (lambda () (load-theme #'ef-melissa-light)))))
+    ;; Use Emacs tooltips for consistent styling (not GTK)
+    (setq x-gtk-use-system-tooltips nil)
+    (add-hook 'after-init-hook (lambda () (load-theme 'modus-operandi-tinted t))))
 #+end_src
 
 ** Font Configuration
@@ -293,25 +294,16 @@ Enable ANSI color support in compilation buffers.
 #+end_src
 
 #+begin_src emacs-lisp
-  ;; (use-package multiple-cursors
-  ;;   :bind
-  ;;   (("C-S-c C-S-c" . mc/edit-lines)
-  ;;    ("C->"         . mc/mark-next-like-this)
-  ;;    ("C-<"         . mc/mark-previous-like-this)
-  ;;    ("C-c C-<"     . mc/mark-all-like-this)
-  ;;    ("C-\""        . mc/skip-to-next-like-this)
-  ;;    ("C-:"         . mc/skip-to-previous-like-this)))
+  (use-package multiple-cursors
+    :bind
+    (("C-S-c C-S-c" . mc/edit-lines)
+     ("C->"         . mc/mark-next-like-this)
+     ("C-<"         . mc/mark-previous-like-this)
+     ("C-c C-<"     . mc/mark-all-like-this)
+     ("C-\""        . mc/skip-to-next-like-this)
+     ("C-:"         . mc/skip-to-previous-like-this)))
   (use-package iedit)
 #+end_src
-** meow mode
-#+begin_src emacs-lisp
-  (use-package hel
-    :custom
-    (hel-normal-state-cursor 'box)
-    (hel-insert-state-cursor 'bar)
-    :hook (prog-mode . hel-mode))
-#+end_src
-
 ** Expand Region
 Intelligently expand selection by semantic units.
 #+begin_src emacs-lisp
@@ -347,6 +339,119 @@ Structural editing for Lisp code.
   ;; Built-in paren matching (deferred)
   (setq show-paren-delay 0)
   (add-hook 'after-init-hook #'show-paren-mode)
+#+end_src
+
+** Meow Mode
+Modal editing with helix-style keybindings. Selection-first paradigm:
+select text first, then act on it.
+#+begin_src emacs-lisp
+  (use-package meow
+    :config
+    ;; Define g prefix keymap for helix-style goto commands
+    (define-prefix-command 'meow-goto-keymap)
+    (define-key meow-goto-keymap (kbd "g") #'beginning-of-buffer)
+    (define-key meow-goto-keymap (kbd "e") #'end-of-buffer)
+    (define-key meow-goto-keymap (kbd "h") #'beginning-of-line)
+    (define-key meow-goto-keymap (kbd "l") #'end-of-line)
+    (define-key meow-goto-keymap (kbd "s") #'back-to-indentation)
+    (define-key meow-goto-keymap (kbd "d") #'xref-find-definitions)
+    (define-key meow-goto-keymap (kbd "r") #'xref-find-references)
+    (define-key meow-goto-keymap (kbd "b") #'xref-go-back)
+
+    (defun meow-setup-helix ()
+      "Setup meow with helix-style keybindings."
+      (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
+
+      ;; MOTION state (for special modes like dired, magit)
+      (meow-motion-define-key
+       '("j" . meow-next)
+       '("k" . meow-prev)
+       '("<escape>" . ignore))
+
+      ;; NORMAL state - helix-style
+      (meow-normal-define-key
+       ;; Numbers for digit argument (allows 20j, 5w, etc.)
+       '("0" . meow-digit-argument)
+       '("1" . meow-digit-argument)
+       '("2" . meow-digit-argument)
+       '("3" . meow-digit-argument)
+       '("4" . meow-digit-argument)
+       '("5" . meow-digit-argument)
+       '("6" . meow-digit-argument)
+       '("7" . meow-digit-argument)
+       '("8" . meow-digit-argument)
+       '("9" . meow-digit-argument)
+       '("-" . negative-argument)
+
+       ;; Basic movement (hjkl)
+       '("h" . meow-left)
+       '("j" . meow-next)
+       '("k" . meow-prev)
+       '("l" . meow-right)
+
+       ;; Word movement
+       '("w" . meow-next-word)
+       '("W" . meow-next-symbol)
+       '("b" . meow-back-word)
+       '("B" . meow-back-symbol)
+       '("e" . meow-mark-word)
+
+       ;; Find/Till (select to char)
+       '("f" . meow-find)
+       '("t" . meow-till)
+
+       ;; Selection
+       '("x" . meow-line)
+       '("X" . meow-goto-line)
+       '(";" . meow-reverse)
+       '("," . meow-inner-of-thing)
+       '("." . meow-bounds-of-thing)
+       '("[" . meow-beginning-of-thing)
+       '("]" . meow-end-of-thing)
+       '("%" . mark-whole-buffer)
+
+       ;; Editing
+       '("d" . meow-kill)
+       '("c" . meow-change)
+       '("s" . meow-kill)
+       '("y" . meow-save)
+       '("p" . meow-yank)
+       '("P" . meow-yank-pop)
+       '("r" . meow-replace)
+       '("R" . meow-swap-grab)
+       '("u" . meow-undo)
+       '("U" . undo-redo)
+       '("J" . meow-join)
+       '(">" . indent-rigidly-right-to-tab-stop)
+       '("<" . indent-rigidly-left-to-tab-stop)
+
+       ;; Insert mode entry
+       '("i" . meow-insert)
+       '("a" . meow-append)
+       '("I" . meow-open-above)
+       '("A" . meow-open-below)
+       '("o" . meow-open-below)
+       '("O" . meow-open-above)
+
+       ;; Search
+       '("/" . meow-visit)
+       '("n" . meow-search)
+       '("*" . meow-mark-symbol)
+
+       ;; Misc
+       '("q" . meow-quit)
+       '("Q" . meow-goto-line)
+       '("'" . repeat)
+       '("z" . meow-pop-selection)
+       '("Z" . meow-pop-all-selection)
+       '("&" . meow-query-replace-regexp)
+       '("<escape>" . meow-cancel-selection)
+
+       ;; g prefix commands (helix-style)
+       '("g" . meow-goto-keymap)))
+
+    (meow-setup-helix)
+    (meow-global-mode 1))
 #+end_src
 
 ** Which Key
@@ -385,13 +490,7 @@ Fallback jump-to-definition using ripgrep.
     (xref-show-definitions-function #'xref-show-definitions-completing-read)
     (xref-search-program 'ripgrep))
 #+end_src
-**
-** Devil Mode
-#+begin_src emacs-lisp
-  (use-package devil
-    :bind ("C-," . global-devil-mode)
-    :config (global-devil-mode))
-#+end_src
+
 * Completion & Search
 ** Vertico
 Vertical completion UI for minibuffer.
@@ -454,7 +553,7 @@ Rich annotations for minibuffer completions.
            ("M-y" . consult-yank-pop)                ;; orig. yank-pop
            ;; M-g bindings in `goto-map'
            ("M-g e" . consult-compile-error)
-           ("M-g r" . consult-grep-match)
+           ("M-g r" . consult-recent-file)
            ("M-g f" . consult-flymake)               ;; Alternative: consult-flycheck
            ("M-g g" . consult-goto-line)             ;; orig. goto-line
            ("M-g M-g" . consult-goto-line)           ;; orig. goto-line
@@ -566,6 +665,13 @@ Rich annotations for minibuffer completions.
      (eshell-mode . corfu-mode)))
 
   (use-package corfu-popupinfo
+    :ensure nil
+    :after corfu
+    :custom
+    (corfu-popupinfo-delay '(0.5 . 0.2))
+    (corfu-popupinfo-max-width 80)
+    (corfu-popupinfo-max-height 20)
+    (corfu-popupinfo-direction '(right left vertical))
     :hook ((global-corfu-mode . corfu-popupinfo-mode)
            (corfu-mode . corfu-popupinfo-mode)))
 #+end_src
@@ -725,6 +831,69 @@ Rich annotations for minibuffer completions.
   (use-package groovy-mode
     :defer t)
 #+end_src
+*** OCaml
+#+begin_src emacs-lisp
+  (use-package tuareg
+    :mode ("\\.ml\\'" "\\.mli\\'"))
+#+end_src
+
+** LSP with Eglot
+Built-in LSP client for language intelligence.
+#+begin_src emacs-lisp
+  (use-package eglot
+    :ensure nil
+    :hook ((nix-ts-mode . eglot-ensure)
+           (rust-ts-mode . eglot-ensure)
+           (rust-mode . eglot-ensure)
+           (go-ts-mode . eglot-ensure)
+           (go-mode . eglot-ensure)
+           (typescript-ts-mode . eglot-ensure)
+           (typescript-mode . eglot-ensure)
+           (js-ts-mode . eglot-ensure)
+           (ruby-ts-mode . eglot-ensure)
+           (ruby-mode . eglot-ensure)
+           (zig-ts-mode . eglot-ensure)
+           (haskell-mode . eglot-ensure)
+           (tuareg-mode . eglot-ensure)
+           (terraform-mode . eglot-ensure)
+           (c-ts-mode . eglot-ensure)
+           (c++-ts-mode . eglot-ensure)
+           (dockerfile-ts-mode . eglot-ensure)
+           (nael-mode . eglot-ensure)
+           (racket-mode . eglot-ensure))
+    :custom
+    (eglot-autoshutdown t)
+    (eglot-send-changes-idle-time 0.1)
+    (eglot-extend-to-xref t)
+    :config
+    (fset #'jsonrpc--log-event #'ignore)
+    (add-to-list 'eglot-server-programs '(nix-ts-mode . ("nixd")))
+    (add-to-list 'eglot-server-programs '(nael-mode . ("lake" "serve")))
+    (add-to-list 'eglot-server-programs '(racket-mode . ("racket-langserver"))))
+#+end_src
+
+** Eldoc Box
+Display hover documentation in a styled child frame. Zed-like appearance.
+#+begin_src emacs-lisp
+  (use-package eldoc-box
+    :hook (eglot-managed-mode . eldoc-box-hover-mode)
+    :custom
+    (eldoc-box-max-pixel-width 600)
+    (eldoc-box-max-pixel-height 400)
+    (eldoc-box-cleanup-interval 1)
+    (eldoc-box-clear-with-C-g t)
+    :config
+    (setq eldoc-box-frame-parameters
+          '((left-fringe . 8)
+            (right-fringe . 8)
+            (internal-border-width . 1)
+            (vertical-scroll-bars . nil)
+            (horizontal-scroll-bars . nil)
+            (menu-bar-lines . 0)
+            (tool-bar-lines . 0)
+            (line-spacing . 0.1)
+            (no-special-glyphs . t))))
+#+end_src
 
 * Project & Version Control
 ** Git Integration
@@ -820,7 +989,7 @@ Support for jj version control system.
 Visual indication of git changes in the fringe. Faster than git-gutter.
 #+begin_src emacs-lisp
   (use-package diff-hl
-    :hook (prog-mode . diff-hl-mode)
+    :hook (after-init . global-diff-hl-mode)
     :config
     ;; Dired integration
     (with-eval-after-load 'dired
@@ -944,5 +1113,50 @@ YouTube feed support for Elfeed.
                   (face-remap-add-relative 'shr-text :height 1.3)
                   (face-remap-add-relative 'shr-code :height 1.2)
                   (display-line-numbers-mode -1))))
+#+end_src
 
-                  #+end_src
+* AI Assistant
+** gptel
+LLM interface for Emacs with streaming support and multiple backends.
+#+begin_src emacs-lisp
+  (use-package gptel
+    :commands (gptel gptel-send gptel-rewrite gptel-menu)
+    :bind (("C-c g g" . gptel)
+           ("C-c g s" . gptel-send)
+           ("C-c g r" . gptel-rewrite)
+           ("C-c g m" . gptel-menu))
+    :config
+    (setq gptel-default-mode 'org-mode)
+    (require 'gptel-anthropic)
+    (require 'gptel-transient)
+    (setq gptel-model 'claude-sonnet-4-20250514)
+    (setq gptel-backend
+          (gptel-make-anthropic "Claude"
+            :stream t
+            :key (lambda ()
+                   (auth-source-pick-first-password
+                    :host "api.anthropic.com"
+                    :user "apikey")))))
+#+end_src
+
+** gptel-aibo
+Invoke LLM at cursor with inline diff preview. Zed-like inline editing.
+#+begin_src emacs-lisp
+  (use-package gptel-aibo
+    :after gptel
+    :bind (("C-c g i" . gptel-aibo-summon))
+    :custom
+    (gptel-aibo-auto-apply nil))
+#+end_src
+
+** gptel-emacs-tools
+Custom tools to allow LLMs to inspect Emacs state, buffers, and projects.
+Provides claude-code-ide style capabilities for gptel.
+#+begin_src emacs-lisp
+  (use-package gptel-emacs-tools
+    :ensure nil
+    :after gptel
+    :load-path "~/.emacs.d/lisp"
+    :config
+    (setq gptel-tools gptel-emacs-tools-all))
+#+end_src
