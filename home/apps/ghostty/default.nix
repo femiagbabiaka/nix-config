@@ -1,7 +1,7 @@
 {pkgs, ...}:
 {
   programs.ghostty = {
-    package = pkgs.ghostty-bin;
+    package = if pkgs.stdenv.isDarwin then pkgs.ghostty-bin else pkgs.ghostty;
     enable = true;
     enableFishIntegration = true;
     settings = {

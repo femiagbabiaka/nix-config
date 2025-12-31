@@ -17,6 +17,15 @@
     ./apps/kitty
     ./apps/neovim
     ./apps/kakoune
+    # Niri desktop environment modules
+    ./apps/niri
+    ./apps/waybar
+    ./apps/fuzzel
+    ./apps/mako
+    ./apps/swaylock
+    ./apps/swayidle
+    ./apps/swaybg
+    ./apps/darkman
   ];
 
   home = {
@@ -122,6 +131,19 @@
     fwupd
     gcc
     zen-browser.packages."${system}".default
+
+    # Wayland desktop utilities (for niri)
+    brightnessctl
+    grim
+    slurp
+    wl-clipboard
+    cliphist
+    pavucontrol
+    blueman
+    networkmanagerapplet
+    kdePackages.dolphin
+    swaylock-effects
+    niri
   ];
 
   fonts.fontconfig.enable = true;

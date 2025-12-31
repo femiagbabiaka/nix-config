@@ -30,6 +30,7 @@
       };
     };
     llm-agents.url = "github:numtide/llm-agents.nix";
+    niri.url = "github:sodiboo/niri-flake";
   };
 
   outputs =
@@ -99,7 +100,10 @@
 
         giljotin = mkSystem.mkNixosSystem {
           hostname = "giljotin";
-          extraModules = [ determinate.nixosModules.default ];
+          extraModules = [
+            determinate.nixosModules.default
+            inputs.niri.nixosModules.niri
+          ];
         };
 
         tachibana = mkSystem.mkNixosSystem {

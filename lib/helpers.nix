@@ -27,6 +27,8 @@ in
 
       inputs.home-manager.nixosModules.home-manager
       {
+        # Apply niri overlay for proper niri package with vendored deps
+        nixpkgs.overlays = [ inputs.niri.overlays.niri ];
         home-manager.useGlobalPkgs = true;
         home-manager.useUserPackages = true;
         home-manager.users.${username} = import defaultLinuxHome;

@@ -311,6 +311,15 @@ Intelligently expand selection by semantic units.
     :bind ("C-=" . er/expand-region))
 #+end_src
 
+** Surround (Embrace)
+Add/change/delete surrounding pairs. Works with expand-region for semantic unit selection.
+#+begin_src emacs-lisp
+  (use-package embrace
+    :commands (embrace-add embrace-change embrace-delete)
+    :hook ((org-mode . embrace-org-mode-hook)
+           (LaTeX-mode . embrace-LaTeX-mode-hook)))
+#+end_src
+
 ** Move Text
 Move lines or regions up and down.
 #+begin_src emacs-lisp
@@ -357,6 +366,47 @@ select text first, then act on it.
     (define-key meow-goto-keymap (kbd "d") #'xref-find-definitions)
     (define-key meow-goto-keymap (kbd "r") #'xref-find-references)
     (define-key meow-goto-keymap (kbd "b") #'xref-go-back)
+
+    ;; Define m prefix keymap for match/surround commands (helix-style)
+    (define-prefix-command 'meow-match-keymap)
+    (define-key meow-match-keymap (kbd "s") #'embrace-add)
+    (define-key meow-match-keymap (kbd "r") #'embrace-change)
+    (define-key meow-match-keymap (kbd "d") #'embrace-delete)
+    (define-key meow-match-keymap (kbd "m") #'meow-block)
+
+    (defun my/eldoc-box-help-at-point ()
+      "Show hover documentation at point using eldoc-box.
+Uses eglot's hover if available, otherwise falls back to general eldoc."
+      (interactive)
+      (if (and (bound-and-true-p eglot--managed-mode)
+               (eglot-current-server))
+          (eldoc-box-eglot-help-at-point)
+        (eldoc-box-help-at-point)))
+
+    (defun my/meow-insert-at-bol ()
+      "Move to first non-whitespace character of line and enter insert mode."
+      (interactive)
+      (back-to-indentation)
+      (meow-insert))
+
+    (defun my/meow-append-at-eol ()
+      "Move to end of line and enter insert mode."
+      (interactive)
+      (end-of-line)
+      (meow-append))
+
+    (defun my/format-region ()
+      "Format the selected region using eglot-format or indent-region.
+Requires an active selection. Uses eglot-format if the LSP server
+supports textDocument/rangeFormatting, otherwise falls back to indent-region."
+      (interactive)
+      (if (not (region-active-p))
+          (message "No selection - select region first")
+        (if (and (bound-and-true-p eglot--managed-mode)
+                 (eglot-current-server)
+                 (eglot--server-capable :documentRangeFormattingProvider))
+            (eglot-format (region-beginning) (region-end))
+          (indent-region (region-beginning) (region-end)))))
 
     (defun meow-setup-helix ()
       "Setup meow with helix-style keybindings."
@@ -428,8 +478,8 @@ select text first, then act on it.
        ;; Insert mode entry
        '("i" . meow-insert)
        '("a" . meow-append)
-       '("I" . meow-open-above)
-       '("A" . meow-open-below)
+       '("I" . my/meow-insert-at-bol)
+       '("A" . my/meow-append-at-eol)
        '("o" . meow-open-below)
        '("O" . meow-open-above)
 
@@ -445,10 +495,15 @@ select text first, then act on it.
        '("z" . meow-pop-selection)
        '("Z" . meow-pop-all-selection)
        '("&" . meow-query-replace-regexp)
+       '("=" . my/format-region)
+       '("K" . my/eldoc-box-help-at-point)
        '("<escape>" . meow-cancel-selection)
 
        ;; g prefix commands (helix-style)
-       '("g" . meow-goto-keymap)))
+       '("g" . meow-goto-keymap)
+
+       ;; m prefix commands (match/surround)
+       '("m" . meow-match-keymap)))
 
     (meow-setup-helix)
     (meow-global-mode 1))
@@ -880,7 +935,6 @@ Built-in LSP client for language intelligence.
 Display hover documentation in a styled child frame. Zed-like appearance.
 #+begin_src emacs-lisp
   (use-package eldoc-box
-    :hook (eglot-managed-mode . eldoc-box-hover-mode)
     :custom
     (eldoc-box-max-pixel-width 600)
     (eldoc-box-max-pixel-height 400)
@@ -1155,14 +1209,15 @@ Invoke LLM at cursor with inline diff preview. Zed-like inline editing.
     (gptel-aibo-auto-apply nil))
 #+end_src
 
-** gptel-emacs-tools
-Custom tools to allow LLMs to inspect Emacs state, buffers, and projects.
-Provides claude-code-ide style capabilities for gptel.
+** gptel-tools
+Comprehensive tool suite for gptel enabling claude-code-ide style capabilities.
+Includes tools for: Emacs introspection, Git (via magit), LSP/eglot, compilation,
+advanced editing, navigation, environment inspection, and documentation lookup.
 #+begin_src emacs-lisp
-  (use-package gptel-emacs-tools
+  (use-package gptel-tools
     :ensure nil
     :after gptel
     :load-path "~/.emacs.d/lisp"
     :config
-    (setq gptel-tools gptel-emacs-tools-all))
+    (setq gptel-tools gptel-tools-all))
 #+end_src

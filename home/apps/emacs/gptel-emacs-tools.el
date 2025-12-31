@@ -13,11 +13,52 @@
 ;; - Inspect project structure
 ;; - Read and modify files
 ;; - Execute elisp code (with confirmation)
+;; - Compact/summarize conversation sessions (similar to OpenCode's /compact)
+;;
+;; Session Compaction:
+;; When conversations get long, use `gptel-emacs-tools-compact-session' to
+;; summarize the conversation and reduce context size.  The LLM can also
+;; invoke the `compact_session' tool to do this automatically.
+;;
+;; Auto-compaction can be enabled with `gptel-emacs-tools-enable-auto-compact'
+;; which will trigger compaction when token usage approaches the model's
+;; context limit (configurable via `gptel-emacs-tools-auto-compact-threshold').
 
 ;;; Code:
 
 (require 'gptel)
 (require 'project)
+
+;;; Customization
+
+(defgroup gptel-emacs-tools nil
+  "Tools for gptel to inspect and manipulate Emacs state."
+  :group 'gptel)
+
+(defcustom gptel-emacs-tools-compact-prompt
+  "Provide a detailed summary for continuing our conversation. Focus on:
+- What we discussed and accomplished
+- What files or code we're working on
+- Current state and context
+- What we're planning to do next
+
+The new session will not have access to our conversation history, so include all relevant context."
+  "Prompt used when compacting a gptel session."
+  :type 'string
+  :group 'gptel-emacs-tools)
+
+(defcustom gptel-emacs-tools-compact-model 'claude-sonnet-4-20250514
+  "Model to use for session compaction.
+Use a smaller/cheaper model for cost efficiency."
+  :type 'symbol
+  :group 'gptel-emacs-tools)
+
+(defcustom gptel-emacs-tools-auto-compact-threshold 0.8
+  "Trigger auto-compaction when token usage exceeds this fraction of context limit.
+Set to nil to disable auto-compaction."
+  :type '(choice (const :tag "Disabled" nil)
+                 (float :tag "Threshold (0.0-1.0)"))
+  :group 'gptel-emacs-tools)
 
 ;;; Buffer Tools
 
@@ -551,6 +592,92 @@
    :category "emacs")
   "Tool to describe a variable.")
 
+;;; Session Compaction Functions
+
+(defun gptel-emacs-tools--estimate-tokens (text)
+  "Estimate token count for TEXT using ~4 chars per token heuristic."
+  (/ (length text) 4))
+
+(defun gptel-emacs-tools--get-context-limit ()
+  "Get the context limit for the current model.
+Returns the model's context window size, or 100000 as fallback."
+  (or (and (boundp 'gptel-model)
+           (boundp 'gptel-backend)
+           gptel-backend
+           (let* ((models (cl-struct-slot-value
+                           (type-of gptel-backend) 'models gptel-backend))
+                  (model-plist (alist-get gptel-model models)))
+             (when (listp model-plist)
+               (plist-get model-plist :context-window))))
+      100000))
+
+(defun gptel-emacs-tools--compact-replace-buffer (summary)
+  "Replace buffer contents with SUMMARY, preserving gptel state."
+  (let ((inhibit-read-only t)
+        (gptel-mode-was-on (bound-and-true-p gptel-mode)))
+    (erase-buffer)
+    (insert "[Session Summary]\n\n" summary "\n\n")
+    (when gptel-mode-was-on
+      (gptel-mode 1))
+    (goto-char (point-max))))
+
+(defun gptel-emacs-tools--compact-callback (response info)
+  "Handle compaction response, replacing buffer with summary.
+RESPONSE is the LLM's summary text, INFO contains request metadata."
+  (if (stringp response)
+      (with-current-buffer (plist-get info :buffer)
+        (gptel-emacs-tools--compact-replace-buffer response)
+        (message "Session compacted successfully."))
+    (message "Session compaction failed: %s" (plist-get info :status))))
+
+;;;###autoload
+(defun gptel-emacs-tools-compact-session (&optional no-confirm)
+  "Compact the current gptel session by summarizing the conversation.
+With NO-CONFIRM or when called non-interactively, skip confirmation.
+Uses `gptel-emacs-tools-compact-model' for summarization."
+  (interactive)
+  (unless (bound-and-true-p gptel-mode)
+    (user-error "Not in a gptel buffer"))
+  (when (or no-confirm
+            (not (called-interactively-p 'any))
+            (yes-or-no-p "Compact session? This will replace the conversation with a summary. "))
+    (let* ((conversation (buffer-substring-no-properties (point-min) (point-max)))
+           (prompt (concat conversation "\n\n---\n\n" gptel-emacs-tools-compact-prompt))
+           (gptel-model gptel-emacs-tools-compact-model))
+      (message "Compacting session...")
+      (gptel-request prompt
+                     :callback #'gptel-emacs-tools--compact-callback
+                     :buffer (current-buffer)))))
+
+(defun gptel-emacs-tools--maybe-auto-compact (&optional _beg _end)
+  "Check if auto-compaction should trigger based on token threshold.
+Intended for use in `gptel-post-response-functions'."
+  (when (and gptel-emacs-tools-auto-compact-threshold
+             (bound-and-true-p gptel-mode))
+    (let* ((text (buffer-substring-no-properties (point-min) (point-max)))
+           (tokens (gptel-emacs-tools--estimate-tokens text))
+           (limit (gptel-emacs-tools--get-context-limit))
+           (threshold (* limit gptel-emacs-tools-auto-compact-threshold)))
+      (when (> tokens threshold)
+        (message "Auto-compacting session (estimated %d tokens, threshold %d)..."
+                 tokens (floor threshold))
+        (gptel-emacs-tools-compact-session t)))))
+
+;;;###autoload
+(defun gptel-emacs-tools-enable-auto-compact ()
+  "Enable automatic session compaction when approaching context limits."
+  (interactive)
+  (add-hook 'gptel-post-response-functions #'gptel-emacs-tools--maybe-auto-compact)
+  (message "Auto-compaction enabled (threshold: %.0f%%)"
+           (* 100 gptel-emacs-tools-auto-compact-threshold)))
+
+;;;###autoload
+(defun gptel-emacs-tools-disable-auto-compact ()
+  "Disable automatic session compaction."
+  (interactive)
+  (remove-hook 'gptel-post-response-functions #'gptel-emacs-tools--maybe-auto-compact)
+  (message "Auto-compaction disabled"))
+
 ;;; Shell Command Tool
 
 (defvar gptel-emacs-tools--shell-command
@@ -570,6 +697,22 @@
    :category "shell"
    :confirm t)
   "Tool to run shell commands.")
+
+;;; Session Compaction Tool
+
+(defvar gptel-emacs-tools--compact-session
+  (gptel-make-tool
+   :name "compact_session"
+   :function (lambda ()
+               (if (bound-and-true-p gptel-mode)
+                   (progn
+                     (gptel-emacs-tools-compact-session t)
+                     "Session compaction initiated. The conversation will be summarized and replaced with a detailed context summary.")
+                 (error "Not in a gptel buffer")))
+   :description "Compact/summarize the current conversation session to reduce context size. Use this when the conversation is getting long and you want to preserve important context while reducing token usage. The conversation will be replaced with a detailed summary that preserves the key context."
+   :args nil
+   :category "session")
+  "Tool to compact the current gptel session.")
 
 ;;; Collection of all tools
 
@@ -593,7 +736,8 @@
         gptel-emacs-tools--eval-elisp
         gptel-emacs-tools--describe-function
         gptel-emacs-tools--describe-variable
-        gptel-emacs-tools--shell-command)
+        gptel-emacs-tools--shell-command
+        gptel-emacs-tools--compact-session)
   "List of all gptel Emacs tools.")
 
 ;;;###autoload

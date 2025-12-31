@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 let
   baseEmacs = if pkgs.stdenv.isDarwin then pkgs.emacs-macport else pkgs.emacs-igc;
 
@@ -157,8 +157,28 @@ in
 
   services.emacs.enable = true;
 
-  # Copy gptel-emacs-tools.el to ~/.emacs.d/lisp/
+  # Ensure emacs daemon starts after graphical session and xwayland-satellite for DISPLAY
+  systemd.user.services.emacs = {
+    Unit = {
+      After = [ "graphical-session.target" "xwayland-satellite.service" ];
+      PartOf = [ "graphical-session.target" ];
+      Wants = [ "xwayland-satellite.service" ];
+    };
+    Install = {
+      WantedBy = lib.mkForce [ "graphical-session.target" ];
+    };
+  };
+
+  # Copy all gptel tool files to ~/.emacs.d/lisp/
+  home.file.".emacs.d/lisp/gptel-tools.el".source = ./gptel-tools.el;
   home.file.".emacs.d/lisp/gptel-emacs-tools.el".source = ./gptel-emacs-tools.el;
+  home.file.".emacs.d/lisp/gptel-compile-tools.el".source = ./gptel-compile-tools.el;
+  home.file.".emacs.d/lisp/gptel-doc-tools.el".source = ./gptel-doc-tools.el;
+  home.file.".emacs.d/lisp/gptel-edit-tools.el".source = ./gptel-edit-tools.el;
+  home.file.".emacs.d/lisp/gptel-env-tools.el".source = ./gptel-env-tools.el;
+  home.file.".emacs.d/lisp/gptel-git-tools.el".source = ./gptel-git-tools.el;
+  home.file.".emacs.d/lisp/gptel-lsp-tools.el".source = ./gptel-lsp-tools.el;
+  home.file.".emacs.d/lisp/gptel-nav-tools.el".source = ./gptel-nav-tools.el;
 
   # This writes the early-init.el to ~/.emacs.d/early-init.el
   home.file.".emacs.d/early-init.el".text = ''

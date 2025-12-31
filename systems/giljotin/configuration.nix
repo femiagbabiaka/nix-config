@@ -17,10 +17,21 @@ let
   '';
 in
 {
-  nix.settings.experimental-features = [
-    "nix-command"
-    "flakes"
-  ];
+  nix.settings = {
+    experimental-features = [
+      "nix-command"
+      "flakes"
+    ];
+    # Add niri cachix for pre-built niri packages
+    substituters = [
+      "https://cache.nixos.org/"
+      "https://niri.cachix.org"
+    ];
+    trusted-public-keys = [
+      "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+      "niri.cachix.org-1:Wv0OmO7PsuocRKzfDoJ3mulSl7Z6oezYhGhR+3W2964="
+    ];
+  };
   nix.gc.automatic = true;
   fileSystems."/".options = [
     "noatime"
@@ -57,10 +68,18 @@ in
   };
 
   services = {
-	  desktopManager.plasma6.enable = true;
-	  displayManager.sddm.enable = true;
-	  displayManager.sddm.wayland.enable = true;
+    desktopManager.plasma6.enable = true;
+    displayManager.sddm.enable = true;
+    displayManager.sddm.wayland.enable = true;
   };
+
+  # Enable niri scrollable-tiling Wayland compositor
+  programs.niri.enable = true;
+  programs.niri.package = pkgs.niri-stable;
+  niri-flake.cache.enable = true;
+
+  # PAM entry for swaylock screen locker
+  security.pam.services.swaylock = {};
 
 
   services.fprintd.enable = true;
@@ -94,6 +113,29 @@ in
     enable = true;
     pulse.enable = true;
   };
+
+  hardware.bluetooth = {
+    enable = true;
+    powerOnBoot = true;
+    settings = {
+      General = {
+        # Shows battery charge of connected devices on supported
+        # Bluetooth adapters. Defaults to 'false'.
+        Experimental = true;
+        # When enabled other devices can connect faster to us, however
+        # the tradeoff is increased power consumption. Defaults to
+        # 'false'.
+        FastConnectable = true;
+      };
+      Policy = {
+        # Enable all controllers when they are found. This includes
+        # adapters present on start as well as adapters that are plugged
+        # in later on. Defaults to 'true'.
+        AutoEnable = true;
+      };
+    };
+  };
+
 
   # Enable touchpad support (enabled default in most desktopManager).
   services.libinput = {
@@ -142,6 +184,7 @@ in
     wayland-utils # Wayland utilities
     wl-clipboard # Command-line copy/paste utilities for Wayland
     kdePackages.ksshaskpass
+    xwayland-satellite
   ];
 
   programs.steam = {
