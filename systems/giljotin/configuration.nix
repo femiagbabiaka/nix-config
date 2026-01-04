@@ -194,6 +194,7 @@ in
     localNetworkGameTransfers.openFirewall = true; # Open ports in the firewall for Steam Local Network Game Transfers
   };
 
+  programs.nix-ld.enable = true;
   services.pcscd.enable = true;
   services.tailscale.enable = true;
   services.udev.packages = [ pkgs.yubikey-personalization ];

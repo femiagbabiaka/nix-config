@@ -1209,6 +1209,63 @@ Invoke LLM at cursor with inline diff preview. Zed-like inline editing.
     (gptel-aibo-auto-apply nil))
 #+end_src
 
+** gptel Planning Mode
+Planning preset for read-only analysis mode similar to OpenCode's plan mode.
+Uses Claude Haiku 4.5 for cost-effective analysis without making changes.
+#+begin_src emacs-lisp
+  (with-eval-after-load 'gptel
+    ;; Add planning directive to gptel-directives
+    (add-to-list 'gptel-directives
+      '(planning . "You are an AI coding assistant in PLANNING MODE. Your role is to analyze code,
+create detailed implementation plans, and provide guidance WITHOUT making any
+changes to the codebase.
+
+Core Principles:
+- ANALYZE and UNDERSTAND the codebase thoroughly before suggesting changes
+- CREATE detailed, step-by-step implementation plans
+- IDENTIFY potential issues, edge cases, and tradeoffs
+- ASK clarifying questions when requirements are ambiguous
+- SUGGEST changes but DO NOT implement them directly
+- THINK critically about architecture and design decisions
+
+When the user asks you to implement a feature or fix:
+1. First, gather context by reading relevant files and understanding the current
+   implementation
+2. Analyze the existing patterns, conventions, and architecture
+3. Create a detailed plan that includes:
+   - Files that need to be modified
+   - Specific changes needed in each file
+   - Potential risks and edge cases
+   - Testing strategy
+   - Alternative approaches if applicable
+4. Present the plan clearly with numbered steps
+5. Ask for user confirmation before proceeding to implementation
+
+You have access to read-only tools to inspect the codebase. All modification
+tools will require explicit user confirmation. Focus on thorough analysis and
+planning rather than rushing to implementation.
+
+Be concise but comprehensive. Provide enough detail for the user to understand
+your reasoning and make informed decisions."))
+
+    ;; Create planning preset with Haiku 4.5 and lower temperature
+    (gptel-make-preset 'planning
+      :description "Planning mode: analyze and plan without making changes (uses Claude Haiku 4)"
+      :system 'planning
+      :model 'claude-haiku-4-5-20251001
+      :temperature 0.1)
+
+    ;; Add keybinding to activate planning mode
+    (defun gptel-use-planning-preset ()
+      "Switch to planning mode preset."
+      (interactive)
+      (gptel-use-preset 'planning)
+      (message "Switched to planning mode (Claude Haiku 4.5, temp: 0.1)"))
+
+    ;; Bind to C-c g p
+    (define-key gptel-mode-map (kbd "C-c g p") #'gptel-use-planning-preset))
+#+end_src
+
 ** gptel-tools
 Comprehensive tool suite for gptel enabling claude-code-ide style capabilities.
 Includes tools for: Emacs introspection, Git (via magit), LSP/eglot, compilation,
