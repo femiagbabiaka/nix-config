@@ -66,7 +66,14 @@
   ];
 
   services.prowlarr.enable = true;
-  # Prowlarr listens on 127.0.0.1:9696 by default
+
+  # Bind Prowlarr to all interfaces (tailnet-only host)
+  systemd.services.prowlarr.preStart = ''
+    CONFIG="/var/lib/prowlarr/.config/Prowlarr/config.xml"
+    if [ -f "$CONFIG" ]; then
+      ${pkgs.gnused}/bin/sed -i 's|<BindAddress>127\.0\.0\.1</BindAddress>|<BindAddress>0.0.0.0</BindAddress>|' "$CONFIG"
+    fi
+  '';
 
   services.plex = {
     enable = true;
