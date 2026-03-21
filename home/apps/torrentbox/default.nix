@@ -32,6 +32,7 @@ lib.mkIf (hostname == "cerebro") {
       ExecStart = "${pkgs.nodejs_25}/bin/npx --yes poke tunnel http://localhost:8001/mcp --name \"torrentbox\"";
       Restart = "always";
       RestartSec = "15";
+      EnvironmentFile = [ "%h/.config/torrentbox/poke.env" ];
       Environment = [
         "PATH=${lib.makeBinPath [ pkgs.nodejs_25 ]}:/run/current-system/sw/bin"
         "HOME=%h"
