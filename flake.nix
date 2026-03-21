@@ -96,6 +96,9 @@
         cerebro = mkSystem.mkNixosSystem {
           hostname = "cerebro";
           hardwareModules = [ nixos-hardware.nixosModules.framework-desktop-amd-ai-max-300-series ];
+          extraModules = [
+            determinate.nixosModules.default
+          ];
         };
 
         giljotin = mkSystem.mkNixosSystem {

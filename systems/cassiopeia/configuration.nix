@@ -101,7 +101,7 @@
       git
       _1password-gui-beta
       networkmanagerapplet
-      neofetch
+      fastfetch
       htop
       discord
       fish

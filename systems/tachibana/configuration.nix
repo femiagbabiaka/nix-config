@@ -86,7 +86,7 @@
       delta
       bat
       fzf
-      neofetch
+      fastfetch
       htop
     ];
     openssh.authorizedKeys.keys = [

@@ -4,6 +4,7 @@ zoxide init fish --cmd cd | source
 set -x LSP_USE_LISTS true
 set -x EDITOR nvim
 set -l NON_WORK_HOSTS laincomp nixos cassiopeia jormungand tachibana cerebro giljotin
+set -x -a PATH ~/go/bin
 
 if not contains (hostname) $NON_WORK_HOSTS
     eval (cinc shell-init fish)
@@ -18,7 +19,6 @@ if not contains (hostname) $NON_WORK_HOSTS
     set -x PATH ~/.config/emacs/bin $PATH
     set -x PATH ~/.rd/bin $PATH
     set -x -a PATH /usr/local/go/bin
-    set -x -a PATH ~/go/bin
 end
 
 set -g fish_greeting ""

@@ -13,27 +13,60 @@
   boot.kernelModules = [ "kvm-amd" ];
   boot.extraModulePackages = [ ];
 
-  boot.kernelParams = [
-    "amd_iommu=off"
-    "amdgpu.gttsize=131072"
-    "ttm.pages_limit=33554432"
-  ];
-
   fileSystems."/" =
-    { device = "/dev/disk/by-label/NIXROOT";
-      fsType = "ext4";
+    { device = "/dev/disk/by-uuid/3e75a2ce-e912-4a37-b5da-b4fb1bdbbd4d";
+      fsType = "btrfs";
+      options = [ "subvol=@" ];
     };
 
   fileSystems."/boot" =
-    { device = "/dev/disk/by-label/NIXBOOT";
+    { device = "/dev/disk/by-uuid/9E9C-1BF7";
       fsType = "vfat";
       options = [ "fmask=0022" "dmask=0022" ];
     };
 
-  fileSystems."/models" =
-    { device = "/dev/disk/by-label/MODELS";
-      fsType = "xfs";
+  fileSystems."/home" =
+    { device = "/dev/disk/by-uuid/3e75a2ce-e912-4a37-b5da-b4fb1bdbbd4d";
+      fsType = "btrfs";
+      options = [ "subvol=@home" ];
     };
+
+  fileSystems."/nix" =
+    { device = "/dev/disk/by-uuid/3e75a2ce-e912-4a37-b5da-b4fb1bdbbd4d";
+      fsType = "btrfs";
+      options = [ "subvol=@nix" ];
+    };
+
+  fileSystems."/var/log" =
+    { device = "/dev/disk/by-uuid/3e75a2ce-e912-4a37-b5da-b4fb1bdbbd4d";
+      fsType = "btrfs";
+      options = [ "subvol=@log" ];
+    };
+
+  fileSystems."/models" = {
+    device = "/dev/disk/by-uuid/82dda6fb-db89-44b4-b8d3-33e318cf352d";
+    fsType = "btrfs";
+    options = [ 
+      "subvol=@models"         # Mount the specific subvolume
+      "noatime"
+      "compress-force=zstd:1" 
+      "space_cache=v2"
+      "discard=async"
+    ];
+  };
+
+  fileSystems."/mnt/plex" = {
+    device = "//brain-2/plex";
+    fsType = "cifs";
+    options = [
+      "x-systemd.automount"
+      "noauto"
+      "x-systemd.idle-timeout=600"
+      "credentials=/etc/nixos/smb-credentials"
+      "uid=plex"
+      "gid=plex"
+    ];
+  };
 
   swapDevices = [ ];
 

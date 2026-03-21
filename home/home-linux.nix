@@ -17,15 +17,6 @@
     ./apps/kitty
     ./apps/neovim
     ./apps/kakoune
-    # Niri desktop environment modules
-    ./apps/niri
-    ./apps/waybar
-    ./apps/fuzzel
-    ./apps/mako
-    ./apps/swaylock
-    ./apps/swayidle
-    ./apps/swaybg
-    ./apps/darkman
   ];
 
   home = {
@@ -43,12 +34,17 @@
   };
 
   home.packages = with pkgs; [
+    ffmpeg
+    uv
+    gemini-cli-bin
+    _1password-cli
     aider-chat-with-playwright
     ansible
     automake
     awscli2
     brave
     bat
+    bun
     cmake
     colima
     coreutils
@@ -122,6 +118,7 @@
     delta
     bat
     signal-desktop
+    signal-cli
     elan
     racket
     discord

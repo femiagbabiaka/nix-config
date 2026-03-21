@@ -70,7 +70,7 @@ let
     kubernetes-helm
     lldb
     mosh
-    neofetch
+    fastfetch
     nerd-fonts.fira-code
     nil
     nixfmt-rfc-style

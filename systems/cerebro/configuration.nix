@@ -2,11 +2,8 @@
 # your system. Help is available in the configuration.nix(5) man page, on
 # https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
 
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, inputs, ... }:
 
-let
-  radHome = "/var/lib/radicle-seed";
-in
 {
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
@@ -26,44 +23,6 @@ in
   ];
 
   nixpkgs.config.allowUnfree = true;
-  nixpkgs.config.allowBroken = true;
-
-
-  # Configure network proxy if necessary
-  # networking.proxy.default = "http://user:password@proxy:port/";
-  # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
-
-  # Select internationalisation properties.
-  # i18n.defaultLocale = "en_US.UTF-8";
-  # console = {
-  #   font = "Lat2-Terminus16";
-  #   keyMap = "us";
-  #   useXkbConfig = true; # use xkb.options in tty.
-  # };
-
-  # Enable the X11 windowing system.
-  # services.xserver.enable = true;
-
-
-
-
-  # Configure keymap in X11
-  # services.xserver.xkb.layout = "us";
-  # services.xserver.xkb.options = "eurosign:e,caps:escape";
-
-  # Enable CUPS to print documents.
-  # services.printing.enable = true;
-
-  # Enable sound.
-  # services.pulseaudio.enable = true;
-  # OR
-  # services.pipewire = {
-  #   enable = true;
-  #   pulse.enable = true;
-  # };
-
-  # Enable touchpad support (enabled default in most desktopManager).
-  # services.libinput.enable = true;
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.femi = {
@@ -76,7 +35,7 @@ in
       delta
       bat
       fzf
-      neofetch
+      fastfetch
       htop
     ];
   };
@@ -90,20 +49,9 @@ in
     ];
   };
 
-  users.users.radicle = {
-    isSystemUser = true;
-    group = "radicle";
-    extraGroups = [ "tailscale" ];
-    home = radHome;
-    createHome = true;
-  };
-  users.groups.radicle = {};
-
-  # programs.firefox.enable = true;
-
-  # List packages installed in system profile.
-  # You can use https://search.nixos.org/ to find more packages (and options).
   environment.systemPackages = with pkgs; [
+    inputs.llm-agents.packages.x86_64-linux.claude-code
+    cifs-utils
     delve
     git
     go
@@ -111,58 +59,16 @@ in
     gotools
     libdrm
     racket
-    radicle-node
-    radicle-httpd
     ripgrep
     rocmPackages.amdsmi
     rustup
-    vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
+    helix # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
   ];
 
-  # 1. The Radicle Node Service (The P2P Engine)
-  systemd.services.radicle-seed-node = {
-    description = "Radicle Private Seed Node";
-    wantedBy = [ "multi-user.target" ];
-    after = [ "network.target" "tailscaled.service" ];
-    serviceConfig = {
-      User = "radicle";
-      Environment = "RAD_HOME=${config.users.users.radicle.home}/.radicle";
-      ExecStart = "${pkgs.radicle-node}/bin/radicle-node --force";
-      Restart = "always";
-      PrivateTmp = true;
-      NoNewPrivileges = true;
-      ProtectSystem = "strict";
-      ProtectHome = true;
-      ReadWritePaths = [ radHome ];
-    };
-  };
-
-  # 2. The Radicle HTTP Service (The "Forgejo" Web UI)
-  systemd.services.radicle-httpd = {
-    description = "Radicle Web Interface";
-    wantedBy = [ "multi-user.target" ];
-    after = [ "radicle-seed-node.service" "tailscaled.service" ];
-    serviceConfig = {
-      User = "radicle";
-      Environment = "RAD_HOME=${config.users.users.radicle.home}/.radicle";
-      # Dynamically determine Tailscale IP at service start
-      ExecStart = "${pkgs.writeShellScript "radicle-httpd-start" ''
-        TAILSCALE_IP=$(${pkgs.tailscale}/bin/tailscale ip -4) || {
-          echo "Failed to get Tailscale IP" >&2
-          exit 1
-        }
-        [ -n "$TAILSCALE_IP" ] || {
-          echo "Tailscale IP is empty" >&2
-          exit 1
-        }
-        exec ${pkgs.radicle-httpd}/bin/radicle-httpd --listen 0.0.0.0:8080
-      ''}";
-      Restart = "always";
-      PrivateTmp = true;
-      ProtectSystem = "strict";
-      ProtectHome = true;
-      ReadWritePaths = [ radHome ];
-    };
+  services.plex = {
+    enable = true;
+    dataDir = "/var/lib/plex";
+    openFirewall = true;
   };
 
   systemd.services.llama-cpp = {
@@ -232,61 +138,6 @@ in
     };
   };
 
-  services.nginx = {
-    enable = true;
-    # Recommended Nginx optimizations
-    recommendedGzipSettings = true;
-    recommendedOptimisation = true;
-    recommendedProxySettings = true;
-    recommendedTlsSettings = true;
-    virtualHosts."cerebro.tail601e.ts.net" = {
-      # Replace 'radicle.local' with your domain or IP
-      serverName = "cerebro.tail601e.ts.net";
-
-      serverAliases = [];
-
-      # --- SSL / Let's Encrypt Setup ---
-      forceSSL = true;
-      enableACME = false;
-      sslCertificate = "/var/lib/tailscale/certs/cerebro.tail601e.ts.net.crt";
-      sslCertificateKey = "/var/lib/tailscale/certs/cerebro.tail601e.ts.net.key";
-      # The root directory is the installed package path
-      root = "${pkgs.radicle-explorer}";
-
-      locations."/" = {
-        # Essential for SPAs: try the file, directory, then fallback to index.html
-        tryFiles = "$uri $uri/ /index.html =404";
-      };
-
-      # --- API Proxy (Connect UI to Backend) ---
-      # The UI sends requests to /api/v1/...
-      # We proxy these to your local daemon on port 8081.
-      locations."/api/" = {
-        # The trailing slash at the end of the URL is CRITICAL.
-        # It tells Nginx to strip "/api/" before passing to the backend.
-        # Request: https://domain/api/v1/projects -> http://127.0.0.1:8081/v1/projects
-        proxyPass = "http://127.0.0.1:8080";
-
-        # WebSockets are often required for real-time updates
-        proxyWebsockets = true;
-      };
-
-      # --- Git Smart HTTP Proxy (Optional) ---
-      # Allows: git clone https://radicle.your-domain.com/git/urn:rad:...
-      locations."/git/" = {
-        proxyPass = "http://127.0.0.1:8080/git/";
-        proxyWebsockets = true;
-      };
-    };
-  };
-
-  # Some programs need SUID wrappers, can be configured further or are
-  # started in user sessions.
-  # programs.mtr.enable = true;
-  # programs.gnupg.agent = {
-  #   enable = true;
-  #   enableSSHSupport = true;
-  # };
   programs.fish.enable = true;
 
   # List services that you want to enable:
@@ -304,19 +155,8 @@ in
     };
   };
 
-  systemd.tmpfiles.rules = [
-    # Syntax: Type Path Mode User Group Age Argument
-
-    # Allow nginx to "search" (x) inside /var/lib/tailscale
-    "a+ /var/lib/tailscale - - - - u:nginx:x"
-
-    # Allow nginx to "read and search" (rx) inside /var/lib/tailscale/certs
-    "a+ /var/lib/tailscale/certs - - - - u:nginx:rx"
-  ];
-
   services.tailscale = {
     enable = true;
-    permitCertUid = "nginx";
   };
 
   # Enable the OpenSSH daemon.
@@ -330,11 +170,6 @@ in
   # networking.firewall.allowedUDPPorts = [ ... ];
   # Or disable the firewall altogether.
   # networking.firewall.enable = false;
-
-  # Copy the NixOS configuration file and link it from the resulting system
-  # (/run/current-system/configuration.nix). This is useful in case you
-  # accidentally delete configuration.nix.
-  #system.copySystemConfiguration = true;
 
   # This option defines the first version of NixOS you have installed on this particular machine,
   # and is used to maintain compatibility with application data (e.g. databases) created on older NixOS versions.
@@ -353,6 +188,6 @@ in
   # and migrated your data accordingly.
   #
   # For more information, see `man configuration.nix` or https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion .
-  system.stateVersion = "25.11"; # Did you read the comment?
+  system.stateVersion = "26.05"; # Did you read the comment?
 
 }
