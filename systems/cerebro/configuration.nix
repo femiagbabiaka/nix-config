@@ -65,6 +65,9 @@
     helix # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
   ];
 
+  services.prowlarr.enable = true;
+  # Prowlarr listens on 127.0.0.1:9696 by default
+
   services.plex = {
     enable = true;
     dataDir = "/var/lib/plex";

@@ -33,7 +33,7 @@ in
         home-manager.useUserPackages = true;
         home-manager.users.${username} = import defaultLinuxHome;
         home-manager.extraSpecialArgs = {
-          inherit inputs username;
+          inherit inputs username hostname;
           homeDirectory = "/home/${username}";
           self = inputs.self;
           home-manager = inputs.home-manager;

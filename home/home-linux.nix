@@ -2,6 +2,7 @@
   pkgs,
   lib,
   username,
+  hostname,
   homeDirectory,
   zen-browser,
   llm-agents,
@@ -17,6 +18,7 @@
     ./apps/kitty
     ./apps/neovim
     ./apps/kakoune
+    ./apps/torrentbox
   ];
 
   home = {
