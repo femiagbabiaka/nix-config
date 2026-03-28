@@ -19,6 +19,7 @@
     ./apps/neovim
     ./apps/kakoune
     ./apps/torrentbox
+    ./apps/hermes-agent
   ];
 
   home = {
