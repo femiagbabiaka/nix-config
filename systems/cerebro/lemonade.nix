@@ -27,6 +27,10 @@ let
       libwebsockets    # libwebsockets (for router)
     ];
 
+    # Force libwebsockets into RPATH (autoPatchelfHook finds it but
+    # doesn't always add the lib path)
+    runtimeDependencies = [ pkgs.libwebsockets ];
+
     unpackPhase = ''
       rpm2cpio $src | cpio -idm
     '';
@@ -38,6 +42,8 @@ let
       cp opt/bin/lemonade $out/bin/
       cp opt/bin/lemonade-router $out/bin/
 
+      # Router expects resources/ next to its binary
+      cp -r opt/share/lemonade-server/resources $out/bin/resources
       cp -r opt/share/lemonade-server/resources $out/share/lemonade-server/
       cp etc/lemonade/lemonade.conf $out/etc/lemonade/
     '';
@@ -51,6 +57,8 @@ in
     wants = [ "network-online.target" ];
     after = [ "network-online.target" ];
     wantedBy = [ "multi-user.target" ];
+
+    path = with pkgs; [ procps coreutils bash gnutar gzip ];
 
     serviceConfig = {
       Type = "simple";
@@ -73,7 +81,7 @@ in
         "LEMONADE_PORT=13305"
         "LEMONADE_LOG_LEVEL=info"
         "LEMONADE_CTX_SIZE=131072"
-        "LEMONADE_LLAMACPP=rocm"
+        "LEMONADE_LLAMACPP=vulkan"
       ];
 
       # GPU access needed for Vulkan/ROCm

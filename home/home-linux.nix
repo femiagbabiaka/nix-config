@@ -68,7 +68,7 @@
     ocaml
     zed-editor-fhs
     ocamlPackages.merlin
-    llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.opencode
+    llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.pi
     chromium
     haskell-language-server
     helix
