@@ -36,7 +36,6 @@ let
             pkgs.lua51Packages.luarocks
             pkgs.lua-language-server
             pkgs.mdformat
-            pkgs.nodePackages.js-beautify
             pkgs.python313Packages.demjson3
             pkgs.rubyPackages.htmlbeautifier
             pkgs.shellcheck

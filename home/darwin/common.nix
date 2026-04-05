@@ -73,7 +73,7 @@ let
     fastfetch
     nerd-fonts.fira-code
     nil
-    nixfmt-rfc-style
+    nixfmt
     nodejs
     nushell
     platinum-searcher
@@ -97,7 +97,6 @@ let
     zoxide
     zstd
     _1password-gui
-    aider-chat-with-playwright
     ansible
     automake
     awscli2
@@ -133,7 +132,7 @@ let
     mpv
     nerd-fonts.fira-code
     nil
-    nixfmt-rfc-style
+    nixfmt
     nushell
     platinum-searcher
     pulseaudio

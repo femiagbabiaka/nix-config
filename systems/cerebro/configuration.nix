@@ -5,6 +5,9 @@
 { config, lib, pkgs, inputs, ... }:
 
 {
+  imports = [
+    ./lemonade.nix
+  ];
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -81,72 +84,6 @@
     openFirewall = true;
   };
 
-  systemd.services.llama-cpp = {
-    description = "LLaMA C++ server";
-    after = [ "network.target" ];
-    wantedBy = [ "multi-user.target" ];
-
-    serviceConfig = {
-      Type = "idle";
-      KillSignal = "SIGINT";
-      ExecStart = "${pkgs.llama-cpp-vulkan}/bin/llama-server --log-disable --host 0.0.0.0 --port 8081 -hf unsloth/Qwen3-30B-A3B-Instruct-2507-GGUF:Q8_0 --jinja -ngl 99 --threads -1 --ctx-size 262144     --temp 0.7 --min-p 0.0 --top-p 0.80 --top-k 20 --presence-penalty 1.0";
-      Restart = "on-failure";
-      RestartSec = 300;
-
-      ReadWritePaths = [ "/models" ];
-
-      # Give the service proper writable homes (created with correct perms)
-      StateDirectory = "llama-cpp";
-      CacheDirectory = "llama-cpp";
-      LogsDirectory  = "llama-cpp";
-
-      # Make XDG paths explicit so the app doesn’t guess dumb locations
-      Environment = [
-        "XDG_STATE_HOME=/var/lib/llama-cpp"
-        "XDG_CACHE_HOME=/var/cache/llama-cpp"
-        "XDG_DATA_HOME=/var/lib/llama-cpp"
-        "XDG_RUNTIME_DIR=/run/llama-cpp"
-      ];
-
-      # for GPU acceleration
-      PrivateDevices = false;
-
-      # hardening
-      DynamicUser = true;
-      CapabilityBoundingSet = "";
-      RestrictAddressFamilies = [
-        "AF_INET"
-        "AF_INET6"
-        "AF_UNIX"
-      ];
-      NoNewPrivileges = true;
-      PrivateMounts = true;
-      PrivateTmp = true;
-      PrivateUsers = true;
-      ProtectClock = true;
-      ProtectControlGroups = true;
-      ProtectHome = true;
-      ProtectKernelLogs = true;
-      ProtectKernelModules = true;
-      ProtectKernelTunables = true;
-      ProtectSystem = "strict";
-      MemoryDenyWriteExecute = true;
-      LockPersonality = true;
-      RemoveIPC = true;
-      RestrictNamespaces = true;
-      RestrictRealtime = true;
-      RestrictSUIDSGID = true;
-      SystemCallArchitectures = "native";
-      SystemCallFilter = [
-        "@system-service"
-        "~@privileged"
-      ];
-      SystemCallErrorNumber = "EPERM";
-      ProtectProc = "invisible";
-      ProtectHostname = true;
-      ProcSubset = "pid";
-    };
-  };
 
   programs.fish.enable = true;
 

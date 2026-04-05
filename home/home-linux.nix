@@ -41,7 +41,6 @@
     uv
     gemini-cli-bin
     _1password-cli
-    aider-chat-with-playwright
     ansible
     automake
     awscli2
@@ -69,7 +68,7 @@
     ocaml
     zed-editor-fhs
     ocamlPackages.merlin
-    llm-agents.packages.${pkgs.system}.opencode
+    llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.opencode
     chromium
     haskell-language-server
     helix
@@ -88,7 +87,7 @@
     mosh
     nil
     nixd
-    nixfmt-rfc-style
+    nixfmt
     nushell
     platinum-searcher
     pulseaudio
@@ -130,7 +129,7 @@
     exercism
     fwupd
     gcc
-    zen-browser.packages."${system}".default
+    zen-browser.packages.${pkgs.stdenv.hostPlatform.system}.default
 
     # Wayland desktop utilities (for niri)
     brightnessctl
