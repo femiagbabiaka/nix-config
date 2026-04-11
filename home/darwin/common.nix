@@ -16,10 +16,10 @@ let
     ../apps/bash
     ../apps/fish
     ../apps/gitconfig
+    ../apps/kakoune
     ../apps/kitty
     ../apps/neovim
-    ../apps/emacs
-    ../apps/kakoune
+    ../apps/pi
   ];
 
   basePackages = with pkgs; [

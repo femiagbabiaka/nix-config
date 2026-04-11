@@ -185,7 +185,7 @@ let
       for bin in $out/bin/*; do
         wrapProgram "$bin" \
           --prefix PATH : ${lib.makeBinPath [ pkgs.ripgrep pkgs.ffmpeg pkgs.nodejs_22 pkgs.signal-cli agent-browser pkgs.uv pkgs.chromium ]} \
-          --set SIGNAL_HTTP_URL http://localhost:8080
+          --set SIGNAL_HTTP_URL http://localhost:8085
       done
     '';
     doCheck = false;
@@ -205,7 +205,7 @@ in
       After = [ "network.target" ];
     };
     Service = {
-      ExecStart = "${pkgs.signal-cli}/bin/signal-cli --config %h/.local/share/signal-cli daemon --http localhost:8080";
+      ExecStart = "${pkgs.signal-cli}/bin/signal-cli --config %h/.local/share/signal-cli daemon --http localhost:8085";
       Restart = "always";
       RestartSec = "5";
     };

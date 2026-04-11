@@ -7,6 +7,7 @@
 {
   imports = [
     ./lemonade.nix
+    ./mcpo.nix
   ];
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
@@ -84,6 +85,21 @@
     openFirewall = true;
   };
 
+  services.open-webui = {
+    enable = true;
+    host = "0.0.0.0";
+    port = 8080;
+    environment = {
+      OLLAMA_API_BASE_URL = "";
+      OPENAI_API_BASE_URLS = "http://127.0.0.1:13305/api/v1";
+      OPENAI_API_KEYS = "lemonade";
+      WEBUI_AUTH = "false";
+      ENABLE_OPENAI_API = "true";
+      SCARF_NO_ANALYTICS = "true";
+      DO_NOT_TRACK = "true";
+      ANONYMIZED_TELEMETRY = "false";
+    };
+  };
 
   programs.fish.enable = true;
 

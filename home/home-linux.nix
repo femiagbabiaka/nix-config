@@ -10,16 +10,16 @@
 }:
 {
   imports = [
+    ./apps/bash
     ./apps/fish
     ./apps/gitconfig
-    ./apps/ssh
-    ./apps/emacs
-    ./apps/bash
+    ./apps/hermes-agent
+    ./apps/kakoune
     ./apps/kitty
     ./apps/neovim
-    ./apps/kakoune
+    ./apps/pi
+    ./apps/ssh
     ./apps/torrentbox
-    ./apps/hermes-agent
   ];
 
   home = {
@@ -34,6 +34,36 @@
 
   programs.firefox = {
     enable = true;
+  };
+
+  programs.pi = {
+    enable = true;
+    settings = {
+      defaultProvider = "lemonade";
+      defaultModel = "Qwen3.5-27B-GGUF";
+      hideThinkingBlock = true;
+      defaultThinkingLevel = "medium";
+    };
+    # Enable built-in extensions
+    builtInExtensions = {
+      # Safety extensions (recommended)
+      permissionGate = true; # Confirm before rm -rf, sudo, etc.
+      protectedPaths = true; # Block writes to .env, .git/, etc.
+
+      # Productivity
+      todo = true; # Todo list with /todos command
+
+      # UI enhancements
+      notify = true; # Desktop notifications
+      summarize = true; # Summarize conversations
+      statusLine = true; # Turn progress in footer
+      titlebarSpinner = true; # Braille spinner while working
+
+      # Useful features
+      inlineBash = true; # Expand !{command} in prompts
+      tools = true; # Interactive /tools command
+      triggerCompact = true; # Auto-compact at 100k tokens
+    };
   };
 
   home.packages = with pkgs; [
@@ -68,7 +98,7 @@
     ocaml
     zed-editor-fhs
     ocamlPackages.merlin
-    llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.pi
+
     chromium
     haskell-language-server
     helix
